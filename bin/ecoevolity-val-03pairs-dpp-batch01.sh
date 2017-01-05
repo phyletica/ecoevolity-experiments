@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 #PBS -l nodes=1:ppn=1
 #PBS -l walltime=02:00:00
 #PBS -j oe 
@@ -27,7 +27,15 @@ then
     module load gcc/5.3.0
 fi
 
-CFGPATH="../simulations/validation/03pairs-dpp/batch01/simcoevolity-sim-0000-config.yml"
-SEED="9207172975"
+SEED="1"
+RANDOM=$SEED
 
-ecoevolity "$CFGPATH"
+i=0
+while [ "$i" -lt 10 ]
+do
+    SIMSEED=$RANDOM
+    SIMNUM=$(printf "%04d" $i)
+    CFGPATH="../simulations/validation/03pairs-dpp/batch01/simcoevolity-sim-${SIMNUM}-config.yml"
+    echo ecoevolity --seed "$SIMSEED" "$CFGPATH"
+    i=$(expr $i + 1)
+done
