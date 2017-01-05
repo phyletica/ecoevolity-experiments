@@ -2,7 +2,7 @@
 #PBS -l nodes=1:ppn=1
 #PBS -l walltime=02:00:00
 #PBS -j oe 
-#   #PBS -l jobflags=ADVRES:jro0014_lab.56281
+#PBS -l jobflags=ADVRES:jro0014_lab.56281
 
 if [ -n "$PBS_JOBNAME" ]
 then
@@ -36,6 +36,6 @@ do
     SIMSEED=$RANDOM
     SIMNUM=$(printf "%04d" $i)
     CFGPATH="../simulations/validation/03pairs-dpp/batch01/simcoevolity-sim-${SIMNUM}-config.yml"
-    echo ecoevolity --seed "$SIMSEED" "$CFGPATH"
+    ecoevolity --seed "$SIMSEED" "$CFGPATH"
     i=$(expr $i + 1)
 done
