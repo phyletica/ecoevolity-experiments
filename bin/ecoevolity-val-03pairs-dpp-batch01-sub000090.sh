@@ -1,6 +1,6 @@
 #! /bin/bash
 #PBS -l nodes=1:ppn=1
-#PBS -l walltime=02:00:00
+#PBS -l walltime=30:00:00
 #PBS -j oe 
 #PBS -l jobflags=ADVRES:jro0014_lab.56281
 
