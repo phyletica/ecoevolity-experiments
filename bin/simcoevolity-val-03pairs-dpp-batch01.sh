@@ -23,6 +23,8 @@ then
 
     source ${PBS_O_HOME}/.bash_profile
     cd $PBS_O_WORKDIR
+
+    module load gcc/5.3.0
 fi
 
 CFGPATH="../configs/config-3pairs-dpp.yml"
