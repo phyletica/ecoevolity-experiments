@@ -60,16 +60,16 @@ def write_dummy_biallelic_alignment(
     check_prefix_and_delimiter(prefix, delimiter)
     nspecies_padding = len(str(nspecies))
     ngenomes_padding = len(str(ngenomes))
-    label_padding = len(prefix) + nspecies_padding + 1 + ngenomes_padding + 2
+    label_padding = len(prefix) + nspecies_padding + 1 + ngenomes_padding + 4
     row_idx = 0
     for sp_idx in range(nspecies):
         sp_label = prefix + "{n:0{padding}d}".format(
                 n = sp_idx + 1,
                 padding = nspecies_padding)
         for g_idx in range(ngenomes):
-            row_label = sp_label + delimiter + "{n:0{padding}d}".format(
+            row_label = "\'" + sp_label + delimiter + "{n:0{padding}d}".format(
                     n = g_idx + 1,
-                    padding = ngenomes_padding)
+                    padding = ngenomes_padding) + "\'"
             out.write("{s:{padding}}".format(
                     s = row_label,
                     padding = label_padding))
