@@ -6,7 +6,7 @@ import sys
 BIN_DIR = os.path.abspath(os.path.dirname(__file__))
 PROJECT_DIR = os.path.dirname(BIN_DIR)
 SIM_DIR = os.path.join(PROJECT_DIR, 'simulations')
-VAL_DIR = os.path.join(PROJECT_DIR, 'validation')
+VAL_DIR = os.path.join(SIM_DIR, 'validation')
 
 def main():
     sys.stdout.write("{0}\n".format(PROJECT_DIR))
