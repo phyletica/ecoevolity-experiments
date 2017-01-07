@@ -1,0 +1,65 @@
+---
+event_model_prior:
+    uniform:
+
+event_time_prior:
+    gamma_distribution:
+        shape: 1.0
+        scale: 0.01
+        offset: 0.0
+
+mcmc_settings:
+    chain_length: 200000
+    sample_frequency: 100
+
+operator_settings:
+    auto_optimize: true
+    auto_optimize_delay: 10000
+    operators:
+        ModelOperator:
+            weight: 3.0
+        ComparisonHeightScaler:
+            scale: 0.13
+            weight: 1.0
+        RootPopulationSizeScaler:
+            scale: 0.4
+            weight: 1.0
+        ChildPopulationSizeScaler:
+            scale: 0.22
+            weight: 1.0
+
+global_comparison_settings:
+    ploidy: 2
+    genotypes_are_diploid: false
+    markers_are_dominant: false
+    population_name_delimiter: "-"
+    population_name_is_prefix: true
+    constant_sites_removed: true
+    use_empirical_starting_value_for_freq_1: false
+    equal_population_sizes: false
+    equal_state_frequencies: true
+    parameters:
+        population_size:
+            value: 0.002
+            estimate: true
+            prior:
+                gamma_distribution:
+                    shape: 2.0
+                    scale: 0.001
+                    offset: 0.0
+        freq_1:
+            value: 0.5
+            estimate: false
+
+        mutation_rate:
+            value: 1.0
+            estimate: false
+
+
+comparisons:
+- comparison:
+    path: "../alignments/comp01-2species-10genomes-1000chars.nex"
+- comparison:
+    path: "../alignments/comp02-2species-10genomes-1000chars.nex"
+- comparison:
+    path: "../alignments/comp03-2species-10genomes-1000chars.nex"
