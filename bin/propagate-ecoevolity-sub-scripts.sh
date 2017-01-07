@@ -13,7 +13,7 @@ do
         > "$outfile"
     sed -e "s/i=0/i=${istart}/g" -e "s/-lt 10/-lt ${istop}/g" \
         ecoevolity-val-03pairs-rj-batch01-sub000001.sh \
-        > "$outfile"
+        > "$rjoutfile"
     chmod +x "$outfile"
     i=$(expr $i + 1)
     istart=$(expr $istart + 10)
