@@ -2,7 +2,7 @@
 
 NSPECIES=2
 NGENOMES=10
-NCHARS=1000
+NCHARS=10000
 
 i=1
 while [ "$i" -lt 9 ]

@@ -65,7 +65,8 @@ class PosteriorSummary(object):
 
 
 def main_cli():
-    results_dir = os.path.join(project_util.VAL_DIR, '03pairs-dpp', 'batch01')
+    # results_dir = os.path.join(project_util.VAL_DIR, '03pairs-dpp', 'batch01')
+    results_dir = os.path.join(project_util.VAL_DIR, '03pairs-rj', 'batch01')
     true_value_paths = []
     posterior_summaries = []
     for i in range(number_of_simulations):
@@ -79,7 +80,7 @@ def main_cli():
                 "simcoevolity-sim-" + sim_index + "-config-state-run-1.log")
         if os.path.exists(post_path):
             post_sum = PosteriorSummary([post_path], burnin = 101)
-            assert(post_sum.number_of_samples == 1900)
+            # assert(post_sum.number_of_samples == 1900)
             posterior_summaries.append(post_sum)
 
     true_values = sumcoevolity.parsing.get_dict_from_spreadsheets(
@@ -97,6 +98,9 @@ def main_cli():
     for i in range(number_of_simulations):
         correct_model = tuple(int(true_values[h][i]) for h in height_index_keys)
         inferred_model = posterior_summaries[i].get_models()[0][0]
+        print correct_model
+        print posterior_summaries[i].get_models()
+        print "\n"
         if correct_model == inferred_model:
             n_correct_model += 1
         if int(true_values['number_of_events'][i]) == posterior_summaries[i].get_number_of_events()[0][0]:

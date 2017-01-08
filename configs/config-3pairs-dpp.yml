@@ -39,7 +39,7 @@ global_comparison_settings:
     markers_are_dominant: false
     population_name_delimiter: "-"
     population_name_is_prefix: true
-    constant_sites_removed: true
+    constant_sites_removed: false
     use_empirical_starting_value_for_freq_1: false
     equal_population_sizes: false
     equal_state_frequencies: true
@@ -63,8 +63,8 @@ global_comparison_settings:
 
 comparisons:
 - comparison:
-    path: "../alignments/comp01-2species-10genomes-1000chars.nex"
+    path: "../alignments/comp01-2species-10genomes-10000chars.nex"
 - comparison:
-    path: "../alignments/comp02-2species-10genomes-1000chars.nex"
+    path: "../alignments/comp02-2species-10genomes-10000chars.nex"
 - comparison:
-    path: "../alignments/comp03-2species-10genomes-1000chars.nex"
+    path: "../alignments/comp03-2species-10genomes-10000chars.nex"
