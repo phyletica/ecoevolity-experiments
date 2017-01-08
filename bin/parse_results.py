@@ -10,7 +10,7 @@ import project_util
 
 _LOG = logging.getLogger(__name__)
 
-number_of_simulations = 100
+number_of_simulations = 1000
 
 class PosteriorSummary(object):
     def __init__(self, paths, burnin = 0):
@@ -80,7 +80,7 @@ def main_cli():
                 "simcoevolity-sim-" + sim_index + "-config-state-run-1.log")
         if os.path.exists(post_path):
             post_sum = PosteriorSummary([post_path], burnin = 101)
-            # assert(post_sum.number_of_samples == 1900)
+            assert(post_sum.number_of_samples == 1900)
             posterior_summaries.append(post_sum)
 
     true_values = sumcoevolity.parsing.get_dict_from_spreadsheets(
@@ -94,20 +94,51 @@ def main_cli():
 
     height_index_keys = posterior_summaries[0].height_index_keys
     n_correct_model = 0
+    n_model_within_95_set = 0
     n_correct_number_of_events = 0
+    height_mean_path = os.path.join(results_dir, "summary-height-means.csv")
+    height_median_path = os.path.join(results_dir, "summary-height-medians.csv")
+    nevents_mode_path = os.path.join(results_dir, "summary-nevent-modes.csv")
+    h_mean_out = open(height_mean_path, 'w')
+    h_median_out = open(height_median_path, 'w')
+    nevents_out = open(nevents_mode_path, 'w')
+    h_mean_out.write("{0},{1}\n".format("true_height", "mean_height"))
+    h_median_out.write("{0},{1}\n".format("true_height", "median_height"))
+    nevents_out.write("{0},{1}\n".format("true_nevents", "mode_nevents"))
     for i in range(number_of_simulations):
         correct_model = tuple(int(true_values[h][i]) for h in height_index_keys)
-        inferred_model = posterior_summaries[i].get_models()[0][0]
-        print correct_model
-        print posterior_summaries[i].get_models()
-        print "\n"
+        inferred_models = posterior_summaries[i].get_models()
+        inferred_model = inferred_models[0][0]
         if correct_model == inferred_model:
             n_correct_model += 1
-        if int(true_values['number_of_events'][i]) == posterior_summaries[i].get_number_of_events()[0][0]:
+        total_prob = 0.0
+        for m, p in inferred_models:
+            if m == correct_model:
+                n_model_within_95_set += 1
+                break
+            total_prob += p
+            if total_prob > 0.95:
+                break
+        true_nevents = int(true_values['number_of_events'][i])
+        inferred_nevents = posterior_summaries[i].get_number_of_events()[0][0]
+        if true_nevents == inferred_nevents:
             n_correct_number_of_events += 1
+
+        nevents_out.write("{0},{1}\n".format(true_nevents, inferred_nevents))
+        for header_key in ("root_height_c1sp1", "root_height_c2sp1", "root_height_c3sp1"):
+            true_height = float(true_values[header_key][i])
+            mean_height = posterior_summaries[i].continuous_parameter_summaries[header_key]['mean']
+            median_height = posterior_summaries[i].continuous_parameter_summaries[header_key]['median']
+            h_mean_out.write("{0},{1}\n".format(true_height, mean_height))
+            h_median_out.write("{0},{1}\n".format(true_height, median_height))
+
+    h_mean_out.close()
+    h_median_out.close()
+    nevents_out.close()
 
     p_correct_model = n_correct_model / float(number_of_simulations)
     p_correct_number_of_events = n_correct_number_of_events / float(number_of_simulations)
+    sys.stdout.write("Number of reps with correct model in 95% credibility set: {0}\n".format(n_model_within_95_set))
     sys.stdout.write("Number of reps with correctly inferred model: {0}\n".format(n_correct_model))
     sys.stdout.write("Estimated probability of correctly inferring model: {0}\n".format(p_correct_model))
     sys.stdout.write("Number of reps with correctly inferred number of events: {0}\n".format(n_correct_number_of_events))
