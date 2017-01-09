@@ -101,15 +101,27 @@ def main_cli():
     n_correct_number_of_events = 0
     height_mean_path = os.path.join(results_dir, "summary-height-means.csv")
     height_median_path = os.path.join(results_dir, "summary-height-medians.csv")
+    size_mean_path = os.path.join(results_dir, "summary-tip-pop-size-means.csv")
+    root_size_mean_path = os.path.join(results_dir, "summary-root-pop-size-means.csv")
+    size_median_path = os.path.join(results_dir, "summary-tip-pop-size-medians.csv")
+    root_size_median_path = os.path.join(results_dir, "summary-root-pop-size-medians.csv")
     nevents_mean_path = os.path.join(results_dir, "summary-nevent-means.csv")
     nevents_mode_path = os.path.join(results_dir, "summary-nevent-modes.csv")
     h_mean_out = open(height_mean_path, 'w')
     h_median_out = open(height_median_path, 'w')
     nevents_out = open(nevents_mode_path, 'w')
     nevents_mean_out = open(nevents_mean_path, 'w')
+    size_mean_out = open(size_mean_path, 'w')
+    root_size_mean_out = open(root_size_mean_path, 'w')
+    size_median_out = open(size_median_path, 'w')
+    root_size_median_out = open(root_size_median_path, 'w')
     h_mean_out.write("{0},{1}\n".format("true_height", "mean_height"))
     h_median_out.write("{0},{1}\n".format("true_height", "median_height"))
     nevents_out.write("{0},{1}\n".format("true_nevents", "mode_nevents"))
+    size_mean_out.write("{0},{1}\n".format("true_tip_pop_size", "mean_tip_pop_size"))
+    size_median_out.write("{0},{1}\n".format("true_tip_pop_size", "median_tip_pop_size"))
+    root_size_mean_out.write("{0},{1}\n".format("true_root_pop_size", "mean_root_pop_size"))
+    root_size_median_out.write("{0},{1}\n".format("true_root_pop_size", "median_root_pop_size"))
     for i in range(number_of_samples):
         correct_model = tuple(int(true_values[h][i]) for h in height_index_keys)
         inferred_models = posterior_summaries[i].get_models()
@@ -138,6 +150,27 @@ def main_cli():
             median_height = posterior_summaries[i].continuous_parameter_summaries[header_key]['median']
             h_mean_out.write("{0},{1}\n".format(true_height, mean_height))
             h_median_out.write("{0},{1}\n".format(true_height, median_height))
+        for header_key in (
+                "pop_size_root_c1sp1",
+                "pop_size_root_c2sp1",
+                "pop_size_root_c3sp1"):
+            true_size = float(true_values[header_key][i])
+            mean_size = posterior_summaries[i].continuous_parameter_summaries[header_key]['mean']
+            median_size = posterior_summaries[i].continuous_parameter_summaries[header_key]['median']
+            root_size_mean_out.write("{0},{1}\n".format(true_size, mean_size))
+            root_size_median_out.write("{0},{1}\n".format(true_size, median_size))
+        for header_key in (
+                "pop_size_c1sp1",
+                "pop_size_c2sp1",
+                "pop_size_c3sp1",
+                "pop_size_c1sp2",
+                "pop_size_c2sp2",
+                "pop_size_c3sp2"):
+            true_size = float(true_values[header_key][i])
+            mean_size = posterior_summaries[i].continuous_parameter_summaries[header_key]['mean']
+            median_size = posterior_summaries[i].continuous_parameter_summaries[header_key]['median']
+            size_mean_out.write("{0},{1}\n".format(true_size, mean_size))
+            size_median_out.write("{0},{1}\n".format(true_size, median_size))
 
     h_mean_out.close()
     h_median_out.close()
