@@ -118,6 +118,7 @@ def main_cli():
     h_mean_out.write("{0},{1}\n".format("true_height", "mean_height"))
     h_median_out.write("{0},{1}\n".format("true_height", "median_height"))
     nevents_out.write("{0},{1}\n".format("true_nevents", "mode_nevents"))
+    nevents_mean_out.write("{0},{1}\n".format("true_nevents", "mean_nevents"))
     size_mean_out.write("{0},{1}\n".format("true_tip_pop_size", "mean_tip_pop_size"))
     size_median_out.write("{0},{1}\n".format("true_tip_pop_size", "median_tip_pop_size"))
     root_size_mean_out.write("{0},{1}\n".format("true_root_pop_size", "mean_root_pop_size"))
@@ -143,7 +144,7 @@ def main_cli():
 
         nevents_out.write("{0},{1}\n".format(true_nevents, inferred_nevents))
         nevents_mean = posterior_summaries[i].continuous_parameter_summaries["number_of_events"]["mean"]
-        nevents_out.write("{0},{1}\n".format(true_nevents, nevents_mean))
+        nevents_mean_out.write("{0},{1}\n".format(true_nevents, nevents_mean))
         for header_key in ("root_height_c1sp1", "root_height_c2sp1", "root_height_c3sp1"):
             true_height = float(true_values[header_key][i])
             mean_height = posterior_summaries[i].continuous_parameter_summaries[header_key]['mean']
@@ -175,6 +176,11 @@ def main_cli():
     h_mean_out.close()
     h_median_out.close()
     nevents_out.close()
+    nevents_mean_out.close()
+    size_mean_out.close()
+    size_median_out.close()
+    root_size_mean_out.close()
+    root_size_median_out.close()
 
     p_correct_model = n_correct_model / float(number_of_samples)
     p_correct_number_of_events = n_correct_number_of_events / float(number_of_samples)
