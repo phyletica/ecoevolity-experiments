@@ -58,7 +58,6 @@ global_comparison_settings:
             value: 1.0
             estimate: false
 
-
 comparisons:
 - comparison:
     path: "../alignments/comp01-2species-10genomes-100000chars.nex"
@@ -66,3 +65,7 @@ comparisons:
     path: "../alignments/comp02-2species-10genomes-100000chars.nex"
 - comparison:
     path: "../alignments/comp03-2species-10genomes-100000chars.nex"
+- comparison:
+    path: "../alignments/comp04-2species-10genomes-100000chars.nex"
+- comparison:
+    path: "../alignments/comp05-2species-10genomes-100000chars.nex"
