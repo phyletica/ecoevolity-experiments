@@ -22,7 +22,7 @@ operator_settings:
     operators:
         ModelOperator:
             weight: 1.0
-            number_of_auxiliary_categories: 2
+            number_of_auxiliary_categories: 4
         CollectionScaler:
             scale: 0.4
             weight: 1.0
