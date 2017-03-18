@@ -9,24 +9,30 @@ event_time_prior:
         offset: 0.0
 
 mcmc_settings:
-    chain_length: 200000
-    sample_frequency: 100
+    chain_length: 100000
+    sample_frequency: 50
 
 operator_settings:
     auto_optimize: true
     auto_optimize_delay: 10000
     operators:
         ModelOperator:
-            weight: 3.0
+            weight: 1.0
+        CompositeHeightSizeRateMixer:
+            weight: 1.0
+            scale: 0.2
+        CompositeHeightSizeRateScaler:
+            weight: 1.0
+            scale: 0.2
         ComparisonHeightScaler:
+            weight: 1.0
             scale: 0.13
-            weight: 1.0
         RootPopulationSizeScaler:
+            weight: 1.0
             scale: 0.4
-            weight: 1.0
         ChildPopulationSizeScaler:
-            scale: 0.22
             weight: 1.0
+            scale: 0.22
 
 global_comparison_settings:
     ploidy: 2
@@ -44,8 +50,8 @@ global_comparison_settings:
             estimate: true
             prior:
                 gamma_distribution:
-                    shape: 2.0
-                    scale: 0.001
+                    shape: 4.0
+                    scale: 0.0005
                     offset: 0.0
         freq_1:
             value: 0.5
@@ -58,8 +64,8 @@ global_comparison_settings:
 
 comparisons:
 - comparison:
-    path: "../alignments/comp01-2species-10genomes-10000chars.nex"
+    path: "../alignments/comp01-2species-10genomes-500000chars.nex"
 - comparison:
-    path: "../alignments/comp02-2species-10genomes-10000chars.nex"
+    path: "../alignments/comp02-2species-10genomes-500000chars.nex"
 - comparison:
-    path: "../alignments/comp03-2species-10genomes-10000chars.nex"
+    path: "../alignments/comp03-2species-10genomes-500000chars.nex"

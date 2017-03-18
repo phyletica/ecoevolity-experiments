@@ -23,18 +23,21 @@ operator_settings:
         ModelOperator:
             weight: 1.0
             number_of_auxiliary_categories: 4
-        CollectionScaler:
-            scale: 0.4
+        CompositeHeightSizeRateMixer:
             weight: 1.0
+            scale: 0.2
+        CompositeHeightSizeRateScaler:
+            weight: 1.0
+            scale: 0.2
         ComparisonHeightScaler:
+            weight: 1.0
             scale: 0.13
-            weight: 1.0
         RootPopulationSizeScaler:
+            weight: 1.0
             scale: 0.4
-            weight: 1.0
         ChildPopulationSizeScaler:
-            scale: 0.22
             weight: 1.0
+            scale: 0.22
 
 global_comparison_settings:
     ploidy: 2
@@ -65,12 +68,12 @@ global_comparison_settings:
 
 comparisons:
 - comparison:
-    path: "../alignments/comp01-2species-10genomes-100000chars.nex"
+    path: "../alignments/comp01-2species-10genomes-500000chars.nex"
 - comparison:
-    path: "../alignments/comp02-2species-10genomes-100000chars.nex"
+    path: "../alignments/comp02-2species-10genomes-500000chars.nex"
 - comparison:
-    path: "../alignments/comp03-2species-10genomes-100000chars.nex"
+    path: "../alignments/comp03-2species-10genomes-500000chars.nex"
 - comparison:
-    path: "../alignments/comp04-2species-10genomes-100000chars.nex"
+    path: "../alignments/comp04-2species-10genomes-500000chars.nex"
 - comparison:
-    path: "../alignments/comp05-2species-10genomes-100000chars.nex"
+    path: "../alignments/comp05-2species-10genomes-500000chars.nex"
