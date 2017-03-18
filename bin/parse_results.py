@@ -65,12 +65,14 @@ class PosteriorSummary(object):
 
 
 def main_cli():
-    # results_dir = os.path.join(project_util.VAL_DIR, '03pairs-dpp', 'batch01')
-    results_dir = os.path.join(project_util.VAL_DIR, '03pairs-rj', 'batch01')
+    results_dir = os.path.join(project_util.VAL_DIR, '03pairs-dpp', 'batch01')
+    # results_dir = os.path.join(project_util.VAL_DIR, '03pairs-rj', 'batch01')
+    # results_dir = os.path.join(project_util.VAL_DIR, '05pairs-rj', 'batch01')
     true_value_paths = []
     posterior_summaries = []
     for i in range(number_of_simulations):
         sim_index = str(i).zfill(4)
+        # sim_index = str(i).zfill(3)
         true_file_path = os.path.join(
                 results_dir,
                 "simcoevolity-sim-" + sim_index + "-true-values.txt")
