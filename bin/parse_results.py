@@ -71,14 +71,15 @@ def main_cli():
     true_value_paths = []
     posterior_summaries = []
     for i in range(number_of_simulations):
-        sim_index = str(i).zfill(4)
-        # sim_index = str(i).zfill(3)
+        # sim_index = str(i).zfill(4)
+        sim_index = str(i).zfill(3)
         true_file_path = os.path.join(
                 results_dir,
                 "simcoevolity-sim-" + sim_index + "-true-values.txt")
         post_path = os.path.join(
                 results_dir,
-                "simcoevolity-sim-" + sim_index + "-config-state-run-1.log")
+                # "simcoevolity-sim-" + sim_index + "-config-state-run-1.log")
+                "simcoevolity-sim-" + sim_index + "-noconst-config-state-run-1.log")
         if os.path.exists(post_path):
             post_sum = PosteriorSummary([post_path], burnin = 101)
             assert(post_sum.number_of_samples == 1900)
