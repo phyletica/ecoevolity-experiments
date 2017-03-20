@@ -33,4 +33,4 @@ SEED="24752987"
 
 mkdir -p "$OUTPUTDIR"
 
-simcoevolity --seed="$SEED" -n 1000 -o "$OUTPUTDIR" "$CFGPATH"
+simcoevolity --seed="$SEED" -n 100 -o "$OUTPUTDIR" "$CFGPATH"

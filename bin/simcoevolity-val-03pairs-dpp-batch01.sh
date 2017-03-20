@@ -1,6 +1,6 @@
 #! /bin/sh
 #PBS -l nodes=1:ppn=1
-#PBS -l walltime=00:30:00
+#PBS -l walltime=01:00:00
 #PBS -j oe 
 #   #PBS -l jobflags=ADVRES:jro0014_lab.56281
 
@@ -33,4 +33,4 @@ SEED="9207172975"
 
 mkdir -p "$OUTPUTDIR"
 
-simcoevolity --seed="$SEED" -n 1000 -o "$OUTPUTDIR" "$CFGPATH"
+simcoevolity --seed="$SEED" -n 100 -o "$OUTPUTDIR" "$CFGPATH"
