@@ -10,7 +10,7 @@ import project_util
 
 _LOG = logging.getLogger(__name__)
 
-number_of_simulations = 1000
+number_of_simulations = 100
 
 class PosteriorSummary(object):
     def __init__(self, paths, burnin = 0):
@@ -65,7 +65,7 @@ class PosteriorSummary(object):
 
 
 def main_cli():
-    results_dir = os.path.join(project_util.VAL_DIR, '03pairs-dpp', 'batch01')
+    results_dir = os.path.join(project_util.VAL_DIR, '03pairs-rj-fixed-pop-sizes', 'batch01')
     # results_dir = os.path.join(project_util.VAL_DIR, '03pairs-rj', 'batch01')
     # results_dir = os.path.join(project_util.VAL_DIR, '05pairs-rj', 'batch01')
     true_value_paths = []
@@ -78,8 +78,8 @@ def main_cli():
                 "simcoevolity-sim-" + sim_index + "-true-values.txt")
         post_path = os.path.join(
                 results_dir,
-                # "simcoevolity-sim-" + sim_index + "-config-state-run-1.log")
-                "simcoevolity-sim-" + sim_index + "-noconst-config-state-run-1.log")
+                "simcoevolity-sim-" + sim_index + "-config-state-run-1.log")
+                # "simcoevolity-sim-" + sim_index + "-noconst-config-state-run-1.log")
         if os.path.exists(post_path):
             post_sum = PosteriorSummary([post_path], burnin = 101)
             assert(post_sum.number_of_samples == 1900)
