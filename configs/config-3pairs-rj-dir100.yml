@@ -1,10 +1,6 @@
 ---
 event_model_prior:
-    dirichlet_process:
-        parameters:
-            concentration:
-                value:      1.414216
-                estimate:   false
+    uniform:
 
 event_time_prior:
     gamma_distribution:
@@ -22,22 +18,19 @@ operator_settings:
     operators:
         ModelOperator:
             weight: 1.0
-            number_of_auxiliary_categories: 4
+            number_of_auxiliary_categories: 2
         CompositeHeightSizeRateMixer:
-            weight: 1.0
-            scale: 0.2
-        CompositeHeightSizeRateScaler:
             weight: 1.0
             scale: 0.2
         ComparisonHeightScaler:
             weight: 1.0
             scale: 0.13
-        RootPopulationSizeScaler:
+        PopulationSizeScaler:
             weight: 1.0
             scale: 0.4
-        ChildPopulationSizeScaler:
+        PopulationSizeMultiplierMixer:
             weight: 1.0
-            scale: 0.22
+            scale: 0.2
 
 global_comparison_settings:
     ploidy: 2
@@ -46,9 +39,6 @@ global_comparison_settings:
     population_name_delimiter: "-"
     population_name_is_prefix: true
     constant_sites_removed: false
-    use_empirical_starting_value_for_freq_1: false
-    equal_population_sizes: false
-    equal_state_frequencies: true
     parameters:
         population_size:
             value: 0.002
@@ -58,6 +48,12 @@ global_comparison_settings:
                     shape: 4.0
                     scale: 0.0005
                     offset: 0.0
+        population_size_multipliers:
+            value: [1.0, 1.0, 1.0]
+            estimate: true
+            prior:
+                dirichlet_distribution:
+                    alpha: [100.0, 100.0, 100.0]
         freq_1:
             value: 0.5
             estimate: false

@@ -18,7 +18,7 @@ operator_settings:
     operators:
         ModelOperator:
             weight: 1.0
-            number_of_auxiliary_categories: 3
+            number_of_auxiliary_categories: 2
         CompositeHeightSizeRateMixer:
             weight: 1.0
             scale: 0.2
@@ -62,6 +62,7 @@ global_comparison_settings:
             value: 1.0
             estimate: false
 
+
 comparisons:
 - comparison:
     path: "../alignments/comp01-2species-10genomes-500000chars.nex"
@@ -69,7 +70,3 @@ comparisons:
     path: "../alignments/comp02-2species-10genomes-500000chars.nex"
 - comparison:
     path: "../alignments/comp03-2species-10genomes-500000chars.nex"
-- comparison:
-    path: "../alignments/comp04-2species-10genomes-500000chars.nex"
-- comparison:
-    path: "../alignments/comp05-2species-10genomes-500000chars.nex"
