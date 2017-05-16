@@ -1,8 +1,8 @@
 #! /bin/sh
 #PBS -l nodes=1:ppn=1
-#PBS -l walltime=01:00:00
+#PBS -l walltime=02:00:00
 #PBS -j oe 
-#   #PBS -l jobflags=ADVRES:jro0014_lab.56281
+#PBS -l jobflags=ADVRES:jro0014_lab.56281
 
 if [ -n "$PBS_JOBNAME" ]
 then
@@ -27,9 +27,9 @@ then
     module load gcc/5.3.0
 fi
 
-CFGPATH="../configs/config-3pairs-rj.yml"
-OUTPUTDIR="../simulations/validation/03pairs-rj/batch01"
-SEED="24752987"
+CFGPATH="../configs/config-3pairs-dpp-dir001.yml"
+OUTPUTDIR="../simulations/validation/03pairs-dpp-dir001/batch01"
+SEED="27215356"
 
 mkdir -p "$OUTPUTDIR"
 
