@@ -83,7 +83,7 @@ def main_cli(argv = sys.argv):
         args.seed = random.randint(1, 999999999)
     _RNG.seed(args.seed)
 
-    config_path_pattern = os.path.join(project_util.VAL_DIR, "*", "*", "*.yml") 
+    config_path_pattern = os.path.join(project_util.VAL_DIR, "*", "*", "simcoevolity-sim-*.yml") 
 
     for config_path in glob.glob(config_path_pattern):
         write_qsub(config_path = config_path,
