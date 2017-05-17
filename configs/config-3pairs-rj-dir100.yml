@@ -30,7 +30,7 @@ operator_settings:
             scale: 0.4
         PopulationSizeMultiplierMixer:
             weight: 1.0
-            scale: 0.2
+            scale: 0.001
 
 global_comparison_settings:
     ploidy: 2
