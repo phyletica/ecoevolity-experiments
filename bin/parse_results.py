@@ -65,7 +65,7 @@ class PosteriorSummary(object):
 
 
 def main_cli():
-    results_dir = os.path.join(project_util.VAL_DIR, '03pairs-rj-fixed-pop-sizes', 'batch01')
+    results_dir = os.path.join(project_util.VAL_DIR, '03pairs-dpp', 'batch01')
     # results_dir = os.path.join(project_util.VAL_DIR, '03pairs-rj', 'batch01')
     # results_dir = os.path.join(project_util.VAL_DIR, '05pairs-rj', 'batch01')
     true_value_paths = []
