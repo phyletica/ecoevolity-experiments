@@ -19,21 +19,15 @@ operator_settings:
         ModelOperator:
             weight: 1.0
             number_of_auxiliary_categories: 3
-        CompositeHeightSizeRateMixer:
+        CompositeTimeSizeRateMixer:
             weight: 1.0
             scale: 0.2
-        CompositeHeightSizeRateScaler:
+        CompositeTimeSizeRateScaler:
             weight: 0.0
             scale: 0.2
-        ComparisonHeightScaler:
+        EventTimeScaler:
             weight: 1.0
             scale: 0.13
-        PopulationSizeScaler:
-            weight: 1.0
-            scale: 0.4
-        PopulationSizeMultiplierMixer:
-            weight: 1.0
-            scale: 0.001
 
 global_comparison_settings:
     ploidy: 2
@@ -64,6 +58,19 @@ global_comparison_settings:
         mutation_rate:
             value: 1.0
             estimate: false
+    operators:
+        MeanPopulationSizeScaler:
+            weight: 1.0
+            scale: 0.4
+        RelativePopulationSizeMixer:
+            weight: 1.0
+            scale: 0.001
+        RootRelativePopulationSizeMover:
+            weight: 1.0
+            window: 0.1
+        LeafRelativePopulationSizeMover:
+            weight: 1.0
+            window: 0.1
 
 comparisons:
 - comparison:
