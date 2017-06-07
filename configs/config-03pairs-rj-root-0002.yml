@@ -1,10 +1,6 @@
 ---
 event_model_prior:
-    dirichlet_process:
-        parameters:
-            concentration:
-                value:      1.414216
-                estimate:   false
+    uniform:
 
 event_time_prior:
     gamma_distribution:
@@ -55,8 +51,8 @@ global_comparison_settings:
             estimate: true
             prior:
                 gamma_distribution:
-                    shape: 1000.0
-                    scale: 0.001
+                    shape: 2.0
+                    scale: 0.5
                     offset: 0.0
         freq_1:
             value: 0.5

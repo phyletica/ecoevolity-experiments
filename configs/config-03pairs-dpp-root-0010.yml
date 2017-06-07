@@ -21,17 +21,17 @@ operator_settings:
     auto_optimize_delay: 1000
     operators:
         ModelOperator:
-            weight: 1.0
+            weight: 3.0
             number_of_auxiliary_categories: 2
         TimeSizeRateMixer:
-            weight: 1.0
-            scale: 0.2
+            weight: 3.0
+            scale: 0.02
         TimeSizeRateScaler:
             weight: 0.0
-            scale: 0.2
+            scale: 0.02
         EventTimeScaler:
             weight: 1.0
-            scale: 0.13
+            scale: 0.02
 
 global_comparison_settings:
     ploidy: 2
@@ -68,13 +68,13 @@ global_comparison_settings:
     operators:
         RootPopulationSizeScaler:
             weight: 1.0
-            scale: 0.4
+            scale: 0.05
         LeafPopulationSizeScaler:
             weight: 1.0
-            scale: 0.4
+            scale: 0.05
         TimeRootSizeMixer:
             weight: 3.0
-            scale: 0.1
+            scale: 0.05
 
 comparisons:
 - comparison:

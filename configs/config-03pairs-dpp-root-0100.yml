@@ -55,8 +55,8 @@ global_comparison_settings:
             estimate: true
             prior:
                 gamma_distribution:
-                    shape: 1000.0
-                    scale: 0.001
+                    shape: 100.0
+                    scale: 0.01
                     offset: 0.0
         freq_1:
             value: 0.5

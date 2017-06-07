@@ -1,10 +1,6 @@
 ---
 event_model_prior:
-    dirichlet_process:
-        parameters:
-            concentration:
-                value:      1.414216
-                estimate:   false
+    uniform:
 
 event_time_prior:
     gamma_distribution:
@@ -40,7 +36,7 @@ global_comparison_settings:
     population_name_delimiter: "-"
     population_name_is_prefix: true
     constant_sites_removed: false
-    equal_population_sizes: false
+    equal_population_sizes: true 
     parameters:
         population_size:
             value: 0.002
@@ -50,18 +46,9 @@ global_comparison_settings:
                     shape: 5.0
                     scale: 0.0004
                     offset: 0.0
-        root_relative_population_size:
-            value: 1.0
-            estimate: true
-            prior:
-                gamma_distribution:
-                    shape: 1000.0
-                    scale: 0.001
-                    offset: 0.0
         freq_1:
             value: 0.5
             estimate: false
-
         mutation_rate:
             value: 1.0
             estimate: false
@@ -70,10 +57,10 @@ global_comparison_settings:
             weight: 1.0
             scale: 0.05
         LeafPopulationSizeScaler:
-            weight: 1.0
+            weight: 0.0
             scale: 0.05
         TimeRootSizeMixer:
-            weight: 3.0
+            weight: 0.0
             scale: 0.05
 
 comparisons:

@@ -52,12 +52,8 @@ global_comparison_settings:
                     offset: 0.0
         root_relative_population_size:
             value: 1.0
-            estimate: true
-            prior:
-                gamma_distribution:
-                    shape: 1000.0
-                    scale: 0.001
-                    offset: 0.0
+            estimate: false 
+
         freq_1:
             value: 0.5
             estimate: false
@@ -67,13 +63,13 @@ global_comparison_settings:
             estimate: false
     operators:
         RootPopulationSizeScaler:
-            weight: 1.0
+            weight: 0.0
             scale: 0.05
         LeafPopulationSizeScaler:
             weight: 1.0
             scale: 0.05
         TimeRootSizeMixer:
-            weight: 3.0
+            weight: 0.0
             scale: 0.05
 
 comparisons:
