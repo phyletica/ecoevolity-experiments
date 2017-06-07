@@ -18,7 +18,6 @@ operator_settings:
     operators:
         ModelOperator:
             weight: 3.0
-            number_of_auxiliary_categories: 2
         TimeSizeRateMixer:
             weight: 3.0
             scale: 0.02
