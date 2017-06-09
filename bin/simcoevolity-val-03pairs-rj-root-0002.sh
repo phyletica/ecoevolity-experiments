@@ -4,6 +4,12 @@
 #PBS -j oe 
 #PBS -l jobflags=ADVRES:jro0014_lab.56281
 
+myhost="$(hostname | tr -d '0123456789')"
+if [ "$myhost" == "uv" ] || [ "$myhost" == "dmc" ]
+then
+    module load gcc/6.1.0
+fi
+
 if [ -n "$PBS_JOBNAME" ]
 then
     source ${PBS_O_HOME}/.bash_profile
