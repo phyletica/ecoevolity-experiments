@@ -29,14 +29,19 @@ def get_pbs_header(restrict_nodes = False, walltime = "5:00:00"):
           "fi\n\n")
     return s
 
-def write_qsub(config_path, restrict_nodes = False, walltime = "5:00:00", rng = _RNG):
+def write_qsub(config_path,
+        restrict_nodes = False,
+        walltime = "5:00:00",
+        no_pbs = False,
+        rng = _RNG):
     qsub_prefix = os.path.splitext(config_path)[0]
     qsub_path = qsub_prefix + "-qsub.sh"
     if os.path.exists(qsub_path):
         return
     seed = rng.randint(1, 999999999)
     with open(qsub_path, 'w') as out:
-        out.write(get_pbs_header(restrict_nodes, walltime))
+        if not no_pbs:
+            out.write(get_pbs_header(restrict_nodes, walltime))
         out.write("ecoevolity --seed {0} --relax-constant-sites {1}\n".format(
             seed,
             os.path.basename(config_path)))
@@ -74,6 +79,9 @@ def main_cli(argv = sys.argv):
     parser.add_argument('--restrict-nodes',
             action = 'store_true',
             help = 'Run only on lab nodes.')
+    parser.add_argument('--no-pbs',
+            action = 'store_true',
+            help = 'No PBS preamble.')
 
     if argv == sys.argv:
         args = parser.parse_args()
@@ -88,7 +96,8 @@ def main_cli(argv = sys.argv):
     for config_path in glob.glob(config_path_pattern):
         write_qsub(config_path = config_path,
                 restrict_nodes = args.restrict_nodes,
-                walltime = args.walltime)
+                walltime = args.walltime,
+                no_pbs = args.no_pbs)
     
 
 if __name__ == "__main__":
