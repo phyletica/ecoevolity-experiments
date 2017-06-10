@@ -30,7 +30,8 @@ def get_pbs_header(restrict_nodes = False, walltime = "5:00:00"):
     return s
 
 def get_asc_header():
-    s = ("username=\"$USER\"\n"
+    s = ("#! /bin/sh\n\n"
+         "username=\"$USER\"\n"
          "if [ \"$username\" == \"aubjro\" ]\n"
          "then\n"
          "    module load gcc/6.1.0\n"
