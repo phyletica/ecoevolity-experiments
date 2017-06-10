@@ -29,10 +29,18 @@ def get_pbs_header(restrict_nodes = False, walltime = "5:00:00"):
           "fi\n\n")
     return s
 
+def get_asc_header():
+    s = ("username=\"$USER\"\n"
+         "if [ \"$username\" == \"aubjro\" ]\n"
+         "then\n"
+         "    module load gcc/6.1.0\n"
+         "fi\n\n")
+    return s
+
 def write_qsub(config_path,
         restrict_nodes = False,
         walltime = "5:00:00",
-        no_pbs = False,
+        asc = False,
         rng = _RNG):
     qsub_prefix = os.path.splitext(config_path)[0]
     qsub_path = qsub_prefix + "-qsub.sh"
@@ -40,7 +48,9 @@ def write_qsub(config_path,
         return
     seed = rng.randint(1, 999999999)
     with open(qsub_path, 'w') as out:
-        if not no_pbs:
+        if asc:
+            out.write(get_asc_header())
+        else:
             out.write(get_pbs_header(restrict_nodes, walltime))
         out.write("ecoevolity --seed {0} --relax-constant-sites {1}\n".format(
             seed,
@@ -79,9 +89,9 @@ def main_cli(argv = sys.argv):
     parser.add_argument('--restrict-nodes',
             action = 'store_true',
             help = 'Run only on lab nodes.')
-    parser.add_argument('--no-pbs',
+    parser.add_argument('--asc',
             action = 'store_true',
-            help = 'No PBS preamble.')
+            help = 'Format script for AL super computer.')
 
     if argv == sys.argv:
         args = parser.parse_args()
@@ -97,7 +107,7 @@ def main_cli(argv = sys.argv):
         write_qsub(config_path = config_path,
                 restrict_nodes = args.restrict_nodes,
                 walltime = args.walltime,
-                no_pbs = args.no_pbs)
+                asc = args.asc)
     
 
 if __name__ == "__main__":
