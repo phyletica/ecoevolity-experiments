@@ -4,8 +4,8 @@
 #PBS -j oe 
 #PBS -l jobflags=ADVRES:jro0014_lab.56281
 
-myhost="$(hostname | tr -d '0123456789')"
-if [ "$myhost" == "uv" ] || [ "$myhost" == "dmc" ]
+username="$USER"
+if [ "$username" == "aubjro" ]
 then
     module load gcc/6.1.0
 fi
