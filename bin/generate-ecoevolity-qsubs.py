@@ -53,7 +53,7 @@ def write_qsub(config_path,
             out.write(get_asc_header())
         else:
             out.write(get_pbs_header(restrict_nodes, walltime))
-        out.write("ecoevolity --seed {0} --relax-constant-sites {1}\n".format(
+        out.write("ecoevolity --seed {0} --relax-constant-sites {1} 1>{1}.out 2>&1\n".format(
             seed,
             os.path.basename(config_path)))
 
