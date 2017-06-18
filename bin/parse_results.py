@@ -151,6 +151,18 @@ def parse_simulation_results(burnin = 101):
         var_only_results = get_empty_results_dict(number_of_comparisons)
         if (len(var_only_path) > 0):
             var_only_present = True
+        if os.path.exists(var_only_results_path):
+            _LOG.warning("WARNING: Results path {0} already exists; skipping!".format(
+                    var_only_results_path))
+            var_only_present = False
+        skipping_sim = False
+        if os.path.exists(results_path):
+            _LOG.warning("WARNING: Results path {0} already exists; skipping!".format(
+                    results_path))
+            skipping_sim = True
+        if ((skipping_sim) and (not var_only_present)):
+            continue
+
         batch_dirs = glob.glob(os.path.join(val_sim_dir, "batch*"))
         for batch_dir in sorted(batch_dirs):
             batch_number_matches = batch_number_pattern.findall(batch_dir)
@@ -198,17 +210,18 @@ def parse_simulation_results(burnin = 101):
                 assert(len(stdout_paths) == 1)
                 stdout_path = stdout_paths[0]
                 assert(os.path.exists(stdout_path))
-                rep_results = get_results_from_sim_rep(
-                        posterior_path = post_path,
-                        true_path = true_path,
-                        stdout_path = stdout_path,
-                        parameter_names = parameter_names,
-                        number_of_comparisons = number_of_comparisons,
-                        batch_number = batch_number,
-                        sim_number = sim_number,
-                        burnin = burnin)
-                for k, v in rep_results.items():
-                    results[k].append(v)
+                if not skipping_sim:
+                    rep_results = get_results_from_sim_rep(
+                            posterior_path = post_path,
+                            true_path = true_path,
+                            stdout_path = stdout_path,
+                            parameter_names = parameter_names,
+                            number_of_comparisons = number_of_comparisons,
+                            batch_number = batch_number,
+                            sim_number = sim_number,
+                            burnin = burnin)
+                    for k, v in rep_results.items():
+                        results[k].append(v)
                 if var_only_present:
                     var_only_log_paths = glob.glob(os.path.join(batch_dir,
                             "var-only-simcoevolity-sim-{0}-config-state-run-*.log*".format(
@@ -241,7 +254,8 @@ def parse_simulation_results(burnin = 101):
                             batch_number = batch_number,
                             sim_number = sim_number,
                             burnin = burnin)
-                    assert(rep_results["n_var_sites_c1"] == var_only_rep_results["n_var_sites_c1"])
+                    if not skipping_sim:
+                        assert(rep_results["n_var_sites_c1"] == var_only_rep_results["n_var_sites_c1"])
                     for k, v in var_only_rep_results.items():
                         var_only_results[k].append(v)
         with open(results_path, 'w') as out:
