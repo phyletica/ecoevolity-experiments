@@ -2,7 +2,10 @@
 
 import sys
 import os
+import re
 import logging
+import glob
+import argparse
 
 import sumcoevolity
 
@@ -10,190 +13,268 @@ import project_util
 
 _LOG = logging.getLogger(__name__)
 
-number_of_simulations = 100
 
-class PosteriorSummary(object):
-    def __init__(self, paths, burnin = 0):
-        self.paths = list(paths)
-        self.continuous_parameter_summaries = {}
-        self.number_of_event_probabilities = {}
-        self.model_probabilities = {}
-        self.height_index_keys = []
-        self.header = []
-        self.burnin = burnin
-        self.number_of_samples = 0
-        self._parse_posterior_paths()
-    
-    def _parse_posterior_paths(self):
-        self.header = sumcoevolity.parsing.parse_header_from_path(self.paths[0])
-        d = sumcoevolity.parsing.get_dict_from_spreadsheets(self.paths)
-        self.number_of_event_probabilities = sumcoevolity.stats.get_freqs(
-                (int(x) for x in d['number_of_events'][self.burnin:]))
-        total_nsamples = len(d[self.header[0]])
-        n = -1
-        for k, v in d.items():
-            if (k.startswith('generation') or 
-                k.startswith('ln_likelihood') or
-                k.startswith('ln_prior') or
-                # k.startswith('number_of') or
-                k.startswith('root_height_index')):
-                continue
-            self.continuous_parameter_summaries[k] = sumcoevolity.stats.get_summary(
-                    (float(x) for x in v[self.burnin:]))
-            if n < 0:
-                n = self.continuous_parameter_summaries[k]['n']
-            else:
-                assert(self.continuous_parameter_summaries[k]['n'] == n)
-        assert(n > -1)
-        self.number_of_samples = n
-        self.height_index_keys = [h for h in self.header if h.startswith('root_height_index')]
-        models = []
-        for i in range(self.burnin, total_nsamples):
-            models.append(tuple(int(d[h][i]) for h in self.height_index_keys))
-        assert len(models) == self.number_of_samples
-        self.model_probabilities = sumcoevolity.stats.get_freqs(models)
+def get_parameter_names(number_of_comparisons):
+    p = ["ln_likelihood", "concentration"]
+    for i in range(number_of_comparisons):
+        p.append("ln_likelihood_c{0}sp1".format(i + 1))
+        p.append("root_height_c{0}sp1".format(i + 1))
+        p.append("mutation_rate_c{0}sp1".format(i + 1))
+        p.append("freq_1_c{0}sp1".format(i + 1))
+        p.append("pop_size_c{0}sp1".format(i + 1))
+        p.append("pop_size_c{0}sp2".format(i + 1))
+        p.append("pop_size_root_c{0}sp1".format(i + 1))
+    return p
 
-    def get_models(self):
-        return sorted(self.model_probabilities.items(),
-                      reverse = True,
-                      key = lambda x: x[1])
+def get_results_header(number_of_comparisons):
+    h = [
+            "batch",
+            "sim",
+            "true_model",
+            "map_model",
+            "true_model_cred_level",
+            "map_model_p",
+            "true_model_p",
+            "true_num_events",
+            "map_num_events",
+            "true_num_events_cred_level",
+        ]
 
-    def get_number_of_events(self):
-        return sorted(self.number_of_event_probabilities.items(),
-                      reverse = True,
-                      key = lambda x: x[1])
+    for i in range(number_of_comparisons):
+        h.append("num_events_{0}_p".format(i+1))
 
+    h.append("mean_n_var_sites")
+    for i in range(number_of_comparisons):
+        h.append("n_var_sites_c{0}".format(i+1))
 
-def main_cli():
-    results_dir = os.path.join(project_util.VAL_DIR, '03pairs-dpp', 'batch01')
-    # results_dir = os.path.join(project_util.VAL_DIR, '03pairs-rj', 'batch01')
-    # results_dir = os.path.join(project_util.VAL_DIR, '05pairs-rj', 'batch01')
-    true_value_paths = []
-    posterior_summaries = []
-    for i in range(number_of_simulations):
-        # sim_index = str(i).zfill(4)
-        sim_index = str(i).zfill(3)
-        true_file_path = os.path.join(
-                results_dir,
-                "simcoevolity-sim-" + sim_index + "-true-values.txt")
-        post_path = os.path.join(
-                results_dir,
-                "simcoevolity-sim-" + sim_index + "-config-state-run-1.log")
-                # "simcoevolity-sim-" + sim_index + "-noconst-config-state-run-1.log")
-        if os.path.exists(post_path):
-            post_sum = PosteriorSummary([post_path], burnin = 101)
-            assert(post_sum.number_of_samples == 1900)
-            posterior_summaries.append(post_sum)
-            true_value_paths.append(true_file_path)
+    for p in get_parameter_names(number_of_comparisons):
+        h.append("true_{0}".format(p))
+        h.append("true_{0}_rank".format(p))
+        h.append("mean_{0}".format(p))
+        h.append("median_{0}".format(p))
+        h.append("ess_{0}".format(p))
+    return h
 
+def get_empty_results_dict(number_of_comparisons):
+    h = get_results_header(number_of_comparisons)
+    return dict(zip(h, ([] for i in range(len(h)))))
+
+def get_results_from_sim_rep(
+        posterior_path,
+        true_path,
+        stdout_path,
+        parameter_names,
+        number_of_comparisons,
+        batch_number,
+        sim_number,
+        burnin = 101):
+    results = {}
+    post_sample = sumcoevolity.posterior.PosteriorSample(
+            [posterior_path],
+            burnin = burnin)
+    assert(post_sample.number_of_samples == 2001 - burnin)
     true_values = sumcoevolity.parsing.get_dict_from_spreadsheets(
-            true_value_paths,
+            [true_path],
             sep = "\t",
             header = None)
+    for v in true_values.values():
+        assert(len(v) == 1)
+    stdout = sumcoevolity.parsing.EcoevolityStdOut(stdout_path)
+    assert(number_of_comparisons == stdout.number_of_comparisons)
+    results["batch"] = batch_number
+    results["sim"] = sim_number
+    results["mean_n_var_sites"] = stdout.get_mean_number_of_variable_sites()
+    for i in range(number_of_comparisons):
+        results["n_var_sites_c{0}".format(i + 1)] = stdout.get_number_of_variable_sites(i)
+    
+    true_model = tuple(int(true_values[h][0]) for h in post_sample.height_index_keys)
+    true_model_p = post_sample.get_model_probability(true_model)
+    true_model_cred = post_sample.get_model_credibility_level(true_model)
+    map_models = post_sample.get_map_models()
+    map_model = map_models[0]
+    if len(map_models) > 1:
+        if true_model in map_models:
+            map_model = true_model
+    map_model_p = post_sample.get_model_probability(map_model)
+    results["true_model"] = "".join((str(i) for i in true_model))
+    results["map_model"] = "".join((str(i) for i in map_model))
+    results["true_model_cred_level"] = true_model_cred
+    results["map_model_p"] = map_model_p
+    results["true_model_p"] = true_model_p
+    
+    true_nevents = int(true_values["number_of_events"][0])
+    true_nevents_p = post_sample.get_number_of_events_probability(true_nevents)
+    true_nevents_cred = post_sample.get_number_of_events_credibility_level(true_nevents)
+    map_numbers_of_events = post_sample.get_map_numbers_of_events()
+    map_nevents = map_numbers_of_events[0]
+    if len(map_numbers_of_events) > 1:
+        if true_nevents in map_numbers_of_events:
+            map_nevents = true_nevents
+    results["true_num_events"] = true_nevents
+    results["map_num_events"] = map_nevents
+    results["true_num_events_cred_level"] = true_nevents_cred
+    for i in range(number_of_comparisons):
+        results["num_events_{0}_p".format(i + 1)] = post_sample.get_number_of_events_probability(i + 1)
+    
+    for p in parameter_names:
+        true_val = float(true_values[p][0])
+        true_val_rank = post_sample.get_rank(p, true_val)
+        ss = sumcoevolity.stats.SampleSummarizer(post_sample.parameter_samples[p])
+        mean_val = ss.mean
+        median_val = sumcoevolity.stats.median(post_sample.parameter_samples[p])
+        ess = sumcoevolity.stats.effective_sample_size(
+                post_sample.parameter_samples[p])
+        results["true_{0}".format(p)] = true_val
+        results["true_{0}_rank".format(p)] = true_val_rank
+        results["mean_{0}".format(p)] = mean_val
+        results["median_{0}".format(p)] = median_val
+        results["ess_{0}".format(p)] = ess
 
-    number_of_samples = len(posterior_summaries)
-    for vals in true_values.values():
-        # assert(len(vals) == number_of_simulations)
-        assert(len(vals) == number_of_samples)
-    # assert len(posterior_summaries) == number_of_simulations
-    sys.stdout.write("Number of parsed posteriors: {0}\n".format(number_of_samples))
+    return results
 
-    height_index_keys = posterior_summaries[0].height_index_keys
-    n_correct_model = 0
-    n_model_within_95_set = 0
-    n_correct_number_of_events = 0
-    height_mean_path = os.path.join(results_dir, "summary-height-means.csv")
-    height_median_path = os.path.join(results_dir, "summary-height-medians.csv")
-    size_mean_path = os.path.join(results_dir, "summary-tip-pop-size-means.csv")
-    root_size_mean_path = os.path.join(results_dir, "summary-root-pop-size-means.csv")
-    size_median_path = os.path.join(results_dir, "summary-tip-pop-size-medians.csv")
-    root_size_median_path = os.path.join(results_dir, "summary-root-pop-size-medians.csv")
-    nevents_mean_path = os.path.join(results_dir, "summary-nevent-means.csv")
-    nevents_mode_path = os.path.join(results_dir, "summary-nevent-modes.csv")
-    h_mean_out = open(height_mean_path, 'w')
-    h_median_out = open(height_median_path, 'w')
-    nevents_out = open(nevents_mode_path, 'w')
-    nevents_mean_out = open(nevents_mean_path, 'w')
-    size_mean_out = open(size_mean_path, 'w')
-    root_size_mean_out = open(root_size_mean_path, 'w')
-    size_median_out = open(size_median_path, 'w')
-    root_size_median_out = open(root_size_median_path, 'w')
-    h_mean_out.write("{0},{1}\n".format("true_height", "mean_height"))
-    h_median_out.write("{0},{1}\n".format("true_height", "median_height"))
-    nevents_out.write("{0},{1}\n".format("true_nevents", "mode_nevents"))
-    nevents_mean_out.write("{0},{1}\n".format("true_nevents", "mean_nevents"))
-    size_mean_out.write("{0},{1}\n".format("true_tip_pop_size", "mean_tip_pop_size"))
-    size_median_out.write("{0},{1}\n".format("true_tip_pop_size", "median_tip_pop_size"))
-    root_size_mean_out.write("{0},{1}\n".format("true_root_pop_size", "mean_root_pop_size"))
-    root_size_median_out.write("{0},{1}\n".format("true_root_pop_size", "median_root_pop_size"))
-    for i in range(number_of_samples):
-        correct_model = tuple(int(true_values[h][i]) for h in height_index_keys)
-        inferred_models = posterior_summaries[i].get_models()
-        inferred_model = inferred_models[0][0]
-        if correct_model == inferred_model:
-            n_correct_model += 1
-        total_prob = 0.0
-        for m, p in inferred_models:
-            if m == correct_model:
-                n_model_within_95_set += 1
-                break
-            total_prob += p
-            if total_prob > 0.95:
-                break
-        true_nevents = int(true_values['number_of_events'][i])
-        inferred_nevents = posterior_summaries[i].get_number_of_events()[0][0]
-        if true_nevents == inferred_nevents:
-            n_correct_number_of_events += 1
+def parse_simulation_results(burnin = 101):
+    batch_number_pattern = re.compile(r'batch(?P<batch_number>\d+)')
+    sim_number_pattern = re.compile(r'-sim-(?P<sim_number>\d+)-')
+    run_number_pattern = re.compile(r'-run-(?P<sim_number>\d+)\.log')
+    val_sim_dirs = glob.glob(os.path.join(project_util.VAL_DIR, '0*'))
+    for val_sim_dir in val_sim_dirs:
+        sim_name = os.path.basename(val_sim_dir)
+        number_of_comparisons = int(sim_name[0:2])
+        parameter_names = get_parameter_names(number_of_comparisons)
+        header = get_results_header(number_of_comparisons)
+        results_path = os.path.join(val_sim_dir, "results.csv")
+        results = get_empty_results_dict(number_of_comparisons)
+        var_only_results_path = os.path.join(val_sim_dir, "var-only-results.csv")
+        var_only_present = False
+        var_only_path = glob.glob(os.path.join(val_sim_dir, "batch*",
+                "var-only-simcoevolity-sim-000*-config-state-run*log"))
+        var_only_results = get_empty_results_dict(number_of_comparisons)
+        if (len(var_only_path) > 0):
+            var_only_present = True
+        batch_dirs = glob.glob(os.path.join(val_sim_dir, "batch*"))
+        for batch_dir in sorted(batch_dirs):
+            batch_number_matches = batch_number_pattern.findall(batch_dir)
+            assert(len(batch_number_matches) == 1)
+            batch_number_str = batch_number_matches[0]
+            batch_number = int(batch_number_str)
+            posterior_paths = glob.glob(os.path.join(batch_dir,
+                    "simcoevolity-sim-*-config-state-run-1.log*"))
+            for posterior_path in sorted(posterior_paths):
+                sim_number_matches = sim_number_pattern.findall(posterior_path)
+                assert(len(sim_number_matches) == 1)
+                sim_number_str = sim_number_matches[0]
+                sim_number = int(sim_number_str)
+                sys.stdout.write("Parsing {0} batch {1} sim {2}...\n".format(
+                        sim_name,
+                        batch_number_str,
+                        sim_number_str))
+                log_paths = glob.glob(os.path.join(batch_dir,
+                        "simcoevolity-sim-{0}-config-state-run-*.log*".format(
+                                sim_number_str)))
+                assert(len(log_paths) > 0)
+                # Need to get run number of run that finished (runs are
+                # sometimes pre-empted and restarted)
+                run_numbers = []
+                for log_path in log_paths:
+                    run_number_matches = run_number_pattern.findall(log_path)
+                    assert(len(run_number_matches) == 1)
+                    run_numbers.append(int(run_number_matches[0]))
+                run_number = sorted(run_numbers)[-1]
+                post_paths = glob.glob(os.path.join(batch_dir,
+                        "simcoevolity-sim-{0}-config-state-run-{1}.log*".format(
+                                sim_number_str, run_number)))
+                assert(len(post_paths) == 1)
+                post_path = post_paths[0]
+                assert(os.path.exists(post_path))
+                true_paths = glob.glob(os.path.join(batch_dir,
+                        "simcoevolity-sim-{0}-true-values.txt*".format(
+                                sim_number_str)))
+                assert(len(true_paths) == 1)
+                true_path = true_paths[0]
+                assert(os.path.exists(true_path))
+                stdout_paths = glob.glob(os.path.join(batch_dir,
+                        "simcoevolity-sim-{0}-config.yml.out*".format(
+                                sim_number_str)))
+                assert(len(stdout_paths) == 1)
+                stdout_path = stdout_paths[0]
+                assert(os.path.exists(stdout_path))
+                rep_results = get_results_from_sim_rep(
+                        posterior_path = post_path,
+                        true_path = true_path,
+                        stdout_path = stdout_path,
+                        parameter_names = parameter_names,
+                        number_of_comparisons = number_of_comparisons,
+                        batch_number = batch_number,
+                        sim_number = sim_number,
+                        burnin = burnin)
+                for k, v in rep_results.items():
+                    results[k].append(v)
+                if var_only_present:
+                    var_only_log_paths = glob.glob(os.path.join(batch_dir,
+                            "var-only-simcoevolity-sim-{0}-config-state-run-*.log*".format(
+                                    sim_number_str)))
+                    assert(len(var_only_log_paths) > 0)
+                    # Need to get run number of run that finished (runs are
+                    # sometimes pre-empted and restarted)
+                    var_only_run_numbers = []
+                    for log_path in var_only_log_paths:
+                        run_number_matches = run_number_pattern.findall(log_path)
+                        assert(len(run_number_matches) == 1)
+                        var_only_run_numbers.append(int(run_number_matches[0]))
+                    var_only_run_number = sorted(var_only_run_numbers)[-1]
+                    var_only_post_paths = glob.glob(os.path.join(batch_dir,
+                            "var-only-simcoevolity-sim-{0}-config-state-run-{1}.log*".format(
+                                    sim_number_str, var_only_run_number)))
+                    assert(len(var_only_post_paths) == 1)
+                    var_only_post_path = var_only_post_paths[0]
+                    var_only_stdout_paths = glob.glob(os.path.join(batch_dir,
+                            "var-only-simcoevolity-sim-{0}-config.yml.out*".format(
+                                    sim_number_str)))
+                    assert(len(var_only_stdout_paths) == 1)
+                    var_only_stdout_path = var_only_stdout_paths[0]
+                    var_only_rep_results = get_results_from_sim_rep(
+                            posterior_path = var_only_post_path,
+                            true_path = true_path,
+                            stdout_path = var_only_stdout_path,
+                            parameter_names = parameter_names,
+                            number_of_comparisons = number_of_comparisons,
+                            batch_number = batch_number,
+                            sim_number = sim_number,
+                            burnin = burnin)
+                    assert(rep_results["n_var_sites_c1"] == var_only_rep_results["n_var_sites_c1"])
+                    for k, v in var_only_rep_results.items():
+                        var_only_results[k].append(v)
+        with open(results_path, 'w') as out:
+            for line in sumcoevolity.parsing.dict_line_iter(
+                    results,
+                    sep = '\t',
+                    header = header):
+                out.write(line)
+        if var_only_present:
+            with open(var_only_results_path, 'w') as out:
+                for line in sumcoevolity.parsing.dict_line_iter(
+                        var_only_results,
+                        sep = '\t',
+                        header = header):
+                    out.write(line)
 
-        nevents_out.write("{0},{1}\n".format(true_nevents, inferred_nevents))
-        nevents_mean = posterior_summaries[i].continuous_parameter_summaries["number_of_events"]["mean"]
-        nevents_mean_out.write("{0},{1}\n".format(true_nevents, nevents_mean))
-        for header_key in ("root_height_c1sp1", "root_height_c2sp1", "root_height_c3sp1"):
-            true_height = float(true_values[header_key][i])
-            mean_height = posterior_summaries[i].continuous_parameter_summaries[header_key]['mean']
-            median_height = posterior_summaries[i].continuous_parameter_summaries[header_key]['median']
-            h_mean_out.write("{0},{1}\n".format(true_height, mean_height))
-            h_median_out.write("{0},{1}\n".format(true_height, median_height))
-        for header_key in (
-                "pop_size_root_c1sp1",
-                "pop_size_root_c2sp1",
-                "pop_size_root_c3sp1"):
-            true_size = float(true_values[header_key][i])
-            mean_size = posterior_summaries[i].continuous_parameter_summaries[header_key]['mean']
-            median_size = posterior_summaries[i].continuous_parameter_summaries[header_key]['median']
-            root_size_mean_out.write("{0},{1}\n".format(true_size, mean_size))
-            root_size_median_out.write("{0},{1}\n".format(true_size, median_size))
-        for header_key in (
-                "pop_size_c1sp1",
-                "pop_size_c2sp1",
-                "pop_size_c3sp1",
-                "pop_size_c1sp2",
-                "pop_size_c2sp2",
-                "pop_size_c3sp2"):
-            true_size = float(true_values[header_key][i])
-            mean_size = posterior_summaries[i].continuous_parameter_summaries[header_key]['mean']
-            median_size = posterior_summaries[i].continuous_parameter_summaries[header_key]['median']
-            size_mean_out.write("{0},{1}\n".format(true_size, mean_size))
-            size_median_out.write("{0},{1}\n".format(true_size, median_size))
+def main_cli(argv = sys.argv):
+    parser = argparse.ArgumentParser()
 
-    h_mean_out.close()
-    h_median_out.close()
-    nevents_out.close()
-    nevents_mean_out.close()
-    size_mean_out.close()
-    size_median_out.close()
-    root_size_mean_out.close()
-    root_size_median_out.close()
+    parser.add_argument('--burnin',
+            action = 'store',
+            type = int,
+            default = 101,
+            help = ('Number of MCMC samples to be ignored as burnin from the '
+                    'beginning of every chain.'))
 
-    p_correct_model = n_correct_model / float(number_of_samples)
-    p_correct_number_of_events = n_correct_number_of_events / float(number_of_samples)
-    p_model_within_95_set = n_model_within_95_set / float(number_of_samples)
-    sys.stdout.write("Number of reps with correct model in 95% credibility set: {0}\n".format(n_model_within_95_set))
-    sys.stdout.write("Estimated probability of correct model in 95% credibility set: {0}\n".format(p_model_within_95_set))
-    sys.stdout.write("Number of reps with correctly inferred model: {0}\n".format(n_correct_model))
-    sys.stdout.write("Estimated probability of correctly inferring model: {0}\n".format(p_correct_model))
-    sys.stdout.write("Number of reps with correctly inferred number of events: {0}\n".format(n_correct_number_of_events))
-    sys.stdout.write("Estimated probability of correctly inferring number of events: {0}\n".format(p_correct_number_of_events))
+    if argv == sys.argv:
+        args = parser.parse_args()
+    else:
+        args = parser.parse_args(argv)
+
+    parse_simulation_results(burnin = args.burnin)
+
 
 if __name__ == "__main__":
     main_cli()
