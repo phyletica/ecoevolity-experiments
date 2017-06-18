@@ -258,12 +258,14 @@ def parse_simulation_results(burnin = 101):
                         assert(rep_results["n_var_sites_c1"] == var_only_rep_results["n_var_sites_c1"])
                     for k, v in var_only_rep_results.items():
                         var_only_results[k].append(v)
-        with open(results_path, 'w') as out:
-            for line in sumcoevolity.parsing.dict_line_iter(
-                    results,
-                    sep = '\t',
-                    header = header):
-                out.write(line)
+
+        if not skipping_sim:
+            with open(results_path, 'w') as out:
+                for line in sumcoevolity.parsing.dict_line_iter(
+                        results,
+                        sep = '\t',
+                        header = header):
+                    out.write(line)
         if var_only_present:
             with open(var_only_results_path, 'w') as out:
                 for line in sumcoevolity.parsing.dict_line_iter(
