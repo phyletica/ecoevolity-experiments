@@ -14,8 +14,12 @@ import project_util
 _LOG = logging.getLogger(__name__)
 
 
-def get_parameter_names(number_of_comparisons):
-    p = ["ln_likelihood", "concentration"]
+def get_parameter_names(number_of_comparisons, dpp = True):
+    p = ["ln_likelihood"]
+    if dpp:
+        p.append("concentration")
+    else:
+        p.append("split_weight")
     for i in range(number_of_comparisons):
         p.append("ln_likelihood_c{0}sp1".format(i + 1))
         p.append("root_height_c{0}sp1".format(i + 1))
@@ -26,7 +30,7 @@ def get_parameter_names(number_of_comparisons):
         p.append("pop_size_root_c{0}sp1".format(i + 1))
     return p
 
-def get_results_header(number_of_comparisons):
+def get_results_header(number_of_comparisons, dpp = True):
     h = [
             "batch",
             "sim",
@@ -47,7 +51,7 @@ def get_results_header(number_of_comparisons):
     for i in range(number_of_comparisons):
         h.append("n_var_sites_c{0}".format(i+1))
 
-    for p in get_parameter_names(number_of_comparisons):
+    for p in get_parameter_names(number_of_comparisons, dpp = dpp):
         h.append("true_{0}".format(p))
         h.append("true_{0}_rank".format(p))
         h.append("mean_{0}".format(p))
@@ -55,8 +59,8 @@ def get_results_header(number_of_comparisons):
         h.append("ess_{0}".format(p))
     return h
 
-def get_empty_results_dict(number_of_comparisons):
-    h = get_results_header(number_of_comparisons)
+def get_empty_results_dict(number_of_comparisons, dpp = True):
+    h = get_results_header(number_of_comparisons, dpp = dpp)
     return dict(zip(h, ([] for i in range(len(h)))))
 
 def get_results_from_sim_rep(
@@ -136,19 +140,23 @@ def parse_simulation_results(burnin = 101):
     batch_number_pattern = re.compile(r'batch(?P<batch_number>\d+)')
     sim_number_pattern = re.compile(r'-sim-(?P<sim_number>\d+)-')
     run_number_pattern = re.compile(r'-run-(?P<sim_number>\d+)\.log')
+    dpp_pattern = re.compile(r'-dpp-')
     val_sim_dirs = glob.glob(os.path.join(project_util.VAL_DIR, '0*'))
-    for val_sim_dir in val_sim_dirs:
+    for val_sim_dir in sorted(val_sim_dirs):
+        dpp = False
+        if dpp_pattern.search(val_sim_dir):
+            dpp = True
         sim_name = os.path.basename(val_sim_dir)
         number_of_comparisons = int(sim_name[0:2])
-        parameter_names = get_parameter_names(number_of_comparisons)
-        header = get_results_header(number_of_comparisons)
+        parameter_names = get_parameter_names(number_of_comparisons, dpp = dpp)
+        header = get_results_header(number_of_comparisons, dpp = dpp)
         results_path = os.path.join(val_sim_dir, "results.csv")
-        results = get_empty_results_dict(number_of_comparisons)
+        results = get_empty_results_dict(number_of_comparisons, dpp = dpp)
         var_only_results_path = os.path.join(val_sim_dir, "var-only-results.csv")
         var_only_present = False
         var_only_path = glob.glob(os.path.join(val_sim_dir, "batch*",
                 "var-only-simcoevolity-sim-000*-config-state-run*log"))
-        var_only_results = get_empty_results_dict(number_of_comparisons)
+        var_only_results = get_empty_results_dict(number_of_comparisons, dpp = dpp)
         if (len(var_only_path) > 0):
             var_only_present = True
         if os.path.exists(var_only_results_path):
