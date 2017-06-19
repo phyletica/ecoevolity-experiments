@@ -34,6 +34,8 @@ def get_results_header(number_of_comparisons, dpp = True):
     h = [
             "batch",
             "sim",
+            "run_time",
+            "mean_n_var_sites",
             "true_model",
             "map_model",
             "true_model_cred_level",
@@ -47,7 +49,6 @@ def get_results_header(number_of_comparisons, dpp = True):
     for i in range(number_of_comparisons):
         h.append("num_events_{0}_p".format(i+1))
 
-    h.append("mean_n_var_sites")
     for i in range(number_of_comparisons):
         h.append("n_var_sites_c{0}".format(i+1))
 
@@ -71,12 +72,13 @@ def get_results_from_sim_rep(
         number_of_comparisons,
         batch_number,
         sim_number,
+        expected_number_of_samples = 2001,
         burnin = 101):
     results = {}
     post_sample = sumcoevolity.posterior.PosteriorSample(
             [posterior_path],
             burnin = burnin)
-    assert(post_sample.number_of_samples == 2001 - burnin)
+    assert(post_sample.number_of_samples == expected_number_of_samples - burnin)
     true_values = sumcoevolity.parsing.get_dict_from_spreadsheets(
             [true_path],
             sep = "\t",
@@ -87,6 +89,7 @@ def get_results_from_sim_rep(
     assert(number_of_comparisons == stdout.number_of_comparisons)
     results["batch"] = batch_number
     results["sim"] = sim_number
+    results["run_time"] = stdout.run_time
     results["mean_n_var_sites"] = stdout.get_mean_number_of_variable_sites()
     for i in range(number_of_comparisons):
         results["n_var_sites_c{0}".format(i + 1)] = stdout.get_number_of_variable_sites(i)
@@ -136,7 +139,9 @@ def get_results_from_sim_rep(
 
     return results
 
-def parse_simulation_results(burnin = 101):
+def parse_simulation_results(
+        expected_number_of_samples = 2001,
+        burnin = 101):
     batch_number_pattern = re.compile(r'batch(?P<batch_number>\d+)')
     sim_number_pattern = re.compile(r'-sim-(?P<sim_number>\d+)-')
     run_number_pattern = re.compile(r'-run-(?P<sim_number>\d+)\.log')
@@ -227,6 +232,7 @@ def parse_simulation_results(burnin = 101):
                             number_of_comparisons = number_of_comparisons,
                             batch_number = batch_number,
                             sim_number = sim_number,
+                            expected_number_of_samples = expected_number_of_samples,
                             burnin = burnin)
                     for k, v in rep_results.items():
                         results[k].append(v)
@@ -261,6 +267,7 @@ def parse_simulation_results(burnin = 101):
                             number_of_comparisons = number_of_comparisons,
                             batch_number = batch_number,
                             sim_number = sim_number,
+                            expected_number_of_samples = expected_number_of_samples,
                             burnin = burnin)
                     if not skipping_sim:
                         assert(rep_results["n_var_sites_c1"] == var_only_rep_results["n_var_sites_c1"])
@@ -285,6 +292,12 @@ def parse_simulation_results(burnin = 101):
 def main_cli(argv = sys.argv):
     parser = argparse.ArgumentParser()
 
+    parser.add_argument('-e', '--expected-number-of-samples',
+            action = 'store',
+            type = int,
+            default = 2001,
+            help = ('Number of MCMC samples that should be found in the log '
+                    'file of each analysis.'))
     parser.add_argument('--burnin',
             action = 'store',
             type = int,
