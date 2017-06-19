@@ -3,6 +3,7 @@
 import sys
 import os
 import re
+import math
 import logging
 import glob
 import argparse
@@ -34,6 +35,7 @@ def get_results_header(number_of_comparisons, dpp = True):
     h = [
             "batch",
             "sim",
+            "sample_size",
             "run_time",
             "mean_n_var_sites",
             "true_model",
@@ -57,6 +59,11 @@ def get_results_header(number_of_comparisons, dpp = True):
         h.append("true_{0}_rank".format(p))
         h.append("mean_{0}".format(p))
         h.append("median_{0}".format(p))
+        h.append("stddev_{0}".format(p))
+        h.append("hpdi_95_lower_{0}".format(p))
+        h.append("hpdi_95_upper_{0}".format(p))
+        h.append("eti_95_lower_{0}".format(p))
+        h.append("eti_95_upper_{0}".format(p))
         h.append("ess_{0}".format(p))
     return h
 
@@ -90,6 +97,7 @@ def get_results_from_sim_rep(
     results["batch"] = batch_number
     results["sim"] = sim_number
     results["run_time"] = stdout.run_time
+    results["sample_size"] = post_sample.number_of_samples
     results["mean_n_var_sites"] = stdout.get_mean_number_of_variable_sites()
     for i in range(number_of_comparisons):
         results["n_var_sites_c{0}".format(i + 1)] = stdout.get_number_of_variable_sites(i)
@@ -126,15 +134,18 @@ def get_results_from_sim_rep(
     for p in parameter_names:
         true_val = float(true_values[p][0])
         true_val_rank = post_sample.get_rank(p, true_val)
-        ss = sumcoevolity.stats.SampleSummarizer(post_sample.parameter_samples[p])
-        mean_val = ss.mean
-        median_val = sumcoevolity.stats.median(post_sample.parameter_samples[p])
+        ss = sumcoevolity.stats.get_summary(post_sample.parameter_samples[p])
         ess = sumcoevolity.stats.effective_sample_size(
                 post_sample.parameter_samples[p])
         results["true_{0}".format(p)] = true_val
         results["true_{0}_rank".format(p)] = true_val_rank
-        results["mean_{0}".format(p)] = mean_val
-        results["median_{0}".format(p)] = median_val
+        results["mean_{0}".format(p)] = ss["mean"]
+        results["median_{0}".format(p)] = ss["median"]
+        results["stddev_{0}".format(p)] = math.sqrt(ss["variance"])
+        results["hpdi_95_lower_{0}".format(p)] = ss["hpdi_95"][0]
+        results["hpdi_95_upper_{0}".format(p)] = ss["hpdi_95"][1]
+        results["eti_95_lower_{0}".format(p)] = ss["qi_95"][0]
+        results["eti_95_upper_{0}".format(p)] = ss["qi_95"][1]
         results["ess_{0}".format(p)] = ess
 
     return results
