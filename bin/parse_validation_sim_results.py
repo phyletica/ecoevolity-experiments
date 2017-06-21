@@ -21,6 +21,7 @@ def get_parameter_names(number_of_comparisons, dpp = True):
         p.append("concentration")
     else:
         p.append("split_weight")
+    p.append("number_of_events")
     for i in range(number_of_comparisons):
         p.append("ln_likelihood_c{0}sp1".format(i + 1))
         p.append("root_height_c{0}sp1".format(i + 1))
