@@ -172,7 +172,7 @@ def parse_simulation_results(
         var_only_results_path = os.path.join(val_sim_dir, "var-only-results.csv")
         var_only_present = False
         var_only_path = glob.glob(os.path.join(val_sim_dir, "batch*",
-                "var-only-simcoevolity-sim-000*-config-state-run*log"))
+                "var-only-simcoevolity-sim-000*-config-state-run*log*"))
         var_only_results = get_empty_results_dict(number_of_comparisons, dpp = dpp)
         if (len(var_only_path) > 0):
             var_only_present = True
