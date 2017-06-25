@@ -176,12 +176,14 @@ def parse_simulation_results(
         var_only_results = get_empty_results_dict(number_of_comparisons, dpp = dpp)
         if (len(var_only_path) > 0):
             var_only_present = True
-        if os.path.exists(var_only_results_path):
+        if (os.path.exists(var_only_results_path) or 
+                (os.path.exists(var_only_results_path + ".gz"))):
             _LOG.warning("WARNING: Results path {0} already exists; skipping!".format(
                     var_only_results_path))
             var_only_present = False
         skipping_sim = False
-        if os.path.exists(results_path):
+        if (os.path.exists(results_path) or
+                (os.path.exists(results_path + ".gz"))):
             _LOG.warning("WARNING: Results path {0} already exists; skipping!".format(
                     results_path))
             skipping_sim = True
