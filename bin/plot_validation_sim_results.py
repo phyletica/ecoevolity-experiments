@@ -83,34 +83,34 @@ def get_results_paths(
     dpp_500k_results_paths = []
     dpp_500k_results_paths.extend(sorted(glob.glob(os.path.join(
             validatition_sim_dir,
-            "03pairs-dpp-root-[0-9][0-9][0-9][0-9]",
+            "03pairs-dpp-root-[0-9][0-9][0-9][0-9]-500k",
             "results.csv.gz"))))
     if include_root_size_fixed:
         dpp_500k_results_paths.append(os.path.join(
                 validatition_sim_dir,
-                "03pairs-dpp-root-fixed",
+                "03pairs-dpp-root-fixed-500k",
                 "results.csv.gz"))
     if include_all_sizes_fixed:
         dpp_500k_results_paths.append(os.path.join(
                 validatition_sim_dir,
-                "03pairs-dpp-root-fixed-all",
+                "03pairs-dpp-root-fixed-all-500k",
                 "results.csv.gz"))
 
     vo_dpp_500k_results_paths = []
     if include_variable_only:
         vo_dpp_500k_results_paths.extend(sorted(glob.glob(os.path.join(
                 validatition_sim_dir,
-                "03pairs-dpp-root-[0-9][0-9][0-9][0-9]",
+                "03pairs-dpp-root-[0-9][0-9][0-9][0-9]-500k",
                 "var-only-results.csv.gz"))))
         if include_root_size_fixed:
             vo_dpp_500k_results_paths.append(os.path.join(
                     validatition_sim_dir,
-                    "03pairs-dpp-root-fixed",
+                    "03pairs-dpp-root-fixed-500k",
                     "var-only-results.csv.gz"))
         if include_all_sizes_fixed:
             vo_dpp_500k_results_paths.append(os.path.join(
                     validatition_sim_dir,
-                    "03pairs-dpp-root-fixed-all",
+                    "03pairs-dpp-root-fixed-all-500k",
                     "var-only-results.csv.gz"))
 
     dpp_100k_results_paths = []
@@ -179,7 +179,7 @@ def generate_scatter_plots(
         include_all_sizes_fixed = True,
         include_root_size_fixed = False):
     _LOG.info("Generating scatter plots for {0}...".format(parameter_str))
-    root_alpha_pattern = re.compile(r'root-(?P<alpha_setting>\S+)$')
+    root_alpha_pattern = re.compile(r'root-(?P<alpha_setting>\S+)-\d00k$')
 
     row_keys, results_batches = get_results_paths(project_util.VAL_DIR,
             include_all_sizes_fixed = include_all_sizes_fixed,
@@ -410,7 +410,7 @@ def generate_histograms(
         include_root_size_fixed = False,
         include_variable_only = True):
     _LOG.info("Generating histograms for {0}...".format(parameter_str))
-    root_alpha_pattern = re.compile(r'root-(?P<alpha_setting>\S+)$')
+    root_alpha_pattern = re.compile(r'root-(?P<alpha_setting>\S+)-\d00k$')
 
     row_keys, results_batches = get_results_paths(project_util.VAL_DIR,
             include_all_sizes_fixed = include_all_sizes_fixed,
@@ -604,7 +604,7 @@ def generate_model_plots(
         include_all_sizes_fixed = True,
         include_root_size_fixed = False):
     _LOG.info("Generating model plots...")
-    root_alpha_pattern = re.compile(r'root-(?P<alpha_setting>\S+)$')
+    root_alpha_pattern = re.compile(r'root-(?P<alpha_setting>\S+)-\d00k$')
     dpp_pattern = re.compile(r'-dpp-')
     rj_pattern = re.compile(r'-rj-')
     var_only_pattern = re.compile(r'var-only-')
