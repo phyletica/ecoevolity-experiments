@@ -18,7 +18,7 @@ then
     module load gcc/5.3.0
 fi
 
-simname="03pairs-dpp-root-1000"
+simname="03pairs-dpp-root-1000-500k"
 cfgpath="../configs/config-${simname}.yml"
 outputdir="../simulations/validation/${simname}/batch01"
 rngseed="24364"
