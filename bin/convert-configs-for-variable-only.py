@@ -50,14 +50,21 @@ def main_cli(argv = sys.argv):
     config_path_pattern = os.path.join(project_util.VAL_DIR, "*", "*", "simcoevolity-sim-*.yml") 
 
     for config_path in glob.glob(config_path_pattern):
+        config_name = os.path.basename(config_path)
+        new_config_name = "var-only-" + config_name
+        new_config_path = os.path.join(dir_path, new_config_name)
+        if os.path.exists(new_config_path):
+            sys.stderr.out(
+                    "Skipping config that already exists: {0}\n".format(
+                            new_config_path))
+            continue
+
         config = get_yaml_config(config_path)
         config = convert_for_variable_sites_only(config)
         config = update_time_size_rate_scalers(config)
 
         dir_path = os.path.dirname(config_path)
-        config_name = os.path.basename(config_path)
-        new_config_name = "var-only-" + config_name
-        new_config_path = os.path.join(dir_path, new_config_name)
+        assert(not os.path.exists(new_config_path))
         with open(new_config_path, 'w') as stream:
             dump(config, stream, Dumper = Dumper, indent = 4)
     
