@@ -81,7 +81,7 @@ def get_results_from_sim_rep(
         batch_number,
         sim_number,
         expected_number_of_samples = 2001,
-        burnin = 101):
+        burnin = 401):
     results = {}
     post_sample = sumcoevolity.posterior.PosteriorSample(
             [posterior_path],
@@ -153,7 +153,7 @@ def get_results_from_sim_rep(
 
 def parse_simulation_results(
         expected_number_of_samples = 2001,
-        burnin = 101):
+        burnin = 401):
     batch_number_pattern = re.compile(r'batch(?P<batch_number>\d+)')
     sim_number_pattern = re.compile(r'-sim-(?P<sim_number>\d+)-')
     run_number_pattern = re.compile(r'-run-(?P<sim_number>\d+)\.log')
@@ -167,28 +167,6 @@ def parse_simulation_results(
         number_of_comparisons = int(sim_name[0:2])
         parameter_names = get_parameter_names(number_of_comparisons, dpp = dpp)
         header = get_results_header(number_of_comparisons, dpp = dpp)
-        results_path = os.path.join(val_sim_dir, "results.csv")
-        results = get_empty_results_dict(number_of_comparisons, dpp = dpp)
-        var_only_results_path = os.path.join(val_sim_dir, "var-only-results.csv")
-        var_only_present = False
-        var_only_path = glob.glob(os.path.join(val_sim_dir, "batch*",
-                "var-only-simcoevolity-sim-000*-config-state-run*log*"))
-        var_only_results = get_empty_results_dict(number_of_comparisons, dpp = dpp)
-        if (len(var_only_path) > 0):
-            var_only_present = True
-        if (os.path.exists(var_only_results_path) or 
-                (os.path.exists(var_only_results_path + ".gz"))):
-            _LOG.warning("WARNING: Results path {0} already exists; skipping!".format(
-                    var_only_results_path))
-            var_only_present = False
-        skipping_sim = False
-        if (os.path.exists(results_path) or
-                (os.path.exists(results_path + ".gz"))):
-            _LOG.warning("WARNING: Results path {0} already exists; skipping!".format(
-                    results_path))
-            skipping_sim = True
-        if ((skipping_sim) and (not var_only_present)):
-            continue
 
         batch_dirs = glob.glob(os.path.join(val_sim_dir, "batch*"))
         for batch_dir in sorted(batch_dirs):
@@ -196,6 +174,30 @@ def parse_simulation_results(
             assert(len(batch_number_matches) == 1)
             batch_number_str = batch_number_matches[0]
             batch_number = int(batch_number_str)
+
+            results_path = os.path.join(batch_dir, "results.csv")
+            var_only_results_path = os.path.join(batch_dir, "var-only-results.csv")
+            var_only_present = False
+            var_only_path = glob.glob(os.path.join(val_sim_dir, "batch*",
+                    "var-only-simcoevolity-sim-00*-config-state-run*log*"))
+            if (len(var_only_path) > 0):
+                var_only_present = True
+            if (os.path.exists(var_only_results_path) or 
+                    (os.path.exists(var_only_results_path + ".gz"))):
+                _LOG.warning("WARNING: Results path {0} already exists; skipping!".format(
+                        var_only_results_path))
+                var_only_present = False
+            skipping_sim = False
+            if (os.path.exists(results_path) or
+                    (os.path.exists(results_path + ".gz"))):
+                _LOG.warning("WARNING: Results path {0} already exists; skipping!".format(
+                        results_path))
+                skipping_sim = True
+            if ((skipping_sim) and (not var_only_present)):
+                continue
+            results = get_empty_results_dict(number_of_comparisons, dpp = dpp)
+            var_only_results = get_empty_results_dict(number_of_comparisons, dpp = dpp)
+
             posterior_paths = glob.glob(os.path.join(batch_dir,
                     "simcoevolity-sim-*-config-state-run-1.log*"))
             for posterior_path in sorted(posterior_paths):
@@ -288,20 +290,22 @@ def parse_simulation_results(
                     for k, v in var_only_rep_results.items():
                         var_only_results[k].append(v)
 
-        if not skipping_sim:
-            with open(results_path, 'w') as out:
-                for line in sumcoevolity.parsing.dict_line_iter(
-                        results,
-                        sep = '\t',
-                        header = header):
-                    out.write(line)
-        if var_only_present:
-            with open(var_only_results_path, 'w') as out:
-                for line in sumcoevolity.parsing.dict_line_iter(
-                        var_only_results,
-                        sep = '\t',
-                        header = header):
-                    out.write(line)
+            if not skipping_sim:
+                assert(not os.path.exists(results_path))
+                with open(results_path, 'w') as out:
+                    for line in sumcoevolity.parsing.dict_line_iter(
+                            results,
+                            sep = '\t',
+                            header = header):
+                        out.write(line)
+            if var_only_present:
+                assert(not os.path.exists(var_only_results_path))
+                with open(var_only_results_path, 'w') as out:
+                    for line in sumcoevolity.parsing.dict_line_iter(
+                            var_only_results,
+                            sep = '\t',
+                            header = header):
+                        out.write(line)
 
 def main_cli(argv = sys.argv):
     parser = argparse.ArgumentParser()
@@ -315,7 +319,7 @@ def main_cli(argv = sys.argv):
     parser.add_argument('--burnin',
             action = 'store',
             type = int,
-            default = 101,
+            default = 401,
             help = ('Number of MCMC samples to be ignored as burnin from the '
                     'beginning of every chain.'))
 
@@ -324,7 +328,9 @@ def main_cli(argv = sys.argv):
     else:
         args = parser.parse_args(argv)
 
-    parse_simulation_results(burnin = args.burnin)
+    parse_simulation_results(
+            expected_number_of_samples = args.expected_number_of_samples,
+            burnin = args.burnin)
 
 
 if __name__ == "__main__":
