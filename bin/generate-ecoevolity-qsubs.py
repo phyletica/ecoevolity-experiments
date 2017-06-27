@@ -15,7 +15,8 @@ import project_util
 _RNG = random.Random()
 
 def get_pbs_header(restrict_nodes = False, walltime = "5:00:00"):
-    s = ("#PBS -l nodes=1:ppn=1\n"
+    s = ("#! /bin/sh\n"
+         "#PBS -l nodes=1:ppn=1\n"
          "#PBS -l walltime={0}\n"
          "#PBS -j oe\n".format(walltime))
     if restrict_nodes:
@@ -39,12 +40,13 @@ def get_asc_header():
     return s
 
 def write_qsub(config_path,
+        run_number = 1,
         restrict_nodes = False,
-        walltime = "5:00:00",
+        walltime = "2:00:00",
         asc = False,
         rng = _RNG):
     qsub_prefix = os.path.splitext(config_path)[0]
-    qsub_path = qsub_prefix + "-qsub.sh"
+    qsub_path = "{0}-run-{1}-qsub.sh".format(qsub_prefix, run_number)
     if os.path.exists(qsub_path):
         return
     seed = rng.randint(1, 999999999)
@@ -54,8 +56,8 @@ def write_qsub(config_path,
         else:
             out.write(get_pbs_header(restrict_nodes, walltime))
         out.write("ecoevolity --seed {0} --relax-constant-sites {1} 1>{1}.out 2>&1\n".format(
-            seed,
-            os.path.basename(config_path)))
+                seed,
+                os.path.basename(config_path)))
 
 def arg_is_positive_int(i):
     """
@@ -82,11 +84,16 @@ def main_cli(argv = sys.argv):
             action = 'store',
             type = int,
             help = 'Random number seed to use for the analysis.')
+    parser.add_argument('--number-of-runs',
+            action = 'store',
+            type = int,
+            default = 2,
+            help = 'Number of qsubs to generate per config (Default: 2).')
     parser.add_argument('--walltime',
             action = 'store',
             type = str,
-            default = '5:00:00',
-            help = 'Walltime for qsub scripts.')
+            default = '2:00:00',
+            help = 'Walltime for qsub scripts (Default: 2:00:00).')
     parser.add_argument('--restrict-nodes',
             action = 'store_true',
             help = 'Run only on lab nodes.')
@@ -103,12 +110,13 @@ def main_cli(argv = sys.argv):
     _RNG.seed(args.seed)
 
     config_path_pattern = os.path.join(project_util.VAL_DIR, "*", "*", "*simcoevolity-sim-*.yml") 
-
     for config_path in glob.glob(config_path_pattern):
-        write_qsub(config_path = config_path,
-                restrict_nodes = args.restrict_nodes,
-                walltime = args.walltime,
-                asc = args.asc)
+        for i in range(args.number_of_runs):
+            write_qsub(config_path = config_path,
+                    run_number = i + 1,
+                    restrict_nodes = args.restrict_nodes,
+                    walltime = args.walltime,
+                    asc = args.asc)
     
 
 if __name__ == "__main__":
