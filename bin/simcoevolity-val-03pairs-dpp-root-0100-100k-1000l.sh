@@ -23,7 +23,7 @@ simname="03pairs-dpp-root-0100-100k"
 cfgpath="../configs/config-${simname}.yml"
 outputdir="../simulations/validation/${simname}-1000l/batch01"
 rngseed="5482"
-nreps=1000
+nreps=100
 
 mkdir -p "$outputdir"
 
