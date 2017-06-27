@@ -50,6 +50,7 @@ def write_qsub(config_path,
     if os.path.exists(qsub_path):
         return
     seed = rng.randint(1, 999999999)
+    assert(not os.path.exists(qsub_path))
     with open(qsub_path, 'w') as out:
         if asc:
             out.write(get_asc_header())
