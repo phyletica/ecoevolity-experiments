@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 #PBS -l nodes=1:ppn=1
 #PBS -l walltime=10:00:00
 #PBS -j oe 
@@ -18,13 +18,40 @@ then
     module load gcc/5.3.0
 fi
 
-locussize="100"
-simname="03pairs-dpp-root-0100-100k"
-cfgpath="../configs/config-${simname}.yml"
-outputdir="../simulations/validation/${simname}-0100l/batch01"
-rngseed="27932"
-nreps=100
+scriptpath="$(basename "$0")"
+scriptfile="${scriptpath##*/}"
+scriptname="${scriptfile%.*}"
+siminfo="${scriptname/simcoevolity-val-/}"
+rngseed="${siminfo##*-}"
+siminfo="${siminfo%-*}"
+nreps="${siminfo##*-}"
+siminfo="${siminfo%-*}"
+batch="${siminfo##*-}"
+simname="${siminfo%-*}"
+locusinfo="${simname##*-}"
+configname="${simname%-*}"
+
+locusflag=""
+if [ "$locusinfo" == "l0100" ] 
+then
+    locusflag="-l 100"
+elif [ "$locusinfo" == "l0500" ] 
+then
+    locusflag="-l 500"
+elif [ "$locusinfo" == "l1000" ] 
+then
+    locusflag="-l 1000"
+elif [ "$locusinfo" == "l0001" ] 
+then
+    locusflag=""
+else
+    echo "ERROR: Unrecognized locus flag: ${locusinfo}"
+    exit 1
+fi
+
+cfgpath="../configs/config-${configname}.yml"
+outputdir="../simulations/validation/${simname}/${batch}"
 
 mkdir -p "$outputdir"
 
-simcoevolity --seed="$rngseed" -n "$nreps" -l "$locussize" -o "$outputdir" "$cfgpath"
+simcoevolity --seed="$rngseed" -n "$nreps" "$locusflag" -o "$outputdir" "$cfgpath"
