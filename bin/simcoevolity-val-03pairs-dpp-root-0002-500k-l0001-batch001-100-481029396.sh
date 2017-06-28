@@ -51,7 +51,8 @@ fi
 
 cfgpath="../configs/config-${configname}.yml"
 outputdir="../simulations/validation/${simname}/${batch}"
+stdoutpath="${scriptfile}.out"
 
 mkdir -p "$outputdir"
 
-simcoevolity --seed="$rngseed" -n "$nreps" "$locusflag" -o "$outputdir" "$cfgpath"
+simcoevolity --seed="$rngseed" -n "$nreps" "$locusflag" -o "$outputdir" "$cfgpath" 1>"${stdoutpath}" 2>&1
