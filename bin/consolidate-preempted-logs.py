@@ -21,10 +21,10 @@ def line_count(path):
     return count
 
 def get_run_number(log_path):
-    sim_number_matches = sim_number_pattern.findall(log_path)
-    assert len(sim_number_matches) == 1
-    sim_number_str = sim_number_matches[0]
-    return int(sim_number_str)
+    run_number_matches = run_number_pattern.findall(log_path)
+    assert len(run_number_matches) == 1
+    run_number_str = run_number_matches[0]
+    return int(run_number_str)
 
 def consolidate_preempted_logs(
         target_run_number = 1,
@@ -57,8 +57,11 @@ def consolidate_preempted_logs(
                 assert len(sim_number_matches) == 1
                 sim_number_str = sim_number_matches[0]
                 sim_number = int(sim_number_str)
+                posterior_file = os.path.basename(posterior_path)
+                prefix = posterior_file.split("-sim-")[0]
                 gp = os.path.join(batch_dir,
-                        "simcoevolity-sim-{0}-config-state-run-{1}.log*".format(
+                        "{0}-{1}-config-state-run-{2}.log*".format(
+                                prefix,
                                 sim_number_str,
                                 target_run_number))
                 target_state_log_paths = glob.glob(gp)
@@ -66,7 +69,8 @@ def consolidate_preempted_logs(
                         "Multiple matches to {0!r}".format(gp))
                 target_state_log_path = target_state_log_paths[0]
                 gp = os.path.join(batch_dir,
-                        "simcoevolity-sim-{0}-config-operator-run-{1}.log*".format(
+                        "{0}-{1}-config-operator-run-{2}.log*".format(
+                                prefix,
                                 sim_number_str,
                                 target_run_number))
                 target_op_log_paths = glob.glob(gp)
@@ -74,11 +78,13 @@ def consolidate_preempted_logs(
                         "Multiple matches to {0!r}".format(gp))
                 target_op_log_path = target_op_log_paths[0]
                 state_log_path_pattern = os.path.join(batch_dir,
-                        "simcoevolity-sim-{0}-config-state-run-*.log*".format(
+                        "{0}-{1}-config-state-run-*.log*".format(
+                                prefix
                                 sim_number_str))
                 state_log_paths = glob.glob(state_log_path_pattern)
                 op_log_path_pattern = os.path.join(batch_dir,
-                        "simcoevolity-sim-{0}-config-operator-run-*.log*".format(
+                        "{0}-{1}-config-operator-run-*.log*".format(
+                                prefix,
                                 sim_number_str))
                 op_log_paths = glob.glob(op_log_path_pattern)
                 assert (len(state_log_paths) == len(op_log_paths)), (
@@ -124,7 +130,8 @@ def consolidate_preempted_logs(
                         continue
                     completed_run_number = extra_run_numbers.pop(-1)
                     completed_state_log_pattern = os.path.join(batch_dir,
-                            "simcoevolity-sim-{0}-config-state-run-{1}.log*".format(
+                            "{0}-{1}-config-state-run-{2}.log*".format(
+                                    prefix,
                                     sim_number_str,
                                     completed_run_number))
                     completed_state_log_paths = glob.glob(completed_state_log_pattern)
@@ -133,7 +140,8 @@ def consolidate_preempted_logs(
                                     completed_state_log_pattern))
                     completed_state_log_path = completed_state_log_paths[0]
                     completed_op_log_pattern = os.path.join(batch_dir,
-                            "simcoevolity-sim-{0}-config-operator-run-{1}.log*".format(
+                            "{0}-{1}-config-operator-run-{2}.log*".format(
+                                    prefix,
                                     sim_number_str,
                                     completed_run_number))
                     completed_op_log_paths = glob.glob(completed_op_log_pattern)
@@ -157,11 +165,13 @@ def consolidate_preempted_logs(
                     os.rename(completed_op_log_path, target_op_log_path)
                     for n in extra_run_numbers:
                         sp = os.path.join(batch_dir,
-                                "simcoevolity-sim-{0}-config-state-run-{1}.log*".format(
+                                "{0}-{1}-config-state-run-{2}.log*".format(
+                                        prefix,
                                         sim_number_str,
                                         n))
                         op = os.path.join(batch_dir,
-                                "simcoevolity-sim-{0}-config-operator-run-{1}.log*".format(
+                                "{0}-{1}-config-operator-run-{2}.log*".format(
+                                        prefix,
                                         sim_number_str,
                                         n))
                         os.remove(sp)
