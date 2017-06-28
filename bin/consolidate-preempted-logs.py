@@ -60,7 +60,7 @@ def consolidate_preempted_logs(
                 posterior_file = os.path.basename(posterior_path)
                 prefix = posterior_file.split("-sim-")[0]
                 gp = os.path.join(batch_dir,
-                        "{0}-{1}-config-state-run-{2}.log*".format(
+                        "{0}-sim-{1}-config-state-run-{2}.log*".format(
                                 prefix,
                                 sim_number_str,
                                 target_run_number))
@@ -69,7 +69,7 @@ def consolidate_preempted_logs(
                         "Multiple matches to {0!r}".format(gp))
                 target_state_log_path = target_state_log_paths[0]
                 gp = os.path.join(batch_dir,
-                        "{0}-{1}-config-operator-run-{2}.log*".format(
+                        "{0}-sim-{1}-config-operator-run-{2}.log*".format(
                                 prefix,
                                 sim_number_str,
                                 target_run_number))
@@ -78,12 +78,12 @@ def consolidate_preempted_logs(
                         "Multiple matches to {0!r}".format(gp))
                 target_op_log_path = target_op_log_paths[0]
                 state_log_path_pattern = os.path.join(batch_dir,
-                        "{0}-{1}-config-state-run-*.log*".format(
-                                prefix
+                        "{0}-sim-{1}-config-state-run-*.log*".format(
+                                prefix,
                                 sim_number_str))
                 state_log_paths = glob.glob(state_log_path_pattern)
                 op_log_path_pattern = os.path.join(batch_dir,
-                        "{0}-{1}-config-operator-run-*.log*".format(
+                        "{0}-sim-{1}-config-operator-run-*.log*".format(
                                 prefix,
                                 sim_number_str))
                 op_log_paths = glob.glob(op_log_path_pattern)
@@ -130,7 +130,7 @@ def consolidate_preempted_logs(
                         continue
                     completed_run_number = extra_run_numbers.pop(-1)
                     completed_state_log_pattern = os.path.join(batch_dir,
-                            "{0}-{1}-config-state-run-{2}.log*".format(
+                            "{0}-sim-{1}-config-state-run-{2}.log*".format(
                                     prefix,
                                     sim_number_str,
                                     completed_run_number))
@@ -140,7 +140,7 @@ def consolidate_preempted_logs(
                                     completed_state_log_pattern))
                     completed_state_log_path = completed_state_log_paths[0]
                     completed_op_log_pattern = os.path.join(batch_dir,
-                            "{0}-{1}-config-operator-run-{2}.log*".format(
+                            "{0}-sim-{1}-config-operator-run-{2}.log*".format(
                                     prefix,
                                     sim_number_str,
                                     completed_run_number))
@@ -165,17 +165,27 @@ def consolidate_preempted_logs(
                     os.rename(completed_op_log_path, target_op_log_path)
                     for n in extra_run_numbers:
                         sp = os.path.join(batch_dir,
-                                "{0}-{1}-config-state-run-{2}.log*".format(
+                                "{0}-sim-{1}-config-state-run-{2}.log*".format(
                                         prefix,
                                         sim_number_str,
                                         n))
+                        state_purge_paths = glob.glob(sp)
+                        assert (len(state_purge_paths) == 1), (
+                                "Multiple matches to incomplete state log {0!r}".format(
+                                        sp))
+                        state_purge_path = state_purge_paths[0]
                         op = os.path.join(batch_dir,
-                                "{0}-{1}-config-operator-run-{2}.log*".format(
+                                "{0}-sim-{1}-config-operator-run-{2}.log*".format(
                                         prefix,
                                         sim_number_str,
                                         n))
-                        os.remove(sp)
-                        os.remove(op)
+                        op_purge_paths = glob.glob(op)
+                        assert (len(op_purge_paths) == 1), (
+                                "Multiple matches to incomplete op log {0!r}".format(
+                                        op))
+                        op_purge_path = op_purge_paths[0]
+                        os.remove(state_purge_path)
+                        os.remove(op_purge_path)
                     
 
 def main_cli(argv = sys.argv):
