@@ -13,7 +13,7 @@ event_time_prior:
         offset: 0.0
 
 mcmc_settings:
-    chain_length: 50000
+    chain_length: 37500
     sample_frequency: 25
 
 operator_settings:
