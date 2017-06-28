@@ -81,7 +81,17 @@ def consolidate_preempted_logs(
                 assert(run_numbers == sorted(get_run_number(p) for p in op_log_paths))
                 extra_run_numbers = [rn for rn in run_numbers if rn > target_run_number]
                 if len(extra_run_numbers) < 1:
-                    assert(line_count(target_state_log_path) == number_of_samples)
+                    if line_count(target_state_log_path) != number_of_samples:
+                        sys.stderr.write(
+                                "WARNING: Target log is incomplete, but there are no extra runs\n"
+                                "    Simulation: {0}\n"
+                                "    Batch: {1}\n"
+                                "    Rep: {2}\n"
+                                "    Target run: {3}\n    Skipping!!".format(
+                                        sim_name,
+                                        batch_number,
+                                        sim_number,
+                                        target_run_number))
                     continue
                 else:
                     if line_count(target_state_log_path) >= number_of_samples:
