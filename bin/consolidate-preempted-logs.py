@@ -41,7 +41,7 @@ def consolidate_preempted_logs(
 
             posterior_paths = glob.glob(os.path.join(batch_dir,
                     "*simcoevolity-sim-*-config-state-run-{0}.log*".format(
-                            target_run_number))
+                            target_run_number)))
             if not posterior_paths:
                 sys.stderr.write("WARNING: No log files found for\n"
                         "    Simulation: {0}\n"
@@ -150,6 +150,11 @@ def main_cli(argv = sys.argv):
             default = 1501,
             help = ('Number of MCMC samples that should be found in the '
                     'completed log file of each analysis.'))
+
+    if argv == sys.argv:
+        args = parser.parse_args()
+    else:
+        args = parser.parse_args(argv)
 
     consolidate_preempted_logs(
             target_run_number = args.run_number,
