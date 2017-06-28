@@ -15,6 +15,13 @@ import project_util
 _LOG = logging.getLogger(__name__)
 
 
+def line_count(path):
+    count = 0
+    with open(path) as stream:
+        for line in stream:
+            count += 1
+    return count
+
 def get_parameter_names(number_of_comparisons, dpp = True):
     p = ["ln_likelihood"]
     if dpp:
@@ -37,7 +44,7 @@ def get_results_header(number_of_comparisons, dpp = True):
             "batch",
             "sim",
             "sample_size",
-            "run_time",
+            "mean_run_time",
             "mean_n_var_sites",
             "true_model",
             "map_model",
@@ -66,6 +73,8 @@ def get_results_header(number_of_comparisons, dpp = True):
         h.append("eti_95_lower_{0}".format(p))
         h.append("eti_95_upper_{0}".format(p))
         h.append("ess_{0}".format(p))
+        h.append("ess_sum_{0}".format(p))
+        h.append("psrf_{0}".format(p))
     return h
 
 def get_empty_results_dict(number_of_comparisons, dpp = True):
@@ -73,35 +82,54 @@ def get_empty_results_dict(number_of_comparisons, dpp = True):
     return dict(zip(h, ([] for i in range(len(h)))))
 
 def get_results_from_sim_rep(
-        posterior_path,
+        posterior_paths,
+        stdout_paths,
         true_path,
-        stdout_path,
         parameter_names,
         number_of_comparisons,
         batch_number,
         sim_number,
-        expected_number_of_samples = 2001,
+        expected_number_of_samples = 1501,
         burnin = 401):
+    posterior_paths = sorted(posterior_paths)
+    stdout_paths = sorted(stdout_paths)
+    nchains = len(posterior_paths)
+    assert(nchains == len(stdout_paths))
+    if nchains > 1:
+        lc = line_count(posterior_paths[0])
+        for i in range(1, nchains):
+            assert(lc = line_count(posterior_paths[i]))
+
     results = {}
     post_sample = sumcoevolity.posterior.PosteriorSample(
-            [posterior_path],
+            posterior_paths,
             burnin = burnin)
-    assert(post_sample.number_of_samples == expected_number_of_samples - burnin)
+    nsamples_per_chain = expected_number_of_samples - burnin
+    assert(post_sample.number_of_samples == nchains * nsamples_per_chain)
+
     true_values = sumcoevolity.parsing.get_dict_from_spreadsheets(
             [true_path],
             sep = "\t",
             header = None)
     for v in true_values.values():
         assert(len(v) == 1)
-    stdout = sumcoevolity.parsing.EcoevolityStdOut(stdout_path)
-    assert(number_of_comparisons == stdout.number_of_comparisons)
+
     results["batch"] = batch_number
     results["sim"] = sim_number
-    results["run_time"] = stdout.run_time
     results["sample_size"] = post_sample.number_of_samples
+
+    stdout = sumcoevolity.parsing.EcoevolityStdOut(stdout_paths[0])
+    assert(number_of_comparisons == stdout.number_of_comparisons)
     results["mean_n_var_sites"] = stdout.get_mean_number_of_variable_sites()
     for i in range(number_of_comparisons):
         results["n_var_sites_c{0}".format(i + 1)] = stdout.get_number_of_variable_sites(i)
+    run_times = [stdout.run_time]
+    for i in range(1, len(stdout_paths)):
+        so = sumcoevolity.parsing.EcoevolityStdOut(stdout_paths[i])
+        run_times.append(so.run_time)
+        for j in range(number_of_comparisons):
+            assert(results["n_var_sites_c{0}".format(j + 1)] == so.get_number_of_variable_sites(j))
+    results["mean_run_time"] = sum(run_times) / float(len(run_times))
     
     true_model = tuple(int(true_values[h][0]) for h in post_sample.height_index_keys)
     true_model_p = post_sample.get_model_probability(true_model)
@@ -138,6 +166,17 @@ def get_results_from_sim_rep(
         ss = sumcoevolity.stats.get_summary(post_sample.parameter_samples[p])
         ess = sumcoevolity.stats.effective_sample_size(
                 post_sample.parameter_samples[p])
+        ess_sum = 0.0
+        samples_by_chain = []
+        for i in range(nchains):
+            chain_samples = post_sample.parameter_samples[p][i * nsamples_per_chain : (i + 1) * nsamples_per_chain]
+            assert(len(chain_samples) == nsamples_per_chain)
+            ess_sum += sumcoevolity.stats.effective_sample_size(chain_samples)
+            if nchains > 1:
+                samples_by_chain.append(chain_samples)
+        psrf = -1.0
+        if nchains > 1:
+            psrf = sumcoevolity.stats.potential_scale_reduction_factor(samples_by_chain)
         results["true_{0}".format(p)] = true_val
         results["true_{0}_rank".format(p)] = true_val_rank
         results["mean_{0}".format(p)] = ss["mean"]
@@ -148,11 +187,14 @@ def get_results_from_sim_rep(
         results["eti_95_lower_{0}".format(p)] = ss["qi_95"][0]
         results["eti_95_upper_{0}".format(p)] = ss["qi_95"][1]
         results["ess_{0}".format(p)] = ess
+        results["ess_sum_{0}".format(p)] = ess_sum
+        results["psrf_{0}".format(p)] = psrf
 
     return results
 
 def parse_simulation_results(
-        expected_number_of_samples = 2001,
+        expected_number_of_runs = 2,
+        expected_number_of_samples = 1501,
         burnin = 401):
     batch_number_pattern = re.compile(r'batch(?P<batch_number>\d+)')
     sim_number_pattern = re.compile(r'-sim-(?P<sim_number>\d+)-')
@@ -209,24 +251,10 @@ def parse_simulation_results(
                         sim_name,
                         batch_number_str,
                         sim_number_str))
-                log_paths = glob.glob(os.path.join(batch_dir,
+                post_paths = glob.glob(os.path.join(batch_dir,
                         "simcoevolity-sim-{0}-config-state-run-*.log*".format(
                                 sim_number_str)))
-                assert(len(log_paths) > 0)
-                # Need to get run number of run that finished (runs are
-                # sometimes pre-empted and restarted)
-                run_numbers = []
-                for log_path in log_paths:
-                    run_number_matches = run_number_pattern.findall(log_path)
-                    assert(len(run_number_matches) == 1)
-                    run_numbers.append(int(run_number_matches[0]))
-                run_number = sorted(run_numbers)[-1]
-                post_paths = glob.glob(os.path.join(batch_dir,
-                        "simcoevolity-sim-{0}-config-state-run-{1}.log*".format(
-                                sim_number_str, run_number)))
-                assert(len(post_paths) == 1)
-                post_path = post_paths[0]
-                assert(os.path.exists(post_path))
+                assert(len(post_paths) == expected_number_of_runs)
                 true_paths = glob.glob(os.path.join(batch_dir,
                         "simcoevolity-sim-{0}-true-values.txt*".format(
                                 sim_number_str)))
@@ -234,16 +262,14 @@ def parse_simulation_results(
                 true_path = true_paths[0]
                 assert(os.path.exists(true_path))
                 stdout_paths = glob.glob(os.path.join(batch_dir,
-                        "simcoevolity-sim-{0}-config.yml.out*".format(
+                        "simcoevolity-sim-{0}-config.yml-run-*.out*".format(
                                 sim_number_str)))
-                assert(len(stdout_paths) == 1)
-                stdout_path = stdout_paths[0]
-                assert(os.path.exists(stdout_path))
+                assert(len(stdout_paths) == expected_number_of_runs)
                 if not skipping_sim:
                     rep_results = get_results_from_sim_rep(
-                            posterior_path = post_path,
+                            posterior_paths = post_paths,
+                            stdout_paths = stdout_paths,
                             true_path = true_path,
-                            stdout_path = stdout_path,
                             parameter_names = parameter_names,
                             number_of_comparisons = number_of_comparisons,
                             batch_number = batch_number,
@@ -253,32 +279,18 @@ def parse_simulation_results(
                     for k, v in rep_results.items():
                         results[k].append(v)
                 if var_only_present:
-                    var_only_log_paths = glob.glob(os.path.join(batch_dir,
+                    var_only_post_paths = glob.glob(os.path.join(batch_dir,
                             "var-only-simcoevolity-sim-{0}-config-state-run-*.log*".format(
                                     sim_number_str)))
-                    assert(len(var_only_log_paths) > 0)
-                    # Need to get run number of run that finished (runs are
-                    # sometimes pre-empted and restarted)
-                    var_only_run_numbers = []
-                    for log_path in var_only_log_paths:
-                        run_number_matches = run_number_pattern.findall(log_path)
-                        assert(len(run_number_matches) == 1)
-                        var_only_run_numbers.append(int(run_number_matches[0]))
-                    var_only_run_number = sorted(var_only_run_numbers)[-1]
-                    var_only_post_paths = glob.glob(os.path.join(batch_dir,
-                            "var-only-simcoevolity-sim-{0}-config-state-run-{1}.log*".format(
-                                    sim_number_str, var_only_run_number)))
-                    assert(len(var_only_post_paths) == 1)
-                    var_only_post_path = var_only_post_paths[0]
+                    assert(len(var_only_post_paths) == expected_number_of_runs)
                     var_only_stdout_paths = glob.glob(os.path.join(batch_dir,
                             "var-only-simcoevolity-sim-{0}-config.yml.out*".format(
                                     sim_number_str)))
-                    assert(len(var_only_stdout_paths) == 1)
-                    var_only_stdout_path = var_only_stdout_paths[0]
+                    assert(len(var_only_stdout_paths) == expected_number_of_runs)
                     var_only_rep_results = get_results_from_sim_rep(
-                            posterior_path = var_only_post_path,
+                            posterior_paths = var_only_post_paths,
+                            stdout_paths = var_only_stdout_paths,
                             true_path = true_path,
-                            stdout_path = var_only_stdout_path,
                             parameter_names = parameter_names,
                             number_of_comparisons = number_of_comparisons,
                             batch_number = batch_number,
@@ -310,10 +322,15 @@ def parse_simulation_results(
 def main_cli(argv = sys.argv):
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-e', '--expected-number-of-samples',
+    parser.add_argument('-r', '--expected-number-of-runs',
             action = 'store',
             type = int,
-            default = 2001,
+            default = 2,
+            help = 'Number of MCMC chains that were run for each sim rep.')
+    parser.add_argument('-s', '--expected-number-of-samples',
+            action = 'store',
+            type = int,
+            default = 1501,
             help = ('Number of MCMC samples that should be found in the log '
                     'file of each analysis.'))
     parser.add_argument('--burnin',
@@ -329,6 +346,7 @@ def main_cli(argv = sys.argv):
         args = parser.parse_args(argv)
 
     parse_simulation_results(
+            expected_number_of_runs = args.expected_number_of_runs,
             expected_number_of_samples = args.expected_number_of_samples,
             burnin = args.burnin)
 
