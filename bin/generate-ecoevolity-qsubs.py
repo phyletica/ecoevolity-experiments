@@ -49,6 +49,8 @@ def write_qsub(config_path,
     qsub_path = "{0}-run-{1}-qsub.sh".format(qsub_prefix, run_number)
     if os.path.exists(qsub_path):
         return
+    config_file = os.path.basename(config_path)
+    stdout_path = "{0}-run-{1}.out".format(config_file, run_number)
     seed = rng.randint(1, 999999999)
     assert(not os.path.exists(qsub_path))
     with open(qsub_path, 'w') as out:
@@ -56,9 +58,10 @@ def write_qsub(config_path,
             out.write(get_asc_header())
         else:
             out.write(get_pbs_header(restrict_nodes, walltime))
-        out.write("ecoevolity --seed {0} --relax-constant-sites {1} 1>{1}.out 2>&1\n".format(
+        out.write("ecoevolity --seed {0} --relax-constant-sites {1} 1>{2} 2>&1\n".format(
                 seed,
-                os.path.basename(config_path)))
+                config_file,
+                stdout_path))
 
 def arg_is_positive_int(i):
     """
