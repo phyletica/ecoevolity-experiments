@@ -29,6 +29,7 @@ def get_run_number(log_path):
 def consolidate_preempted_logs(
         target_run_number = 1,
         number_of_samples = 1501):
+    number_of_lines = number_of_samples + 1
     val_sim_dirs = glob.glob(os.path.join(project_util.VAL_DIR, '0*'))
     for val_sim_dir in sorted(val_sim_dirs):
         sim_name = os.path.basename(val_sim_dir)
@@ -56,32 +57,45 @@ def consolidate_preempted_logs(
                 assert(len(sim_number_matches) == 1)
                 sim_number_str = sim_number_matches[0]
                 sim_number = int(sim_number_str)
-                target_state_log_paths = glob.glob(os.path.join(batch_dir,
+                gp = os.path.join(batch_dir,
                         "simcoevolity-sim-{0}-config-state-run-{1}.log*".format(
                                 sim_number_str,
-                                target_run_number)))
-                assert(len(target_state_log_paths) == 1)
+                                target_run_number))
+                target_state_log_paths = glob.glob(gp)
+                assert(len(target_state_log_paths) == 1, "Multiple matches to {0!r}".format(gp))
                 target_state_log_path = target_state_log_paths[0]
-                target_op_log_paths = glob.glob(os.path.join(batch_dir,
+                gp = os.path.join(batch_dir,
                         "simcoevolity-sim-{0}-config-operator-run-{1}.log*".format(
                                 sim_number_str,
-                                target_run_number)))
-                assert(len(target_op_log_paths) == 1)
+                                target_run_number))
+                target_op_log_paths = glob.glob(gp)
+                assert(len(target_op_log_paths) == 1, "Multiple matches to {0!r}".format(gp))
                 target_op_log_path = target_op_log_paths[0]
-                state_log_paths = glob.glob(os.path.join(batch_dir,
+                state_log_path_pattern = os.path.join(batch_dir,
                         "simcoevolity-sim-{0}-config-state-run-*.log*".format(
-                                sim_number_str)))
-                op_log_paths = glob.glob(os.path.join(batch_dir,
+                                sim_number_str))
+                state_log_paths = glob.glob(state_log_path_pattern)
+                op_log_path_pattern = os.path.join(batch_dir,
                         "simcoevolity-sim-{0}-config-operator-run-*.log*".format(
-                                sim_number_str)))
-                assert(len(state_log_paths) == len(op_log_paths))
-                assert(target_state_log_path in state_log_paths)
-                assert(target_op_log_path in op_log_paths)
+                                sim_number_str))
+                op_log_paths = glob.glob(op_log_path_pattern)
+                assert(len(state_log_paths) == len(op_log_paths),
+                        "{0} matches for {1!r} and {2} for {3!r}".format(
+                            len(state_log_paths),
+                            state_log_path_pattern,
+                            len(op_log_paths),
+                            op_log_path_pattern))
+                assert(target_state_log_path in state_log_paths,
+                        "Target {0!r} not in matches".format(
+                                target_state_log_path))
+                assert(target_op_log_path in op_log_paths,
+                        "Target {0!r} not in matches".format(
+                                target_op_log_path))
                 run_numbers = sorted(get_run_number(p) for p in state_log_paths)
                 assert(run_numbers == sorted(get_run_number(p) for p in op_log_paths))
                 extra_run_numbers = [rn for rn in run_numbers if rn > target_run_number]
                 if len(extra_run_numbers) < 1:
-                    if line_count(target_state_log_path) != number_of_samples:
+                    if line_count(target_state_log_path) != number_of_lines:
                         sys.stderr.write(
                                 "WARNING: Target log is incomplete, but there are no extra runs\n"
                                 "    Simulation: {0}\n"
@@ -94,7 +108,7 @@ def consolidate_preempted_logs(
                                         target_run_number))
                     continue
                 else:
-                    if line_count(target_state_log_path) >= number_of_samples:
+                    if line_count(target_state_log_path) >= number_of_lines:
                         sys.stderr.write(
                                 "WARNING: Target log is complete, but there are extra runs\n"
                                 "    Simulation: {0}\n"
@@ -107,19 +121,25 @@ def consolidate_preempted_logs(
                                         target_run_number))
                         continue
                     completed_run_number = extra_run_numbers.pop(-1)
-                    completed_state_log_paths = glob.glob(os.path.join(batch_dir,
+                    completed_state_log_pattern = os.path.join(batch_dir,
                             "simcoevolity-sim-{0}-config-state-run-{1}.log*".format(
                                     sim_number_str,
-                                    completed_run_number)))
-                    assert(len(completed_state_log_paths) == 1)
+                                    completed_run_number))
+                    completed_state_log_paths = glob.glob(completed_state_log_pattern)
+                    assert(len(completed_state_log_paths) == 1,
+                            "Multiple matches to complete state log {0!r}".format(
+                                    completed_state_log_pattern))
                     completed_state_log_path = completed_state_log_paths[0]
-                    completed_op_log_paths = glob.glob(os.path.join(batch_dir,
+                    completed_op_log_pattern = os.path.join(batch_dir,
                             "simcoevolity-sim-{0}-config-operator-run-{1}.log*".format(
                                     sim_number_str,
-                                    completed_run_number)))
-                    assert(len(completed_op_log_paths) == 1)
+                                    completed_run_number))
+                    completed_op_log_paths = glob.glob(completed_op_log_pattern)
+                    assert(len(completed_op_log_paths) == 1,
+                            "Multiple matches to complete op log {0!r}".format(
+                                    completed_state_log_pattern))
                     completed_op_log_path = completed_op_log_paths[0]
-                    if line_count(completed_state_log_path) != number_of_samples:
+                    if line_count(completed_state_log_path) != number_of_lines:
                         sys.stderr.write(
                                 "WARNING: could not find completed log for\n"
                                 "    Simulation: {0}\n"
