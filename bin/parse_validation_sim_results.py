@@ -98,7 +98,7 @@ def get_results_from_sim_rep(
     if nchains > 1:
         lc = line_count(posterior_paths[0])
         for i in range(1, nchains):
-            assert(lc = line_count(posterior_paths[i]))
+            assert(lc == line_count(posterior_paths[i]))
 
     results = {}
     post_sample = sumcoevolity.posterior.PosteriorSample(
@@ -254,7 +254,9 @@ def parse_simulation_results(
                 post_paths = glob.glob(os.path.join(batch_dir,
                         "simcoevolity-sim-{0}-config-state-run-*.log*".format(
                                 sim_number_str)))
-                assert(len(post_paths) == expected_number_of_runs)
+                assert (len(post_paths) == expected_number_of_runs), (
+                        "Found {0} state logs for {1}".format(
+                                len(post_paths), posterior_path))
                 true_paths = glob.glob(os.path.join(batch_dir,
                         "simcoevolity-sim-{0}-true-values.txt*".format(
                                 sim_number_str)))
@@ -283,10 +285,14 @@ def parse_simulation_results(
                             "var-only-simcoevolity-sim-{0}-config-state-run-*.log*".format(
                                     sim_number_str)))
                     assert(len(var_only_post_paths) == expected_number_of_runs)
-                    var_only_stdout_paths = glob.glob(os.path.join(batch_dir,
-                            "var-only-simcoevolity-sim-{0}-config.yml.out*".format(
-                                    sim_number_str)))
-                    assert(len(var_only_stdout_paths) == expected_number_of_runs)
+                    vo_so_pattern = os.path.join(batch_dir,
+                            "var-only-simcoevolity-sim-{0}-config.yml-run-*.out*".format(
+                                    sim_number_str))
+                    var_only_stdout_paths = glob.glob(vo_so_pattern)
+                    assert (len(var_only_stdout_paths) == expected_number_of_runs), (
+                            "Found {0} stdout paths for {1}".format(
+                                    len(var_only_stdout_paths),
+                                    vo_so_pattern))
                     var_only_rep_results = get_results_from_sim_rep(
                             posterior_paths = var_only_post_paths,
                             stdout_paths = var_only_stdout_paths,
