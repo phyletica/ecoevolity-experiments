@@ -55,7 +55,7 @@ def main_cli(argv = sys.argv):
         new_config_name = "var-only-" + config_name
         new_config_path = os.path.join(dir_path, new_config_name)
         if os.path.exists(new_config_path):
-            sys.stderr.out(
+            sys.stderr.write(
                     "Skipping config that already exists: {0}\n".format(
                             new_config_path))
             continue
