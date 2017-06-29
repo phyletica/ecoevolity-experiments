@@ -11,6 +11,7 @@ nprocs=10
 nprior=1000000
 batch_size=10000
 nsums=100000
+sortindex=11
 seed=37851841
 
 output_dir="../priors"
@@ -26,7 +27,7 @@ dmc.py --np $nprocs \
     -n $nprior \
     --prior-batch-size $batch_size \
     --num-standardizing-samples $nsums \
-    --sort-index 0 \
+    --sort-index $sortindex \
     --output-dir $output_dir \
     --staging-dir $staging_dir \
     --temp-dir $staging_dir \

@@ -7,13 +7,14 @@
 
 staging_dir=$(mktemp -d /tmp/output.XXXXXXXXX)
 
-reps=500
+reps=200
 nprocs=10
 nprior=1000000
 batch_size=10000
 nsums=100000
 npost=2000
 nquantiles=1000
+sortindex=11
 seed=37851841
 
 output_dir="../results/msbayes"
@@ -31,7 +32,7 @@ dmc.py --np $nprocs \
     --num-posterior-samples $npost \
     --num-standardizing-samples $nsums \
     -q $nquantiles \
-    --sort-index 0 \
+    --sort-index $sortindex \
     --output-dir $output_dir \
     --temp-dir $staging_dir \
     --staging-dir $staging_dir \
