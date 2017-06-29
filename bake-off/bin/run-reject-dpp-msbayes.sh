@@ -38,7 +38,8 @@ dmc.py --np $nprocs \
     --staging-dir $staging_dir \
     --seed $seed \
     --no-global-estimate \
-    --compress
+    --compress \
+    1>run-reject-dpp-msbayes.sh.out 2>&1
 
 echo "Here are the contents of the local temp directory '${staging_dir}':"
 ls -Fla $staging_dir
