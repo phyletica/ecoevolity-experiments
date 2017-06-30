@@ -28,13 +28,17 @@ def get_run_number(log_path):
 
 def consolidate_preempted_logs(
         target_run_number = 1,
-        number_of_samples = 1501):
+        number_of_samples = 1501,
+        batch_dir_name = None):
     number_of_lines = number_of_samples + 1
     val_sim_dirs = glob.glob(os.path.join(project_util.VAL_DIR, '0*'))
     for val_sim_dir in sorted(val_sim_dirs):
         sim_name = os.path.basename(val_sim_dir)
         batch_dirs = glob.glob(os.path.join(val_sim_dir, "batch*"))
         for batch_dir in sorted(batch_dirs):
+            if batch_dir_name and (os.path.basename(batch_dir) != batch_dir_name):
+                sys.stdout.write("Skipping {0}\n".format(batch_dir))
+                continue
             batch_number_matches = batch_number_pattern.findall(batch_dir)
             assert len(batch_number_matches) == 1
             batch_number_str = batch_number_matches[0]
@@ -202,6 +206,11 @@ def main_cli(argv = sys.argv):
             default = 1501,
             help = ('Number of MCMC samples that should be found in the '
                     'completed log file of each analysis.'))
+    parser.add_argument('-b', '--batch-dir',
+            action = 'store',
+            type = str,
+            default = None,
+            help = ('Batch directory name.'))
 
     if argv == sys.argv:
         args = parser.parse_args()
@@ -210,7 +219,8 @@ def main_cli(argv = sys.argv):
 
     consolidate_preempted_logs(
             target_run_number = args.run_number,
-            number_of_samples = args.number_of_samples)
+            number_of_samples = args.number_of_samples,
+            batch_dir_name = args.batch_dir)
 
 
 if __name__ == "__main__":
