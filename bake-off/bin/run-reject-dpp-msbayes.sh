@@ -1,16 +1,22 @@
 #! /bin/bash
-#PBS -l nodes=1:ppn=10
-#PBS -l walltime=40:00:00
-#PBS -l mem=32gb
+#PBS -l nodes=1:ppn=20
+#PBS -l walltime=120:00:00
+#PBS -l mem=120gb
 #PBS -j oe 
 #PBS -l jobflags=ADVRES:jro0014_lab.56281
+
+if [ -n "$PBS_JOBNAME" ]
+then
+    source ${PBS_O_HOME}/.bash_profile
+    cd $PBS_O_WORKDIR
+fi
 
 staging_dir=$(mktemp -d /tmp/output.XXXXXXXXX)
 
 reps=200
-nprocs=10
+nprocs=20
 nprior=1000000
-batch_size=10000
+batch_size=5000
 nsums=100000
 npost=2000
 nquantiles=1000
