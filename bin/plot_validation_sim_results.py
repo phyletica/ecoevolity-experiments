@@ -80,72 +80,68 @@ def get_results_paths(
         include_all_sizes_fixed = True,
         include_root_size_fixed = False,
         include_variable_only = True):
+    dpp_500k_sim_dirs = []
+    dpp_500k_sim_dirs.extend(sorted(glob.glob(os.path.join(
+            validatition_sim_dir,
+            "03pairs-dpp-root-[0-9][0-9][0-9][0-9]-500k"))))
+    if include_root_size_fixed:
+        dpp_500k_sim_dirs.append(os.path.join(
+                validatition_sim_dir,
+                "03pairs-dpp-root-fixed-500k"))
+    if include_all_sizes_fixed:
+        dpp_500k_sim_dirs.append(os.path.join(
+                validatition_sim_dir,
+                "03pairs-dpp-root-fixed-all-500k"))
     dpp_500k_results_paths = []
-    dpp_500k_results_paths.extend(sorted(glob.glob(os.path.join(
-            validatition_sim_dir,
-            "03pairs-dpp-root-[0-9][0-9][0-9][0-9]-500k",
-            "results.csv.gz"))))
-    if include_root_size_fixed:
-        dpp_500k_results_paths.append(os.path.join(
-                validatition_sim_dir,
-                "03pairs-dpp-root-fixed-500k",
-                "results.csv.gz"))
-    if include_all_sizes_fixed:
-        dpp_500k_results_paths.append(os.path.join(
-                validatition_sim_dir,
-                "03pairs-dpp-root-fixed-all-500k",
-                "results.csv.gz"))
-
     vo_dpp_500k_results_paths = []
-    if include_variable_only:
-        vo_dpp_500k_results_paths.extend(sorted(glob.glob(os.path.join(
-                validatition_sim_dir,
-                "03pairs-dpp-root-[0-9][0-9][0-9][0-9]-500k",
-                "var-only-results.csv.gz"))))
-        if include_root_size_fixed:
-            vo_dpp_500k_results_paths.append(os.path.join(
-                    validatition_sim_dir,
-                    "03pairs-dpp-root-fixed-500k",
-                    "var-only-results.csv.gz"))
-        if include_all_sizes_fixed:
-            vo_dpp_500k_results_paths.append(os.path.join(
-                    validatition_sim_dir,
-                    "03pairs-dpp-root-fixed-all-500k",
-                    "var-only-results.csv.gz"))
+    for sim_dir in dpp_500k_sim_dirs:
+        sim_name = os.path.basename(sim_dir)
+        dpp_500k_results_paths.append(
+                (sim_name, sorted(glob.glob(os.path.join(
+                        sim_dir,
+                        "batch*",
+                        "results.csv.gz")))
+                )
+        )
+        vo_dpp_500k_results_paths.append(
+                (sim_name, sorted(glob.glob(os.path.join(
+                        sim_dir,
+                        "batch*",
+                        "var-only-results.csv.gz")))
+                )
+        )
 
-    dpp_100k_results_paths = []
-    dpp_100k_results_paths.extend(sorted(glob.glob(os.path.join(
+    dpp_100k_sim_dirs = []
+    dpp_100k_sim_dirs.extend(sorted(glob.glob(os.path.join(
             validatition_sim_dir,
-            "03pairs-dpp-root-[0-9][0-9][0-9][0-9]-100k",
-            "results.csv.gz"))))
+            "03pairs-dpp-root-[0-9][0-9][0-9][0-9]-100k"))))
     if include_root_size_fixed:
-        dpp_100k_results_paths.append(os.path.join(
+        dpp_100k_sim_dirs.append(os.path.join(
                 validatition_sim_dir,
-                "03pairs-dpp-root-fixed-100k",
-                "results.csv.gz"))
+                "03pairs-dpp-root-fixed-100k"))
     if include_all_sizes_fixed:
-        dpp_100k_results_paths.append(os.path.join(
+        dpp_100k_sim_dirs.append(os.path.join(
                 validatition_sim_dir,
-                "03pairs-dpp-root-fixed-all-100k",
-                "results.csv.gz"))
-
+                "03pairs-dpp-root-fixed-all-100k"))
+    dpp_100k_results_paths = []
     vo_dpp_100k_results_paths = []
-    if include_variable_only:
-        vo_dpp_100k_results_paths.extend(sorted(glob.glob(os.path.join(
-                validatition_sim_dir,
-                "03pairs-dpp-root-[0-9][0-9][0-9][0-9]-100k",
-                "var-only-results.csv.gz"))))
-        if include_root_size_fixed:
-            vo_dpp_100k_results_paths.append(os.path.join(
-                    validatition_sim_dir,
-                    "03pairs-dpp-root-fixed-100k",
-                    "var-only-results.csv.gz"))
-        if include_all_sizes_fixed:
-            vo_dpp_100k_results_paths.append(os.path.join(
-                    validatition_sim_dir,
-                    "03pairs-dpp-root-fixed-all-100k",
-                    "var-only-results.csv.gz"))
-
+    for sim_dir in dpp_100k_sim_dirs:
+        sim_name = os.path.basename(sim_dir)
+        dpp_100k_results_paths.append(
+                (sim_name, sorted(glob.glob(os.path.join(
+                        sim_dir,
+                        "batch*",
+                        "results.csv.gz")))
+                )
+        )
+        vo_dpp_100k_results_paths.append(
+                (sim_name, sorted(glob.glob(os.path.join(
+                        sim_dir,
+                        "batch*",
+                        "var-only-results.csv.gz")))
+                )
+        )
+        
     if not include_variable_only:
         results_batches = {
                 "500k":                 dpp_500k_results_paths,
@@ -214,18 +210,18 @@ def plot_ess_versus_error(
     error_min = float('inf')
     error_max = float('-inf')
     for key, results_batch in results_batches.items():
-        for results_path in results_batch:
+        for sim_dir, results_paths in results_batch:
             results = sumcoevolity.parsing.get_dict_from_spreadsheets(
-                    [results_path],
+                    results_paths,
                     sep = "\t",
                     offset = 0)
             for parameter_str in parameters:
                 ci_widths = tuple(ci_width_iter(results, parameter_str))
                 errors = tuple(absolute_error_iter(results, parameter_str))
                 ess_min = min(ess_min,
-                        min(float(x) for x in results["ess_{0}".format(parameter_str)]))
+                        min(float(x) for x in results["ess_sum_{0}".format(parameter_str)]))
                 ess_max = max(ess_max,
-                        max(float(x) for x in results["ess_{0}".format(parameter_str)]))
+                        max(float(x) for x in results["ess_sum_{0}".format(parameter_str)]))
                 ci_width_min = min(ci_width_min, min(ci_widths))
                 ci_width_max = max(ci_width_max, max(ci_widths))
                 error_min = min(error_min, min(errors))
@@ -251,24 +247,22 @@ def plot_ess_versus_error(
     for row_idx, row_key in enumerate(row_keys):
         results_batch = results_batches[row_key]
         last_col_idx = len(results_batch) - 1
-        for col_idx, results_path in enumerate(results_batch):
-            sim_dir = os.path.basename(os.path.dirname(results_path))
-            results_file = os.path.basename(results_path)
+        for col_idx, (sim_dir, results_paths) in enumerate(results_batch):
             root_alpha_matches = root_alpha_pattern.findall(sim_dir)
             assert(len(root_alpha_matches) == 1)
             root_alpha_setting = root_alpha_matches[0]
 
             results = sumcoevolity.parsing.get_dict_from_spreadsheets(
-                    [results_path],
+                    results_paths,
                     sep = "\t",
                     offset = 0)
-            _LOG.info("row {0}, col {1} : {2}".format(row_idx, col_idx,
-                    os.path.join(sim_dir, results_file)))
+            _LOG.info("row {0}, col {1} : {2} ({3} batches)".format(
+                    row_idx, col_idx, sim_dir, len(results_paths)))
 
             x = []
             y = []
             for parameter_str in parameters:
-                x.extend(float(x) for x in results["ess_{0}".format(parameter_str)])
+                x.extend(float(x) for x in results["ess_sum_{0}".format(parameter_str)])
                 y.extend(ci_width_iter(results, parameter_str))
 
             assert(len(x) == len(y))
@@ -376,24 +370,22 @@ def plot_ess_versus_error(
     for row_idx, row_key in enumerate(row_keys):
         results_batch = results_batches[row_key]
         last_col_idx = len(results_batch) - 1
-        for col_idx, results_path in enumerate(results_batch):
-            sim_dir = os.path.basename(os.path.dirname(results_path))
-            results_file = os.path.basename(results_path)
+        for col_idx, (sim_dir, results_paths) in enumerate(results_batch):
             root_alpha_matches = root_alpha_pattern.findall(sim_dir)
             assert(len(root_alpha_matches) == 1)
             root_alpha_setting = root_alpha_matches[0]
 
             results = sumcoevolity.parsing.get_dict_from_spreadsheets(
-                    [results_path],
+                    results_paths,
                     sep = "\t",
                     offset = 0)
-            _LOG.info("row {0}, col {1} : {2}".format(row_idx, col_idx,
-                    os.path.join(sim_dir, results_file)))
+            _LOG.info("row {0}, col {1} : {2} ({3} batches)".format(
+                    row_idx, col_idx, sim_dir, len(results_paths)))
 
             x = []
             y = []
             for parameter_str in parameters:
-                x.extend(float(x) for x in results["ess_{0}".format(parameter_str)])
+                x.extend(float(x) for x in results["ess_sum_{0}".format(parameter_str)])
                 y.extend(absolute_error_iter(results, parameter_str))
                 
 
@@ -511,9 +503,9 @@ def generate_scatter_plots(
     parameter_min = float('inf')
     parameter_max = float('-inf')
     for key, results_batch in results_batches.items():
-        for results_path in results_batch:
+        for sim_dir, results_paths in results_batch:
             results = sumcoevolity.parsing.get_dict_from_spreadsheets(
-                    [results_path],
+                    results_paths,
                     sep = "\t",
                     offset = 0)
             for parameter_str in parameters:
@@ -540,19 +532,17 @@ def generate_scatter_plots(
     for row_idx, row_key in enumerate(row_keys):
         results_batch = results_batches[row_key]
         last_col_idx = len(results_batch) - 1
-        for col_idx, results_path in enumerate(results_batch):
-            sim_dir = os.path.basename(os.path.dirname(results_path))
-            results_file = os.path.basename(results_path)
+        for col_idx, (sim_dir, results_paths) in enumerate(results_batch):
             root_alpha_matches = root_alpha_pattern.findall(sim_dir)
             assert(len(root_alpha_matches) == 1)
             root_alpha_setting = root_alpha_matches[0]
 
             results = sumcoevolity.parsing.get_dict_from_spreadsheets(
-                    [results_path],
+                    results_paths,
                     sep = "\t",
                     offset = 0)
-            _LOG.info("row {0}, col {1} : {2}".format(row_idx, col_idx,
-                    os.path.join(sim_dir, results_file)))
+            _LOG.info("row {0}, col {1} : {2} ({3} batches)".format(
+                    row_idx, col_idx, sim_dir, len(results_paths)))
 
             x = []
             y = []
@@ -746,9 +736,9 @@ def generate_histograms(
     parameter_min = float('inf')
     parameter_max = float('-inf')
     for key, results_batch in results_batches.items():
-        for results_path in results_batch:
+        for sim_dir, results_paths in results_batch:
             results = sumcoevolity.parsing.get_dict_from_spreadsheets(
-                    [results_path],
+                    results_paths,
                     sep = "\t",
                     offset = 0)
             for parameter_str in parameters:
@@ -776,19 +766,17 @@ def generate_histograms(
     for row_idx, row_key in enumerate(row_keys):
         results_batch = results_batches[row_key]
         last_col_idx = len(results_batch) - 1
-        for col_idx, results_path in enumerate(results_batch):
-            sim_dir = os.path.basename(os.path.dirname(results_path))
-            results_file = os.path.basename(results_path)
+        for col_idx, (sim_dir, results_paths) in enumerate(results_batch):
             root_alpha_matches = root_alpha_pattern.findall(sim_dir)
             assert(len(root_alpha_matches) == 1)
             root_alpha_setting = root_alpha_matches[0]
 
             results = sumcoevolity.parsing.get_dict_from_spreadsheets(
-                    [results_path],
+                    results_paths,
                     sep = "\t",
                     offset = 0)
-            _LOG.info("row {0}, col {1} : {2}".format(row_idx, col_idx,
-                    os.path.join(sim_dir, results_file)))
+            _LOG.info("row {0}, col {1} : {2} ({3} batches)".format(
+                    row_idx, col_idx, sim_dir, len(results_paths)))
 
             x = []
             for parameter_str in parameters:
@@ -956,19 +944,17 @@ def generate_model_plots(
     for row_idx, row_key in enumerate(row_keys):
         results_batch = results_batches[row_key]
         last_col_idx = len(results_batch) - 1
-        for col_idx, results_path in enumerate(results_batch):
-            sim_dir = os.path.basename(os.path.dirname(results_path))
-            results_file = os.path.basename(results_path)
+        for col_idx, (sim_dir, results_paths) in enumerate(results_batch):
             root_alpha_matches = root_alpha_pattern.findall(sim_dir)
             assert(len(root_alpha_matches) == 1)
             root_alpha_setting = root_alpha_matches[0]
 
             results = sumcoevolity.parsing.get_dict_from_spreadsheets(
-                    [results_path],
+                    results_paths,
                     sep = "\t",
                     offset = 0)
-            _LOG.info("row {0}, col {1} : {2}".format(row_idx, col_idx,
-                    os.path.join(sim_dir, results_file)))
+            _LOG.info("row {0}, col {1} : {2} ({3} batches)".format(
+                    row_idx, col_idx, sim_dir, len(results_paths)))
 
             true_map_nevents = []
             for i in range(number_of_comparisons):
@@ -1164,7 +1150,7 @@ def main_cli(argv = sys.argv):
             include_variable_only = False)
     generate_histograms(
             parameters = [
-                    "ess_ln_likelihood",
+                    "ess_sum_ln_likelihood",
                     ],
             parameter_label = "Effective samples size of log likelihood",
             plot_file_prefix = "ess-ln-likelihood",
@@ -1175,9 +1161,9 @@ def main_cli(argv = sys.argv):
             include_variable_only = True)
     generate_histograms(
             parameters = [
-                    "ess_root_height_c1sp1",
-                    "ess_root_height_c2sp1",
-                    "ess_root_height_c3sp1",
+                    "ess_sum_root_height_c1sp1",
+                    "ess_sum_root_height_c2sp1",
+                    "ess_sum_root_height_c3sp1",
                     ],
             parameter_label = "Effective samples size of divergence time",
             plot_file_prefix = "ess-div-time",
@@ -1188,9 +1174,9 @@ def main_cli(argv = sys.argv):
             include_variable_only = True)
     generate_histograms(
             parameters = [
-                    "ess_pop_size_root_c1sp1",
-                    "ess_pop_size_root_c2sp1",
-                    "ess_pop_size_root_c3sp1",
+                    "ess_sum_pop_size_root_c1sp1",
+                    "ess_sum_pop_size_root_c2sp1",
+                    "ess_sum_pop_size_root_c3sp1",
                     ],
             parameter_label = "Effective samples size of root population size",
             plot_file_prefix = "ess-root-pop-size",
