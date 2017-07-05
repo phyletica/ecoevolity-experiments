@@ -18,12 +18,13 @@ then
     module load gcc/5.3.0
 fi
 
-simname="03pairs-dpp-root-1000-500k"
+locussize="500"
+simname="03pairs-dpp-root-0100-500k"
 cfgpath="../configs/config-${simname}.yml"
-outputdir="../simulations/validation/${simname}/batch002"
-rngseed=747174454
+outputdir="../simulations/validation/${simname}-0500l/batch003"
+rngseed=888651993
 nreps=100
 
 mkdir -p "$outputdir"
 
-simcoevolity --seed="$rngseed" -n "$nreps" -o "$outputdir" "$cfgpath"
+simcoevolity --seed="$rngseed" -n "$nreps" -l "$locussize" -o "$outputdir" "$cfgpath"
