@@ -12,7 +12,8 @@ import sumcoevolity
 
 import project_util
 
-_LOG = logging.getLogger(__name__)
+logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
+_LOG = logging.getLogger(os.path.basename(__file__))
 
 
 def line_count(path):
