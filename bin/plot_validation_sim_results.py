@@ -167,6 +167,80 @@ def get_results_paths(
             ]
     return row_keys, results_batches
 
+def get_linked_loci_results_paths(
+        validatition_sim_dir,
+        include_variable_only = True):
+    dpp_500k_sim_dirs = []
+    dpp_500k_sim_dirs.extend(sorted(glob.glob(os.path.join(
+            validatition_sim_dir,
+            "03pairs-dpp-root-0100-500k*"))))
+    dpp_500k_results_paths = []
+    vo_dpp_500k_results_paths = []
+    for sim_dir in dpp_500k_sim_dirs:
+        sim_name = os.path.basename(sim_dir)
+        dpp_500k_results_paths.append(
+                (sim_name, sorted(glob.glob(os.path.join(
+                        sim_dir,
+                        "batch*",
+                        "results.csv.gz")))
+                )
+        )
+        vo_dpp_500k_results_paths.append(
+                (sim_name, sorted(glob.glob(os.path.join(
+                        sim_dir,
+                        "batch*",
+                        "var-only-results.csv.gz")))
+                )
+        )
+
+    dpp_100k_sim_dirs = []
+    dpp_100k_sim_dirs.extend(sorted(glob.glob(os.path.join(
+            validatition_sim_dir,
+            "03pairs-dpp-root-0100-100k*"))))
+    dpp_100k_results_paths = []
+    vo_dpp_100k_results_paths = []
+    for sim_dir in dpp_100k_sim_dirs:
+        sim_name = os.path.basename(sim_dir)
+        dpp_100k_results_paths.append(
+                (sim_name, sorted(glob.glob(os.path.join(
+                        sim_dir,
+                        "batch*",
+                        "results.csv.gz")))
+                )
+        )
+        vo_dpp_100k_results_paths.append(
+                (sim_name, sorted(glob.glob(os.path.join(
+                        sim_dir,
+                        "batch*",
+                        "var-only-results.csv.gz")))
+                )
+        )
+        
+    if not include_variable_only:
+        results_batches = {
+                "500k":                 dpp_500k_results_paths,
+                "100k":                 dpp_100k_results_paths,
+                }
+        row_keys = [
+                "500k",
+                "100k",
+                ]
+        return row_keys, results_batches
+
+    results_batches = {
+            "500k":                 dpp_500k_results_paths,
+            "500k variable only":   vo_dpp_500k_results_paths,
+            "100k":                 dpp_100k_results_paths,
+            "100k variable only":   vo_dpp_100k_results_paths,
+            }
+    row_keys = [
+            "500k",
+            "500k variable only",
+            "100k",
+            "100k variable only",
+            ]
+    return row_keys, results_batches
+
 def ci_width_iter(results, parameter_str):
     n = len(results["eti_95_upper_{0}".format(parameter_str)])
     for i in range(n):
@@ -189,7 +263,7 @@ def plot_ess_versus_error(
         include_all_sizes_fixed = True,
         include_root_size_fixed = False):
     _LOG.info("Generating ESS vs CI scatter plots for {0}...".format(parameter_label))
-    root_alpha_pattern = re.compile(r'root-(?P<alpha_setting>\S+)-\d00k$')
+    root_alpha_pattern = re.compile(r'root-(?P<alpha_setting>\S+)-\d00k')
 
     assert(len(parameters) == len(set(parameters)))
     if not plot_file_prefix:
@@ -486,9 +560,11 @@ def generate_scatter_plots(
         parameter_symbol = "\\tau",
         plot_file_prefix = None,
         include_all_sizes_fixed = True,
-        include_root_size_fixed = False):
+        include_root_size_fixed = False,
+        linked_loci = False):
     _LOG.info("Generating scatter plots for {0}...".format(parameter_label))
-    root_alpha_pattern = re.compile(r'root-(?P<alpha_setting>\S+)-\d00k$')
+    root_alpha_pattern = re.compile(r'root-(?P<alpha_setting>\S+)-\d00k')
+    locus_size_pattern = re.compile(r'root-\d+-\d00k-(?P<locus_size>\d+)l')
 
     assert(len(parameters) == len(set(parameters)))
     if not plot_file_prefix:
@@ -498,6 +574,10 @@ def generate_scatter_plots(
             include_all_sizes_fixed = include_all_sizes_fixed,
             include_root_size_fixed = include_root_size_fixed,
             include_variable_only = True)
+    if linked_loci:
+        row_keys, results_batches = get_linked_loci_results_paths(
+                project_util.VAL_DIR,
+                include_variable_only = True)
 
     # Very inefficient, but parsing all results to get min/max for parameter
     parameter_min = float('inf')
@@ -619,15 +699,23 @@ def generate_scatter_plots(
                     size = 6.0,
                     zorder = 200)
             if row_idx == 0:
-                if root_alpha_setting == "fixed-all":
-                    pop_sizes = results["mean_pop_size_c1sp1"]
-                    assert(len(set(pop_sizes)) == 1)
-                    col_header = "$\\textrm{{\\sffamily All sizes}} = {0}$".format(pop_sizes[0])
-                elif root_alpha_setting == "fixed":
-                    col_header = "$\\textrm{{\\sffamily Root size}} = 1.0$"
+                if linked_loci:
+                    locus_size = 1
+                    locus_size_matches = locus_size_pattern.findall(sim_dir)
+                    if locus_size_matches:
+                        assert len(locus_size_matches) == 1
+                        locus_size = int(locus_size_matches[0])
+                    col_header = "$\\textrm{{\\sffamily Locus length}} = {0}$".format(locus_size)
                 else:
-                    root_shape, root_scale = get_root_gamma_parameters(root_alpha_setting)
-                    col_header = "$\\textrm{{\\sffamily Gamma}}({0}, {1})$".format(int(root_shape), root_scale)
+                    if root_alpha_setting == "fixed-all":
+                        pop_sizes = results["mean_pop_size_c1sp1"]
+                        assert(len(set(pop_sizes)) == 1)
+                        col_header = "$\\textrm{{\\sffamily All sizes}} = {0}$".format(pop_sizes[0])
+                    elif root_alpha_setting == "fixed":
+                        col_header = "$\\textrm{{\\sffamily Root size}} = 1.0$"
+                    else:
+                        root_shape, root_scale = get_root_gamma_parameters(root_alpha_setting)
+                        col_header = "$\\textrm{{\\sffamily Gamma}}({0}, {1})$".format(int(root_shape), root_scale)
                 ax.text(0.5, 1.0,
                         col_header,
                         horizontalalignment = "center",
@@ -718,19 +806,26 @@ def generate_histograms(
         plot_file_prefix = None,
         parameter_discrete = True,
         range_key = "range",
+        number_of_digits = 0,
         include_all_sizes_fixed = True,
         include_root_size_fixed = False,
-        include_variable_only = True):
+        include_variable_only = True,
+        linked_loci = False):
     _LOG.info("Generating histograms for {0}...".format(parameter_label))
     assert(len(parameters) == len(set(parameters)))
     if not plot_file_prefix:
         plot_file_prefix = parameters[0] 
-    root_alpha_pattern = re.compile(r'root-(?P<alpha_setting>\S+)-\d00k$')
+    root_alpha_pattern = re.compile(r'root-(?P<alpha_setting>\S+)-\d00k')
+    locus_size_pattern = re.compile(r'root-\d+-\d00k-(?P<locus_size>\d+)l')
 
     row_keys, results_batches = get_results_paths(project_util.VAL_DIR,
             include_all_sizes_fixed = include_all_sizes_fixed,
             include_root_size_fixed = include_root_size_fixed,
             include_variable_only = include_variable_only)
+    if linked_loci:
+        row_keys, results_batches = get_linked_loci_results_paths(
+                project_util.VAL_DIR,
+                include_variable_only = include_variable_only)
 
     # Very inefficient, but parsing all results to get min/max for parameter
     parameter_min = float('inf')
@@ -817,25 +912,37 @@ def generate_histograms(
             if hist_bins is None:
                 hist_bins = bins
             ax.text(1.0, 1.0,
-                    "\\scriptsize {0:,} ({1:,}--{2:,})".format(
-                            int(round(summary["mean"])),
-                            int(round(summary[range_key][0])),
-                            int(round(summary[range_key][1]))),
+                    "\\scriptsize {mean:,.{ndigits}f} ({lower:,.{ndigits}f}--{upper:,.{ndigits}f})".format(
+                            # int(round(summary["mean"])),
+                            # int(round(summary[range_key][0])),
+                            # int(round(summary[range_key][1]))),
+                            mean = summary["mean"],
+                            lower = summary[range_key][0],
+                            upper = summary[range_key][1],
+                            ndigits = number_of_digits),
                     horizontalalignment = "right",
                     verticalalignment = "top",
                     transform = ax.transAxes,
                     zorder = 200)
 
             if row_idx == 0:
-                if root_alpha_setting == "fixed-all":
-                    pop_sizes = results["mean_pop_size_c1sp1"]
-                    assert(len(set(pop_sizes)) == 1)
-                    col_header = "$\\textrm{{\\sffamily All sizes}} = {0}$".format(pop_sizes[0])
-                elif root_alpha_setting == "fixed":
-                    col_header = "$\\textrm{{\\sffamily Root size}} = 1.0$"
+                if linked_loci:
+                    locus_size = 1
+                    locus_size_matches = locus_size_pattern.findall(sim_dir)
+                    if locus_size_matches:
+                        assert len(locus_size_matches) == 1
+                        locus_size = int(locus_size_matches[0])
+                    col_header = "$\\textrm{{\\sffamily Locus length}} = {0}$".format(locus_size)
                 else:
-                    root_shape, root_scale = get_root_gamma_parameters(root_alpha_setting)
-                    col_header = "$\\textrm{{\\sffamily Gamma}}({0}, {1})$".format(int(root_shape), root_scale)
+                    if root_alpha_setting == "fixed-all":
+                        pop_sizes = results["mean_pop_size_c1sp1"]
+                        assert(len(set(pop_sizes)) == 1)
+                        col_header = "$\\textrm{{\\sffamily All sizes}} = {0}$".format(pop_sizes[0])
+                    elif root_alpha_setting == "fixed":
+                        col_header = "$\\textrm{{\\sffamily Root size}} = 1.0$"
+                    else:
+                        root_shape, root_scale = get_root_gamma_parameters(root_alpha_setting)
+                        col_header = "$\\textrm{{\\sffamily Gamma}}({0}, {1})$".format(int(root_shape), root_scale)
                 ax.text(0.5, 1.0,
                         col_header,
                         horizontalalignment = "center",
@@ -918,9 +1025,11 @@ def generate_histograms(
 def generate_model_plots(
         number_of_comparisons = 3,
         include_all_sizes_fixed = True,
-        include_root_size_fixed = False):
+        include_root_size_fixed = False,
+        linked_loci = False):
     _LOG.info("Generating model plots...")
-    root_alpha_pattern = re.compile(r'root-(?P<alpha_setting>\S+)-\d00k$')
+    root_alpha_pattern = re.compile(r'root-(?P<alpha_setting>\S+)-\d00k')
+    locus_size_pattern = re.compile(r'root-\d+-\d00k-(?P<locus_size>\d+)l')
     dpp_pattern = re.compile(r'-dpp-')
     rj_pattern = re.compile(r'-rj-')
     var_only_pattern = re.compile(r'var-only-')
@@ -932,6 +1041,10 @@ def generate_model_plots(
             include_all_sizes_fixed = include_all_sizes_fixed,
             include_root_size_fixed = include_root_size_fixed,
             include_variable_only = True)
+    if linked_loci:
+        row_keys, results_batches = get_linked_loci_results_paths(
+                project_util.VAL_DIR,
+                include_variable_only = True)
 
     plt.close('all')
     fig = plt.figure(figsize = (9, 6.5))
@@ -1010,15 +1123,23 @@ def generate_model_plots(
                     verticalalignment = "top",
                     transform = ax.transAxes)
             if row_idx == 0:
-                if root_alpha_setting == "fixed-all":
-                    pop_sizes = results["mean_pop_size_c1sp1"]
-                    assert(len(set(pop_sizes)) == 1)
-                    col_header = "$\\textrm{{\\sffamily All sizes}} = {0}$".format(pop_sizes[0])
-                elif root_alpha_setting == "fixed":
-                    col_header = "$\\textrm{{\\sffamily Root size}} = 1.0$"
+                if linked_loci:
+                    locus_size = 1
+                    locus_size_matches = locus_size_pattern.findall(sim_dir)
+                    if locus_size_matches:
+                        assert len(locus_size_matches) == 1
+                        locus_size = int(locus_size_matches[0])
+                    col_header = "$\\textrm{{\\sffamily Locus length}} = {0}$".format(locus_size)
                 else:
-                    root_shape, root_scale = get_root_gamma_parameters(root_alpha_setting)
-                    col_header = "$\\textrm{{\\sffamily Gamma}}({0}, {1})$".format(int(root_shape), root_scale)
+                    if root_alpha_setting == "fixed-all":
+                        pop_sizes = results["mean_pop_size_c1sp1"]
+                        assert(len(set(pop_sizes)) == 1)
+                        col_header = "$\\textrm{{\\sffamily All sizes}} = {0}$".format(pop_sizes[0])
+                    elif root_alpha_setting == "fixed":
+                        col_header = "$\\textrm{{\\sffamily Root size}} = 1.0$"
+                    else:
+                        root_shape, root_scale = get_root_gamma_parameters(root_alpha_setting)
+                        col_header = "$\\textrm{{\\sffamily Gamma}}({0}, {1})$".format(int(root_shape), root_scale)
                 ax.text(0.5, 1.0,
                         col_header,
                         horizontalalignment = "center",
@@ -1091,8 +1212,12 @@ def generate_model_plots(
     plot_dir = os.path.join(project_util.VAL_DIR, "plots")
     if not os.path.exists(plot_dir):
         os.mkdir(plot_dir)
-    plot_path = os.path.join(plot_dir,
-            "nevents.pdf")
+    if linked_loci:
+        plot_path = os.path.join(plot_dir,
+                "linkage-nevents.pdf")
+    else:
+        plot_path = os.path.join(plot_dir,
+                "nevents.pdf")
     plt.savefig(plot_path)
     _LOG.info("Plots written to {0!r}\n".format(plot_path))
 
@@ -1111,6 +1236,18 @@ def main_cli(argv = sys.argv):
             include_root_size_fixed = False)
     generate_scatter_plots(
             parameters = [
+                    "root_height_c1sp1",
+                    "root_height_c2sp1",
+                    "root_height_c3sp1",
+                    ],
+            parameter_label = "divergence time",
+            parameter_symbol = "\\tau",
+            plot_file_prefix = "linkage-div-time",
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            linked_loci = True)
+    generate_scatter_plots(
+            parameters = [
                     "pop_size_root_c1sp1",
                     "pop_size_root_c2sp1",
                     "pop_size_root_c3sp1",
@@ -1122,6 +1259,18 @@ def main_cli(argv = sys.argv):
             include_root_size_fixed = False)
     generate_scatter_plots(
             parameters = [
+                    "pop_size_root_c1sp1",
+                    "pop_size_root_c2sp1",
+                    "pop_size_root_c3sp1",
+                    ],
+            parameter_label = "root population size",
+            parameter_symbol = "N_e\\mu",
+            plot_file_prefix = "linkage-root-pop-size",
+            include_all_sizes_fixed = False,
+            include_root_size_fixed = False,
+            linked_loci = True)
+    generate_scatter_plots(
+            parameters = [
                     "pop_size_c1sp1",
                     "pop_size_c2sp1",
                     "pop_size_c3sp1",
@@ -1131,10 +1280,27 @@ def main_cli(argv = sys.argv):
             plot_file_prefix = "leaf-pop-size",
             include_all_sizes_fixed = False,
             include_root_size_fixed = False)
+    generate_scatter_plots(
+            parameters = [
+                    "pop_size_c1sp1",
+                    "pop_size_c2sp1",
+                    "pop_size_c3sp1",
+                    ],
+            parameter_label = "leaf population size",
+            parameter_symbol = "N_e\\mu",
+            plot_file_prefix = "linkage-leaf-pop-size",
+            include_all_sizes_fixed = False,
+            include_root_size_fixed = False,
+            linked_loci = True)
     generate_model_plots(
             number_of_comparisons = 3,
             include_all_sizes_fixed = True,
             include_root_size_fixed = False)
+    generate_model_plots(
+            number_of_comparisons = 3,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            linked_loci = True)
     generate_histograms(
             parameters = [
                     "n_var_sites_c1",
@@ -1145,9 +1311,25 @@ def main_cli(argv = sys.argv):
             plot_file_prefix = "number-of-variable-sites",
             parameter_discrete = True,
             range_key = "range",
+            number_of_digits = 0,
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
             include_variable_only = False)
+    generate_histograms(
+            parameters = [
+                    "n_var_sites_c1",
+                    "n_var_sites_c2",
+                    "n_var_sites_c3",
+                    ],
+            parameter_label = "Number of variable sites",
+            plot_file_prefix = "linkage-number-of-variable-sites",
+            parameter_discrete = True,
+            range_key = "range",
+            number_of_digits = 0,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            include_variable_only = False,
+            linked_loci = True)
     generate_histograms(
             parameters = [
                     "ess_sum_ln_likelihood",
@@ -1156,9 +1338,23 @@ def main_cli(argv = sys.argv):
             plot_file_prefix = "ess-ln-likelihood",
             parameter_discrete = False,
             range_key = "range",
+            number_of_digits = 0,
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
             include_variable_only = True)
+    generate_histograms(
+            parameters = [
+                    "ess_sum_ln_likelihood",
+                    ],
+            parameter_label = "Effective samples size of log likelihood",
+            plot_file_prefix = "linkage-ess-ln-likelihood",
+            parameter_discrete = False,
+            range_key = "range",
+            number_of_digits = 0,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            include_variable_only = True,
+            linked_loci = True)
     generate_histograms(
             parameters = [
                     "ess_sum_root_height_c1sp1",
@@ -1169,9 +1365,25 @@ def main_cli(argv = sys.argv):
             plot_file_prefix = "ess-div-time",
             parameter_discrete = False,
             range_key = "range",
+            number_of_digits = 0,
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
             include_variable_only = True)
+    generate_histograms(
+            parameters = [
+                    "ess_sum_root_height_c1sp1",
+                    "ess_sum_root_height_c2sp1",
+                    "ess_sum_root_height_c3sp1",
+                    ],
+            parameter_label = "Effective samples size of divergence time",
+            plot_file_prefix = "linkage-ess-div-time",
+            parameter_discrete = False,
+            range_key = "range",
+            number_of_digits = 0,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            include_variable_only = True,
+            linked_loci = True)
     generate_histograms(
             parameters = [
                     "ess_sum_pop_size_root_c1sp1",
@@ -1182,9 +1394,79 @@ def main_cli(argv = sys.argv):
             plot_file_prefix = "ess-root-pop-size",
             parameter_discrete = False,
             range_key = "range",
+            number_of_digits = 0,
             include_all_sizes_fixed = False,
             include_root_size_fixed = False,
             include_variable_only = True)
+    generate_histograms(
+            parameters = [
+                    "ess_sum_pop_size_root_c1sp1",
+                    "ess_sum_pop_size_root_c2sp1",
+                    "ess_sum_pop_size_root_c3sp1",
+                    ],
+            parameter_label = "Effective samples size of root population size",
+            plot_file_prefix = "linkage-ess-root-pop-size",
+            parameter_discrete = False,
+            range_key = "range",
+            number_of_digits = 0,
+            include_all_sizes_fixed = False,
+            include_root_size_fixed = False,
+            include_variable_only = True,
+            linked_loci = True)
+    generate_histograms(
+            parameters = [
+                    "psrf_ln_likelihood",
+                    ],
+            parameter_label = "PSRF of log likelihood",
+            plot_file_prefix = "psrf-ln-likelihood",
+            parameter_discrete = False,
+            range_key = "range",
+            number_of_digits = 3,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            include_variable_only = True)
+    generate_histograms(
+            parameters = [
+                    "psrf_ln_likelihood",
+                    ],
+            parameter_label = "PSRF of log likelihood",
+            plot_file_prefix = "linkage-psrf-ln-likelihood",
+            parameter_discrete = False,
+            range_key = "range",
+            number_of_digits = 3,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            include_variable_only = True,
+            linked_loci = True)
+    generate_histograms(
+            parameters = [
+                    "psrf_root_height_c1sp1",
+                    "psrf_root_height_c2sp1",
+                    "psrf_root_height_c3sp1",
+                    ],
+            parameter_label = "PSRF of divergence time",
+            plot_file_prefix = "psrf-div-time",
+            parameter_discrete = False,
+            range_key = "range",
+            number_of_digits = 3,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            include_variable_only = True)
+    generate_histograms(
+            parameters = [
+                    "psrf_root_height_c1sp1",
+                    "psrf_root_height_c2sp1",
+                    "psrf_root_height_c3sp1",
+                    ],
+            parameter_label = "PSRF of divergence time",
+            plot_file_prefix = "linkage-psrf-div-time",
+            parameter_discrete = False,
+            range_key = "range",
+            number_of_digits = 3,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            include_variable_only = True,
+            linked_loci = True)
     plot_ess_versus_error(
             parameters = [
                     "root_height_c1sp1",
