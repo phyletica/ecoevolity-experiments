@@ -11,12 +11,10 @@ then
     cd $PBS_O_WORKDIR
 fi
 
-staging_dir=$(mktemp -d /tmp/output.XXXXXXXXX)
-
-reps=200
-nprocs=20
-nprior=1000000
-batch_size=5000
+reps=500
+nprocs=8
+nprior=500000
+batch_size=12500
 nsums=100000
 npost=2000
 nquantiles=1000
@@ -32,7 +30,7 @@ fi
 dmc.py --np $nprocs \
     -r $reps \
     -o ../configs/dpp-msbayes.cfg \
-    -p ../priors/pymsbayes-results/pymsbayes-output/prior-stats-summaries \
+    -p ../prior/pymsbayes-results/pymsbayes-output/prior-stats-summaries \
     -n $nprior \
     --prior-batch-size $batch_size \
     --num-posterior-samples $npost \
@@ -40,16 +38,7 @@ dmc.py --np $nprocs \
     -q $nquantiles \
     --sort-index $sortindex \
     --output-dir $output_dir \
-    --temp-dir $staging_dir \
-    --staging-dir $staging_dir \
     --seed $seed \
     --no-global-estimate \
     --compress \
     1>run-reject-dpp-msbayes.sh.out 2>&1
-
-echo "Here are the contents of the local temp directory '${staging_dir}':"
-ls -Fla $staging_dir
-echo 'Removing the local temp directory...'
-rm -r $staging_dir
-echo 'Done!'
-
