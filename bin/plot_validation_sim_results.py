@@ -47,6 +47,261 @@ mpl.rcParams.update(tex_font_settings)
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 
+def get_nevents_probs(
+        nevents = 1,
+        sim_dir = "03pairs-dpp-root-0100-100k",
+        variable_only = False):
+    results_file_name = "results.csv.gz"
+    if variable_only:
+        results_file_name = "var-only-results.csv.gz"
+    results_paths = sorted(glob.glob(
+            os.path.join(project_util.VAL_DIR,
+                    sim_dir,
+                    "batch*",
+                    results_file_name)))
+    
+    probs = []
+    prob_key = "num_events_{0}_p".format(nevents)
+    for d in sumcoevolity.parsing.spreadsheet_iter(results_paths):
+        probs.append((
+                float(d[prob_key]),
+                int(int(d["true_num_events"]) == nevents)
+                ))
+    return probs
+
+def bin_prob_correct_tuples(probability_correct_tuples, nbins = 20):
+    bin_upper_limits = list(get_sequence_iter(0.0, 1.0, nbins+1))[1:]
+    bin_width = (bin_upper_limits[1] - bin_upper_limits[0]) / 2.0
+    bins = [[] for i in range(nbins)]
+    n = 0
+    for (p, t) in probability_correct_tuples:
+        n += 1
+        binned = False
+        for i, l in enumerate(bin_upper_limits):
+            if p < l:
+                bins[i].append((p, t))
+                binned = True
+                break
+        if not binned:
+            bins[i].append((p, t))
+    total = 0
+    for b in bins:
+        total += len(b)
+    assert total == n
+    assert len(bins) == nbins
+    est_true_tups = []
+    for i, b in enumerate(bins):
+        #######################################
+        # est = bin_upper_limits[i] - bin_width
+        ests = [p for (p, t) in b]
+        est = sum(ests) / float(len(ests))
+        #######################################
+        correct = [t for (p, t) in b]
+        true = sum(correct) / float(len(correct))
+        est_true_tups.append((est, true))
+    return bins, est_true_tups
+
+def get_nevents_estimated_true_probs(
+        nevents = 1,
+        sim_dir = "03pairs-dpp-root-0100-100k",
+        variable_only = False,
+        nbins = 20):
+    if variable_only:
+        _LOG.info("Parsing num_events results for {0} (variable only)".format(sim_dir))
+    else:
+        _LOG.info("Parsing num_events results for {0} (all sites)".format(sim_dir))
+    nevent_probs = get_nevents_probs(
+            nevents = nevents,
+            sim_dir = sim_dir,
+            variable_only = variable_only)
+    _LOG.info("\tparsed results for {0} simulations".format(len(nevent_probs)))
+    bins, tups = bin_prob_correct_tuples(nevent_probs, nbins = nbins)
+    _LOG.info("\tbin sample sizes: {0}".format(
+            ", ".join(str(len(b)) for b in bins)
+            ))
+    return bins, tups
+
+def plot_nevents_estimated_vs_true_probs(
+        nevents = 1,
+        sim_dir = "03pairs-dpp-root-0100-100k",
+        nbins = 20,
+        plot_file_prefix = ""):
+    bins, est_true_probs = get_nevents_estimated_true_probs(
+            nevents = nevents,
+            sim_dir = sim_dir,
+            variable_only = False,
+            nbins = nbins)
+    vo_bins, vo_est_true_probs = get_nevents_estimated_true_probs(
+            nevents = nevents,
+            sim_dir = sim_dir,
+            variable_only = True,
+            nbins = nbins)
+
+    plt.close('all')
+    fig = plt.figure(figsize = (5.2, 2.5))
+    nrows = 1
+    ncols = 2
+    gs = gridspec.GridSpec(nrows, ncols,
+            wspace = 0.0,
+            hspace = 0.0)
+
+    ax = plt.subplot(gs[0, 0])
+    x = [e for (e, t) in est_true_probs]
+    y = [t for (e, t) in est_true_probs]
+    sample_sizes = [len(b) for b in bins]
+    line, = ax.plot(x, y)
+    plt.setp(line,
+            marker = 'o',
+            markerfacecolor = 'none',
+            markeredgecolor = '0.35',
+            markeredgewidth = 0.7,
+            markersize = 3.5,
+            linestyle = '',
+            zorder = 100,
+            rasterized = False)
+    ax.set_xlim(0.0, 1.0)
+    ax.set_ylim(0.0, 1.0)
+    for i, (label, lx, ly) in enumerate(zip(sample_sizes, x, y)):
+        if i == 0:
+            ax.annotate(
+                    str(label),
+                    xy = (lx, ly),
+                    xytext = (1, 1),
+                    textcoords = "offset points",
+                    horizontalalignment = "left",
+                    verticalalignment = "bottom")
+        elif i == len(x) - 1:
+            ax.annotate(
+                    str(label),
+                    xy = (lx, ly),
+                    xytext = (-1, -1),
+                    textcoords = "offset points",
+                    horizontalalignment = "right",
+                    verticalalignment = "top")
+        else:
+            ax.annotate(
+                    str(label),
+                    xy = (lx, ly),
+                    xytext = (-1, 1),
+                    textcoords = "offset points",
+                    horizontalalignment = "right",
+                    verticalalignment = "bottom")
+    title_text = ax.set_title("All sites")
+    ylabel_text = ax.set_ylabel("True probability", size = 14.0)
+    ax.text(1.0, -0.14,
+            "Posterior probability of one divergence",
+            horizontalalignment = "center",
+            verticalalignment = "top",
+            size = 14.0)
+    identity_line, = ax.plot(
+            [0.0, 1.0],
+            [0.0, 1.0])
+    plt.setp(identity_line,
+            color = '0.8',
+            linestyle = '-',
+            linewidth = 1.0,
+            marker = '',
+            zorder = 0)
+
+    ax = plt.subplot(gs[0, 1])
+    x = [e for (e, t) in vo_est_true_probs]
+    y = [t for (e, t) in vo_est_true_probs]
+    sample_sizes = [len(b) for b in vo_bins]
+    line, = ax.plot(x, y)
+    plt.setp(line,
+            marker = 'o',
+            markerfacecolor = 'none',
+            markeredgecolor = '0.35',
+            markeredgewidth = 0.7,
+            markersize = 3.5,
+            linestyle = '',
+            zorder = 100,
+            rasterized = False)
+    ax.set_xlim(0.0, 1.0)
+    ax.set_ylim(0.0, 1.0)
+    for i, (label, lx, ly) in enumerate(zip(sample_sizes, x, y)):
+        if i == 0:
+            ax.annotate(
+                    str(label),
+                    xy = (lx, ly),
+                    xytext = (1, 1),
+                    textcoords = "offset points",
+                    horizontalalignment = "left",
+                    verticalalignment = "bottom")
+        elif i == len(x) - 1:
+            ax.annotate(
+                    str(label),
+                    xy = (lx, ly),
+                    xytext = (-1, -1),
+                    textcoords = "offset points",
+                    horizontalalignment = "right",
+                    verticalalignment = "top")
+        else:
+            ax.annotate(
+                    str(label),
+                    xy = (lx, ly),
+                    xytext = (-1, 1),
+                    textcoords = "offset points",
+                    horizontalalignment = "right",
+                    verticalalignment = "bottom")
+    vo_title_text = ax.set_title("Variable only")
+    identity_line, = ax.plot(
+            [0.0, 1.0],
+            [0.0, 1.0])
+    plt.setp(identity_line,
+            color = '0.8',
+            linestyle = '-',
+            linewidth = 1.0,
+            marker = '',
+            zorder = 0)
+
+    # show only the outside ticks
+    all_axes = fig.get_axes()
+    for ax in all_axes:
+        if not ax.is_last_row():
+            ax.set_xticks([])
+        if not ax.is_first_col():
+            ax.set_yticks([])
+
+    # show tick labels only for lower-left plot 
+    all_axes = fig.get_axes()
+    for ax in all_axes:
+        if ax.is_last_row() and ax.is_first_col():
+            continue
+        xtick_labels = ["" for item in ax.get_xticklabels()]
+        ytick_labels = ["" for item in ax.get_yticklabels()]
+        ax.set_xticklabels(xtick_labels)
+        ax.set_yticklabels(ytick_labels)
+
+    # avoid doubled spines
+    all_axes = fig.get_axes()
+    for ax in all_axes:
+        for sp in ax.spines.values():
+            sp.set_visible(False)
+        if ax.is_first_row():
+            ax.spines['top'].set_visible(True)
+            ax.spines['bottom'].set_visible(True)
+        else:
+            ax.spines['bottom'].set_visible(True)
+        if ax.is_first_col():
+            ax.spines['left'].set_visible(True)
+            ax.spines['right'].set_visible(True)
+        else:
+            ax.spines['right'].set_visible(True)
+
+
+    gs.update(left = 0.10, right = 0.995, bottom = 0.18, top = 0.91)
+
+    plot_dir = os.path.join(project_util.VAL_DIR, "plots")
+    if not os.path.exists(plot_dir):
+        os.mkdir(plot_dir)
+    plot_file_name = "est-vs-true-prob-nevent-1.pdf"
+    if plot_file_prefix:
+        plot_file_name = plot_file_prefix + "-" + plot_file_name
+    plot_path = os.path.join(plot_dir,
+            plot_file_name)
+    plt.savefig(plot_path)
+    _LOG.info("Plots written to {0!r}\n".format(plot_path))
 
 def get_sequence_iter(start = 0.0, stop = 1.0, n = 10):
     assert(stop > start)
@@ -99,14 +354,14 @@ def get_results_paths(
         dpp_500k_results_paths.append(
                 (sim_name, sorted(glob.glob(os.path.join(
                         sim_dir,
-                        "batch*",
+                        "batch00[12345]",
                         "results.csv.gz")))
                 )
         )
         vo_dpp_500k_results_paths.append(
                 (sim_name, sorted(glob.glob(os.path.join(
                         sim_dir,
-                        "batch*",
+                        "batch00[12345]",
                         "var-only-results.csv.gz")))
                 )
         )
@@ -130,14 +385,14 @@ def get_results_paths(
         dpp_100k_results_paths.append(
                 (sim_name, sorted(glob.glob(os.path.join(
                         sim_dir,
-                        "batch*",
+                        "batch00[12345]",
                         "results.csv.gz")))
                 )
         )
         vo_dpp_100k_results_paths.append(
                 (sim_name, sorted(glob.glob(os.path.join(
                         sim_dir,
-                        "batch*",
+                        "batch00[12345]",
                         "var-only-results.csv.gz")))
                 )
         )
@@ -181,14 +436,14 @@ def get_linked_loci_results_paths(
         dpp_500k_results_paths.append(
                 (sim_name, sorted(glob.glob(os.path.join(
                         sim_dir,
-                        "batch*",
+                        "batch00[12345]",
                         "results.csv.gz")))
                 )
         )
         vo_dpp_500k_results_paths.append(
                 (sim_name, sorted(glob.glob(os.path.join(
                         sim_dir,
-                        "batch*",
+                        "batch00[12345]",
                         "var-only-results.csv.gz")))
                 )
         )
@@ -204,14 +459,14 @@ def get_linked_loci_results_paths(
         dpp_100k_results_paths.append(
                 (sim_name, sorted(glob.glob(os.path.join(
                         sim_dir,
-                        "batch*",
+                        "batch00[12345]",
                         "results.csv.gz")))
                 )
         )
         vo_dpp_100k_results_paths.append(
                 (sim_name, sorted(glob.glob(os.path.join(
                         sim_dir,
-                        "batch*",
+                        "batch00[12345]",
                         "var-only-results.csv.gz")))
                 )
         )
@@ -1070,8 +1325,10 @@ def generate_model_plots(
                     row_idx, col_idx, sim_dir, len(results_paths)))
 
             true_map_nevents = []
+            true_map_nevents_probs = []
             for i in range(number_of_comparisons):
                 true_map_nevents.append([0 for i in range(number_of_comparisons)])
+                true_map_nevents_probs.append([[] for i in range(number_of_comparisons)])
             true_nevents = tuple(int(x) for x in results["true_num_events"])
             map_nevents = tuple(int(x) for x in results["map_num_events"])
             true_nevents_cred_levels = tuple(float(x) for x in results["true_num_events_cred_level"])
@@ -1079,12 +1336,26 @@ def generate_model_plots(
             assert(len(true_nevents) == len(map_nevents))
             assert(len(true_nevents) == len(true_nevents_cred_levels))
             assert(len(true_nevents) == len(true_model_cred_levels))
+
+            true_nevents_probs = []
+            map_nevents_probs = []
+            for i in range(len(true_nevents)):
+                true_nevents_probs.append(float(
+                    results["num_events_{0}_p".format(true_nevents[i])][i]))
+                map_nevents_probs.append(float(
+                    results["num_events_{0}_p".format(map_nevents[i])][i]))
+            assert(len(true_nevents) == len(true_nevents_probs))
+            assert(len(true_nevents) == len(map_nevents_probs))
+
+            mean_true_nevents_prob = sum(true_nevents_probs) / len(true_nevents_probs)
+            median_true_nevents_prob = sumcoevolity.stats.median(true_nevents_probs)
+
             nevents_within_95_cred = 0
             model_within_95_cred = 0
             ncorrect = 0
             for i in range(len(true_nevents)):
-                # true_map_nevents[true_nevents[i] - 1][map_nevents[i] - 1] += 1
                 true_map_nevents[map_nevents[i] - 1][true_nevents[i] - 1] += 1
+                true_map_nevents_probs[map_nevents[i] - 1][true_nevents[i] - 1].append(map_nevents_probs[i])
                 if true_nevents_cred_levels[i] <= 0.95:
                     nevents_within_95_cred += 1
                 if true_model_cred_levels[i] <= 0.95:
@@ -1102,24 +1373,43 @@ def generate_model_plots(
             ax.imshow(true_map_nevents,
                     origin = 'lower',
                     cmap = cmap,
-                    aspect = 'auto',
+                    interpolation = 'none',
+                    aspect = 'auto'
+                    # extent = [0.5, 3.5, 0.5, 3.5]
                     )
             for i, row_list in enumerate(true_map_nevents):
                 for j, num_events in enumerate(row_list):
+                    # if num_events > 0:
+                    #     n_probs = true_map_nevents_probs[i][j]
+                    #     assert len(n_probs) == num_events
+                    #     mean_p = sum(n_probs) / len(n_probs)
+                    #     median_p = sumcoevolity.stats.median(n_probs)
+                    #     ax.text(j, i,
+                    #             "{0:d}\n{1:.3f}".format(num_events, median_p),
+                    #             horizontalalignment = "center",
+                    #             verticalalignment = "center",
+                    #             size = 8.0)
+                    # else:
                     ax.text(j, i,
                             str(num_events),
                             horizontalalignment = "center",
                             verticalalignment = "center")
             ax.text(0.99, 0.01,
-                    "\\scriptsize$p(n \\in 95\\% \\textrm{{\\sffamily CS}}) = {0:.3f}$".format(
+                    "\\scriptsize$p(k \\in 95\\% \\textrm{{\\sffamily CS}}) = {0:.3f}$".format(
                             p_nevents_within_95_cred),
                     horizontalalignment = "right",
                     verticalalignment = "bottom",
                     transform = ax.transAxes)
             ax.text(0.01, 0.99,
-                    "\\scriptsize$p(\\bar{{n}} = n) = {0:.3f}$".format(
+                    "\\scriptsize$p(\\hat{{k}} = k) = {0:.3f}$".format(
                             p_correct),
                     horizontalalignment = "left",
+                    verticalalignment = "top",
+                    transform = ax.transAxes)
+            ax.text(0.99, 0.99,
+                    "\\scriptsize$\\widetilde{{p(k)}} = {0:.3f}$".format(
+                            median_true_nevents_prob),
+                    horizontalalignment = "right",
                     verticalalignment = "top",
                     transform = ax.transAxes)
             if row_idx == 0:
@@ -1196,12 +1486,12 @@ def generate_model_plots(
             ax.spines['right'].set_visible(True)
 
     fig.text(0.5, 0.001,
-            "True number of events",
+            "True number of events ($k$)",
             horizontalalignment = "center",
             verticalalignment = "bottom",
             size = 18.0)
     fig.text(0.005, 0.5,
-            "Estimated number of events",
+            "Estimated number of events ($\\hat{{k}}$)",
             horizontalalignment = "left",
             verticalalignment = "center",
             rotation = "vertical",
@@ -1222,261 +1512,796 @@ def generate_model_plots(
     _LOG.info("Plots written to {0!r}\n".format(plot_path))
 
 
+def get_msbayes_results(
+        true_path,
+        sim_dir,
+        number_of_pairs = 3,
+        number_of_sims = 500,
+        posterior_sample_size = 2000,
+        prior_sample_size = 600000):
+    results = {
+            'divergence time': {'true': [], 'mean': [], 'lower': [], 'upper': []},
+            'root population size': {'true': [], 'mean': [], 'lower': [], 'upper': []},
+            'leaf population size': {'true': [], 'mean': [], 'lower': [], 'upper': []},
+            'nevents': {'true': [], 'map': [], 'cred_level': [], 'true_prob': [], 'map_prob': []},
+            }
+    column_header_prefixes = {
+            'divergence time': ("PRI.t.",),
+            'root population size': ("PRI.aTheta.",),
+            'leaf population size': ("PRI.d1Theta.", "PRI.d2Theta."),
+            }
+    true_values = sumcoevolity.parsing.get_dict_from_spreadsheets(
+            [true_path],
+            sep = '\t')
+    nsims = len(true_values.values()[0])
+    assert (nsims == number_of_sims)
+    for sim_idx in range(nsims):
+        posterior_path = os.path.join(sim_dir,
+                "d1-m1-s{sim_num}-{prior_sample_size}-posterior-sample.txt.gz".format(
+                        sim_num = sim_idx + 1,
+                        prior_sample_size = prior_sample_size))
+        _LOG.info("Parsing {0}".format(posterior_path))
+        posterior = sumcoevolity.parsing.get_dict_from_spreadsheets(
+                [posterior_path],
+                sep = '\t')
+        for pair_idx in range(number_of_pairs):
+            for parameter_key, header_prefixes in column_header_prefixes.items():
+                for header_prefix in header_prefixes:
+                    header = "{0}{1}".format(header_prefix, pair_idx + 1)
+                    true_val = float(true_values[header][sim_idx])
+                    post_sum = sumcoevolity.stats.get_summary(float(x) for x in posterior[header])
+                    results[parameter_key]['true'].append(true_val)
+                    results[parameter_key]['mean'].append(post_sum['mean'])
+                    results[parameter_key]['lower'].append(post_sum['qi_95'][0])
+                    results[parameter_key]['upper'].append(post_sum['qi_95'][1])
+        true_nevents = int(true_values["PRI.Psi"][sim_idx])
+        nevent_freqs = sumcoevolity.stats.get_freqs(int(x) for x in posterior["PRI.Psi"])
+        sorted_nevent_freqs = sorted(nevent_freqs.items(), reverse = True,
+                key = lambda x: x[1])
+        map_nevents = sorted_nevent_freqs[0][0]
+        true_nevents_prob = nevent_freqs[true_nevents]
+        map_nevents_prob = nevent_freqs[map_nevents]
+        results['nevents']['true'].append(true_nevents)
+        results['nevents']['map'].append(map_nevents)
+        results['nevents']['true_prob'].append(true_nevents_prob)
+        results['nevents']['map_prob'].append(map_nevents_prob)
+        cred_level = 0.0
+        for n, p in sorted_nevent_freqs:
+            if n == true_nevents:
+                break
+            cred_level += p
+        results['nevents']['cred_level'].append(cred_level)
+    assert (len(results['divergence time']['true']) == number_of_sims * number_of_pairs)
+    assert (len(results['root population size']['true']) == number_of_sims * number_of_pairs)
+    assert (len(results['leaf population size']['true']) == number_of_sims * number_of_pairs * 2)
+    assert (len(results['nevents']['true']) == number_of_sims)
+    return results
+
+def generate_bake_off_plots(
+        number_of_pairs = 3,
+        number_of_sims = 500,
+        posterior_sample_size = 2000,
+        prior_sample_size = 500000):
+    _LOG.info("Generating plots of bake-off results...")
+    plot_dir = os.path.join(project_util.BAKE_OFF_DIR, "plots")
+    if not os.path.exists(plot_dir):
+        os.mkdir(plot_dir)
+    msbayes_results = get_msbayes_results(
+            true_path = os.path.join(project_util.BAKE_OFF_DIR,
+                    "results",
+                    "msbayes",
+                    "pymsbayes-results",
+                    "observed-summary-stats",
+                    "observed-1.txt"),
+            sim_dir = os.path.join(project_util.BAKE_OFF_DIR,
+                    "results",
+                    "msbayes",
+                    "pymsbayes-results",
+                    "pymsbayes-output",
+                    "d1",
+                    "m1"),
+            number_of_pairs = number_of_pairs,
+            number_of_sims = number_of_sims,
+            posterior_sample_size = posterior_sample_size,
+            prior_sample_size = prior_sample_size)
+    dpp_msbayes_results = get_msbayes_results(
+            true_path = os.path.join(project_util.BAKE_OFF_DIR,
+                    "results",
+                    "dpp-msbayes",
+                    "pymsbayes-results",
+                    "observed-summary-stats",
+                    "observed-1.txt"),
+            sim_dir = os.path.join(project_util.BAKE_OFF_DIR,
+                    "results",
+                    "dpp-msbayes",
+                    "pymsbayes-results",
+                    "pymsbayes-output",
+                    "d1",
+                    "m1"),
+            number_of_pairs = number_of_pairs,
+            number_of_sims = number_of_sims,
+            posterior_sample_size = posterior_sample_size,
+            prior_sample_size = prior_sample_size)
+    results_paths = glob.glob(os.path.join(project_util.VAL_DIR,
+            "03pairs-dpp-root-0100-040k-0200l",
+            "batch00[12345]",
+            "results.csv.gz"))
+    results = sumcoevolity.parsing.get_dict_from_spreadsheets(
+            results_paths,
+            sep = "\t",
+            offset = 0)
+
+    cmap = truncate_color_map(plt.cm.binary, 0.0, 0.65, 100)
+
+    parameter_dict = {
+            "divergence time": [
+                    "root_height_c1sp1",
+                    "root_height_c2sp1",
+                    "root_height_c3sp1",
+                    ],
+            "root population size": [
+                    "pop_size_root_c1sp1",
+                    "pop_size_root_c2sp1",
+                    "pop_size_root_c3sp1",
+                    ],
+            "leaf population size": [
+                    "pop_size_c1sp1",
+                    "pop_size_c2sp1",
+                    "pop_size_c3sp1",
+                    "pop_size_c1sp2",
+                    "pop_size_c2sp2",
+                    "pop_size_c3sp2",
+                    ],
+            "nevents": [],
+    }
+    for parameter_key, parameters in parameter_dict.items():
+        parameter_label = parameter_key 
+        parameter_symbol = "\\tau"
+        if parameter_key.endswith("size"):
+            parameter_symbol = "N_e\\mu"
+
+        plt.close('all')
+        fig = plt.figure(figsize = (9, 3))
+        nrows = 1
+        ncols = 3 
+        gs = gridspec.GridSpec(nrows, ncols,
+                wspace = 0.0,
+                hspace = 0.0)
+
+        if parameter_key == "nevents":
+            ecoevolity_results = {'true': [], 'map': [], 'cred_level': [],
+                    'true_prob': [], 'map_prob': []}
+            ecoevolity_results['true'].extend(int(x) for x in results["true_num_events"])
+            ecoevolity_results['map'].extend(int(x) for x in results["map_num_events"])
+            ecoevolity_results['cred_level'].extend(float(x) for x in results["true_num_events_cred_level"])
+            for i in range(len(results["map_num_events"])):
+                map_n = results["map_num_events"][i]
+                map_p = float(results["num_events_{0}_p".format(map_n)][i])
+                true_n = results["true_num_events"][i]
+                true_p = float(results["num_events_{0}_p".format(true_n)][i])
+                ecoevolity_results["map_prob"].append(map_p)
+                ecoevolity_results["true_prob"].append(true_p)
+            all_results = {
+                'ecoevolity' : ecoevolity_results,
+                'dpp-msbayes': dpp_msbayes_results[parameter_key],
+                'msbayes': msbayes_results[parameter_key],
+                }
+
+            row_idx = 0
+            for col_idx, col_header in enumerate((
+                    'ecoevolity',
+                    'dpp-msbayes',
+                    'msbayes')):
+                r = all_results[col_header]
+                true_nevents = r['true']
+                map_nevents = r['map']
+                map_nevents_probs = r['map_prob']
+                true_nevents_probs = r['true_prob']
+                true_nevents_cred_levels = r['cred_level']
+
+                assert(len(true_nevents) == len(map_nevents))
+                assert(len(true_nevents) == len(true_nevents_cred_levels))
+                assert(len(true_nevents) == len(map_nevents_probs))
+                assert(len(true_nevents) == len(true_nevents_probs))
+
+                mean_true_nevents_prob = sum(true_nevents_probs) / len(true_nevents_probs)
+                median_true_nevents_prob = sumcoevolity.stats.median(true_nevents_probs)
+
+                nevents_within_95_cred = 0
+                ncorrect = 0
+                true_map_nevents = []
+                true_map_probs = []
+                for i in range(number_of_pairs):
+                    true_map_nevents.append([0 for i in range(number_of_pairs)])
+                    true_map_probs.append([[] for i in range(number_of_pairs)])
+                for i in range(len(true_nevents)):
+                    true_map_nevents[map_nevents[i] - 1][true_nevents[i] - 1] += 1
+                    true_map_probs[map_nevents[i] - 1][true_nevents[i] - 1].append(map_nevents_probs[i])
+                    if true_nevents_cred_levels[i] <= 0.95:
+                        nevents_within_95_cred += 1
+                    if true_nevents[i] == map_nevents[i]:
+                        ncorrect += 1
+                p_nevents_within_95_cred = nevents_within_95_cred / float(len(true_nevents))
+                p_correct = ncorrect / float(len(true_nevents))
+
+                _LOG.info("p(nevents within CS) = {0:.4f}".format(p_nevents_within_95_cred))
+                ax = plt.subplot(gs[row_idx, col_idx])
+
+                ax.imshow(true_map_nevents,
+                        origin = 'lower',
+                        cmap = cmap,
+                        interpolation = 'none',
+                        aspect = 'auto'
+                        # extent = [0.5, 3.5, 0.5, 3.5]
+                        )
+                for i, row_list in enumerate(true_map_nevents):
+                    for j, num_events in enumerate(row_list):
+                        # if num_events > 0:
+                        #     map_probs = true_map_probs[i][j]
+                        #     assert len(map_probs) == num_events
+                        #     mean_prob = sum(map_probs) / len(map_probs)
+                        #     median_prob = sumcoevolity.stats.median(map_probs)
+                        #     ax.text(j, i,
+                        #             "{0:d}\n{1:.3f}".format(num_events, median_prob),
+                        #             horizontalalignment = "center",
+                        #             verticalalignment = "center")
+                        # else:
+                        ax.text(j, i,
+                                str(num_events),
+                                horizontalalignment = "center",
+                                verticalalignment = "center")
+                ax.text(0.99, 0.01,
+                        "\\scriptsize$p(k \\in 95\\% \\textrm{{\\sffamily CS}}) = {0:.3f}$".format(
+                                p_nevents_within_95_cred),
+                        horizontalalignment = "right",
+                        verticalalignment = "bottom",
+                        transform = ax.transAxes)
+                ax.text(0.01, 0.99,
+                        "\\scriptsize$p(\\hat{{k}} = k) = {0:.3f}$".format(
+                                p_correct),
+                        horizontalalignment = "left",
+                        verticalalignment = "top",
+                        transform = ax.transAxes)
+                # ax.text(0.99, 0.99,
+                #         "\\scriptsize$\\overline{{pp(k)}} = {0:.3f}$".format(
+                #                 mean_true_nevents_prob),
+                #         horizontalalignment = "right",
+                #         verticalalignment = "top",
+                #         transform = ax.transAxes)
+                ax.text(0.99, 0.99,
+                        "\\scriptsize$\\widetilde{{pp(k)}} = {0:.3f}$".format(
+                                median_true_nevents_prob),
+                        horizontalalignment = "right",
+                        verticalalignment = "top",
+                        transform = ax.transAxes)
+                if row_idx == 0:
+                    ax.text(0.5, 1.0,
+                            col_header,
+                            horizontalalignment = "center",
+                            verticalalignment = "bottom",
+                            size = 16.0,
+                            transform = ax.transAxes)
+
+            # show only the outside ticks
+            all_axes = fig.get_axes()
+            for ax in all_axes:
+                if not ax.is_last_row():
+                    ax.set_xticks([])
+                if not ax.is_first_col():
+                    ax.set_yticks([])
+
+            # show tick labels only for lower-left plot 
+            label_offset = float(number_of_pairs) * 0.04 # 4% of axis range
+            label_offset += 0.5 # origin is at -0.5
+            all_axes = fig.get_axes()
+            for ax in all_axes:
+                xtick_labels = ["" for item in ax.get_xticklabels()]
+                ytick_labels = ["" for item in ax.get_yticklabels()]
+                ax.set_xticklabels(xtick_labels)
+                ax.set_yticklabels(ytick_labels)
+                if ax.is_last_row() and ax.is_first_col():
+                    # get_xticklabels and set_xticklabels was not working.
+                    # There was only 5 tick elements rather than 7, and so
+                    # changing the last label from 2 to 3 was impossible.
+                    # So, using hack of "erasing" tick labels and then using
+                    # ax.text() to place labels manually.
+                    for i in range(number_of_pairs):
+                        ax.text(i, -label_offset,
+                                str(i + 1),
+                                horizontalalignment = "center",
+                                verticalalignment = "top")
+                        ax.text(-label_offset, i,
+                                str(i + 1),
+                                horizontalalignment = "right",
+                                verticalalignment = "center")
+
+            # avoid doubled spines
+            all_axes = fig.get_axes()
+            for ax in all_axes:
+                for sp in ax.spines.values():
+                    sp.set_visible(False)
+                if ax.is_first_row():
+                    ax.spines['top'].set_visible(True)
+                    ax.spines['bottom'].set_visible(True)
+                else:
+                    ax.spines['bottom'].set_visible(True)
+                if ax.is_first_col():
+                    ax.spines['left'].set_visible(True)
+                    ax.spines['right'].set_visible(True)
+                else:
+                    ax.spines['right'].set_visible(True)
+
+            fig.text(0.5, 0.002,
+                    "True number of events ($k$)",
+                    horizontalalignment = "center",
+                    verticalalignment = "bottom",
+                    size = 12.0)
+            fig.text(0.005, 0.5,
+                    "Estimated number of events ($\\hat{{k}}$)",
+                    horizontalalignment = "left",
+                    verticalalignment = "center",
+                    rotation = "vertical",
+                    size = 12.0)
+
+            gs.update(left = 0.06, right = 0.995, bottom = 0.14, top = 0.92)
+
+            plot_path = os.path.join(plot_dir,
+                    "nevents.pdf")
+            plt.savefig(plot_path)
+            _LOG.info("Plots written to {0!r}\n".format(plot_path))
+            continue
+
+        parameter_min = float('inf')
+        parameter_max = float('-inf')
+        for parameter_str in parameters:
+            parameter_min = min(parameter_min,
+                    min(float(x) for x in results["true_{0}".format(parameter_str)]))
+            parameter_max = max(parameter_max,
+                    max(float(x) for x in results["true_{0}".format(parameter_str)]))
+            parameter_min = min(parameter_min,
+                    min(float(x) for x in results["mean_{0}".format(parameter_str)]))
+            parameter_max = max(parameter_max,
+                    max(float(x) for x in results["mean_{0}".format(parameter_str)]))
+        parameter_min = min(parameter_min,
+                min(msbayes_results[parameter_key]['true']))
+        parameter_min = min(parameter_min,
+                min(msbayes_results[parameter_key]['mean']))
+        parameter_min = min(parameter_min,
+                min(dpp_msbayes_results[parameter_key]['true']))
+        parameter_min = min(parameter_min,
+                min(dpp_msbayes_results[parameter_key]['mean']))
+        parameter_max = max(parameter_max,
+                max(msbayes_results[parameter_key]['true']))
+        parameter_max = max(parameter_max,
+                max(msbayes_results[parameter_key]['mean']))
+        parameter_max = max(parameter_max,
+                max(dpp_msbayes_results[parameter_key]['true']))
+        parameter_max = max(parameter_max,
+                max(dpp_msbayes_results[parameter_key]['mean']))
+
+        axis_buffer = math.fabs(parameter_max - parameter_min) * 0.05
+        axis_min = parameter_min - axis_buffer
+        axis_max = parameter_max + axis_buffer
+
+        ecoevolity_results = {'true': [], 'mean': [], 'lower': [], 'upper': []}
+        for parameter_str in parameters:
+            ecoevolity_results['true'].extend(float(x) for x in results["true_{0}".format(parameter_str)])
+            ecoevolity_results['mean'].extend(float(x) for x in results["mean_{0}".format(parameter_str)])
+            ecoevolity_results['lower'].extend(float(x) for x in results["eti_95_lower_{0}".format(parameter_str)])
+            ecoevolity_results['upper'].extend(float(x) for x in results["eti_95_upper_{0}".format(parameter_str)])
+
+        all_results = {
+            'ecoevolity' : ecoevolity_results,
+            'dpp-msbayes': dpp_msbayes_results[parameter_key],
+            'msbayes': msbayes_results[parameter_key],
+            }
+
+        row_idx = 0
+        for col_idx, col_header in enumerate((
+                'ecoevolity',
+                'dpp-msbayes',
+                'msbayes')):
+            r = all_results[col_header]
+            x = r['true']
+            y = r['mean']
+            y_lower = r['lower']
+            y_upper = r['upper']
+
+            assert(len(x) == len(y))
+            assert(len(x) == len(y_lower))
+            assert(len(x) == len(y_upper))
+            proportion_within_ci = sumcoevolity.stats.get_proportion_of_values_within_intervals(
+                    x,
+                    y_lower,
+                    y_upper)
+            rmse = sumcoevolity.stats.root_mean_square_error(x, y)
+            _LOG.info("p(within CI) = {0:.4f}".format(proportion_within_ci))
+            _LOG.info("RMSE = {0:.2e}".format(rmse))
+            ax = plt.subplot(gs[row_idx, col_idx])
+            line = ax.errorbar(
+                    x = x,
+                    y = y,
+                    yerr = get_errors(y, y_lower, y_upper),
+                    ecolor = '0.65',
+                    elinewidth = 0.5,
+                    capsize = 0.8,
+                    barsabove = False,
+                    marker = 'o',
+                    linestyle = '',
+                    markerfacecolor = 'none',
+                    markeredgecolor = '0.35',
+                    markeredgewidth = 0.7,
+                    markersize = 2.5,
+                    zorder = 100,
+                    rasterized = True)
+            ax.set_xlim(axis_min, axis_max)
+            ax.set_ylim(axis_min, axis_max)
+            identity_line, = ax.plot(
+                    [axis_min, axis_max],
+                    [axis_min, axis_max])
+            plt.setp(identity_line,
+                    color = '0.7',
+                    linestyle = '-',
+                    linewidth = 1.0,
+                    marker = '',
+                    zorder = 0)
+            ax.text(0.02, 0.97,
+                    "\\scriptsize\\noindent$p({0:s} \\in \\textrm{{\\sffamily CI}}) = {1:.3f}$".format(
+                            parameter_symbol,
+                            proportion_within_ci),
+                    horizontalalignment = "left",
+                    verticalalignment = "top",
+                    transform = ax.transAxes,
+                    size = 6.0,
+                    zorder = 200)
+            ax.text(0.02, 0.87,
+                    # "\\scriptsize\\noindent$\\textrm{{\\sffamily RMSE}} = {0:.2e}$".format(
+                    "\\scriptsize\\noindent RMSE = {0:.2e}".format(
+                            rmse),
+                    horizontalalignment = "left",
+                    verticalalignment = "top",
+                    transform = ax.transAxes,
+                    size = 6.0,
+                    zorder = 200)
+            if row_idx == 0:
+                ax.text(0.5, 1.0,
+                        col_header,
+                        horizontalalignment = "center",
+                        verticalalignment = "bottom",
+                        size = 16.0,
+                        transform = ax.transAxes)
+
+        # show only the outside ticks
+        all_axes = fig.get_axes()
+        for ax in all_axes:
+            if not ax.is_last_row():
+                ax.set_xticks([])
+            if not ax.is_first_col():
+                ax.set_yticks([])
+
+        # show tick labels only for lower-left plot 
+        all_axes = fig.get_axes()
+        for ax in all_axes:
+            if ax.is_last_row() and ax.is_first_col():
+                continue
+            xtick_labels = ["" for item in ax.get_xticklabels()]
+            ytick_labels = ["" for item in ax.get_yticklabels()]
+            ax.set_xticklabels(xtick_labels)
+            ax.set_yticklabels(ytick_labels)
+
+        # avoid doubled spines
+        all_axes = fig.get_axes()
+        for ax in all_axes:
+            for sp in ax.spines.values():
+                sp.set_visible(False)
+            if ax.is_first_row():
+                ax.spines['top'].set_visible(True)
+                ax.spines['bottom'].set_visible(True)
+            else:
+                ax.spines['bottom'].set_visible(True)
+            if ax.is_first_col():
+                ax.spines['left'].set_visible(True)
+                ax.spines['right'].set_visible(True)
+            else:
+                ax.spines['right'].set_visible(True)
+
+        fig.text(0.5, 0.001,
+                "True {0} (${1}$)".format(parameter_label, parameter_symbol),
+                horizontalalignment = "center",
+                verticalalignment = "bottom",
+                size = 14.0)
+        fig.text(0.005, 0.5,
+                "Estimated {0} ($\\bar{{{1}}}$)".format(parameter_label, parameter_symbol),
+                horizontalalignment = "left",
+                verticalalignment = "center",
+                rotation = "vertical",
+                size = 12.0)
+
+        gs.update(left = 0.10, right = 0.995, bottom = 0.17, top = 0.925)
+
+        plot_file_prefix = parameter_label.replace(" ", "-")
+        plot_path = os.path.join(plot_dir,
+                "{0}-scatter.pdf".format(plot_file_prefix))
+        plt.savefig(plot_path, dpi=600)
+        _LOG.info("Plots written to {0!r}\n".format(plot_path))
+
+
+
 def main_cli(argv = sys.argv):
-    generate_scatter_plots(
-            parameters = [
-                    "root_height_c1sp1",
-                    "root_height_c2sp1",
-                    "root_height_c3sp1",
-                    ],
-            parameter_label = "divergence time",
-            parameter_symbol = "\\tau",
-            plot_file_prefix = "div-time",
-            include_all_sizes_fixed = True,
-            include_root_size_fixed = False)
-    generate_scatter_plots(
-            parameters = [
-                    "root_height_c1sp1",
-                    "root_height_c2sp1",
-                    "root_height_c3sp1",
-                    ],
-            parameter_label = "divergence time",
-            parameter_symbol = "\\tau",
-            plot_file_prefix = "linkage-div-time",
-            include_all_sizes_fixed = True,
-            include_root_size_fixed = False,
-            linked_loci = True)
-    generate_scatter_plots(
-            parameters = [
-                    "pop_size_root_c1sp1",
-                    "pop_size_root_c2sp1",
-                    "pop_size_root_c3sp1",
-                    ],
-            parameter_label = "root population size",
-            parameter_symbol = "N_e\\mu",
-            plot_file_prefix = "root-pop-size",
-            include_all_sizes_fixed = False,
-            include_root_size_fixed = False)
-    generate_scatter_plots(
-            parameters = [
-                    "pop_size_root_c1sp1",
-                    "pop_size_root_c2sp1",
-                    "pop_size_root_c3sp1",
-                    ],
-            parameter_label = "root population size",
-            parameter_symbol = "N_e\\mu",
-            plot_file_prefix = "linkage-root-pop-size",
-            include_all_sizes_fixed = False,
-            include_root_size_fixed = False,
-            linked_loci = True)
-    generate_scatter_plots(
-            parameters = [
-                    "pop_size_c1sp1",
-                    "pop_size_c2sp1",
-                    "pop_size_c3sp1",
-                    ],
-            parameter_label = "leaf population size",
-            parameter_symbol = "N_e\\mu",
-            plot_file_prefix = "leaf-pop-size",
-            include_all_sizes_fixed = False,
-            include_root_size_fixed = False)
-    generate_scatter_plots(
-            parameters = [
-                    "pop_size_c1sp1",
-                    "pop_size_c2sp1",
-                    "pop_size_c3sp1",
-                    ],
-            parameter_label = "leaf population size",
-            parameter_symbol = "N_e\\mu",
-            plot_file_prefix = "linkage-leaf-pop-size",
-            include_all_sizes_fixed = False,
-            include_root_size_fixed = False,
-            linked_loci = True)
-    generate_model_plots(
-            number_of_comparisons = 3,
-            include_all_sizes_fixed = True,
-            include_root_size_fixed = False)
-    generate_model_plots(
-            number_of_comparisons = 3,
-            include_all_sizes_fixed = True,
-            include_root_size_fixed = False,
-            linked_loci = True)
-    generate_histograms(
-            parameters = [
-                    "n_var_sites_c1",
-                    "n_var_sites_c2",
-                    "n_var_sites_c3",
-                    ],
-            parameter_label = "Number of variable sites",
-            plot_file_prefix = "number-of-variable-sites",
-            parameter_discrete = True,
-            range_key = "range",
-            number_of_digits = 0,
-            include_all_sizes_fixed = True,
-            include_root_size_fixed = False,
-            include_variable_only = False)
-    generate_histograms(
-            parameters = [
-                    "n_var_sites_c1",
-                    "n_var_sites_c2",
-                    "n_var_sites_c3",
-                    ],
-            parameter_label = "Number of variable sites",
-            plot_file_prefix = "linkage-number-of-variable-sites",
-            parameter_discrete = True,
-            range_key = "range",
-            number_of_digits = 0,
-            include_all_sizes_fixed = True,
-            include_root_size_fixed = False,
-            include_variable_only = False,
-            linked_loci = True)
-    generate_histograms(
-            parameters = [
-                    "ess_sum_ln_likelihood",
-                    ],
-            parameter_label = "Effective samples size of log likelihood",
-            plot_file_prefix = "ess-ln-likelihood",
-            parameter_discrete = False,
-            range_key = "range",
-            number_of_digits = 0,
-            include_all_sizes_fixed = True,
-            include_root_size_fixed = False,
-            include_variable_only = True)
-    generate_histograms(
-            parameters = [
-                    "ess_sum_ln_likelihood",
-                    ],
-            parameter_label = "Effective samples size of log likelihood",
-            plot_file_prefix = "linkage-ess-ln-likelihood",
-            parameter_discrete = False,
-            range_key = "range",
-            number_of_digits = 0,
-            include_all_sizes_fixed = True,
-            include_root_size_fixed = False,
-            include_variable_only = True,
-            linked_loci = True)
-    generate_histograms(
-            parameters = [
-                    "ess_sum_root_height_c1sp1",
-                    "ess_sum_root_height_c2sp1",
-                    "ess_sum_root_height_c3sp1",
-                    ],
-            parameter_label = "Effective samples size of divergence time",
-            plot_file_prefix = "ess-div-time",
-            parameter_discrete = False,
-            range_key = "range",
-            number_of_digits = 0,
-            include_all_sizes_fixed = True,
-            include_root_size_fixed = False,
-            include_variable_only = True)
-    generate_histograms(
-            parameters = [
-                    "ess_sum_root_height_c1sp1",
-                    "ess_sum_root_height_c2sp1",
-                    "ess_sum_root_height_c3sp1",
-                    ],
-            parameter_label = "Effective samples size of divergence time",
-            plot_file_prefix = "linkage-ess-div-time",
-            parameter_discrete = False,
-            range_key = "range",
-            number_of_digits = 0,
-            include_all_sizes_fixed = True,
-            include_root_size_fixed = False,
-            include_variable_only = True,
-            linked_loci = True)
-    generate_histograms(
-            parameters = [
-                    "ess_sum_pop_size_root_c1sp1",
-                    "ess_sum_pop_size_root_c2sp1",
-                    "ess_sum_pop_size_root_c3sp1",
-                    ],
-            parameter_label = "Effective samples size of root population size",
-            plot_file_prefix = "ess-root-pop-size",
-            parameter_discrete = False,
-            range_key = "range",
-            number_of_digits = 0,
-            include_all_sizes_fixed = False,
-            include_root_size_fixed = False,
-            include_variable_only = True)
-    generate_histograms(
-            parameters = [
-                    "ess_sum_pop_size_root_c1sp1",
-                    "ess_sum_pop_size_root_c2sp1",
-                    "ess_sum_pop_size_root_c3sp1",
-                    ],
-            parameter_label = "Effective samples size of root population size",
-            plot_file_prefix = "linkage-ess-root-pop-size",
-            parameter_discrete = False,
-            range_key = "range",
-            number_of_digits = 0,
-            include_all_sizes_fixed = False,
-            include_root_size_fixed = False,
-            include_variable_only = True,
-            linked_loci = True)
-    generate_histograms(
-            parameters = [
-                    "psrf_ln_likelihood",
-                    ],
-            parameter_label = "PSRF of log likelihood",
-            plot_file_prefix = "psrf-ln-likelihood",
-            parameter_discrete = False,
-            range_key = "range",
-            number_of_digits = 3,
-            include_all_sizes_fixed = True,
-            include_root_size_fixed = False,
-            include_variable_only = True)
-    generate_histograms(
-            parameters = [
-                    "psrf_ln_likelihood",
-                    ],
-            parameter_label = "PSRF of log likelihood",
-            plot_file_prefix = "linkage-psrf-ln-likelihood",
-            parameter_discrete = False,
-            range_key = "range",
-            number_of_digits = 3,
-            include_all_sizes_fixed = True,
-            include_root_size_fixed = False,
-            include_variable_only = True,
-            linked_loci = True)
-    generate_histograms(
-            parameters = [
-                    "psrf_root_height_c1sp1",
-                    "psrf_root_height_c2sp1",
-                    "psrf_root_height_c3sp1",
-                    ],
-            parameter_label = "PSRF of divergence time",
-            plot_file_prefix = "psrf-div-time",
-            parameter_discrete = False,
-            range_key = "range",
-            number_of_digits = 3,
-            include_all_sizes_fixed = True,
-            include_root_size_fixed = False,
-            include_variable_only = True)
-    generate_histograms(
-            parameters = [
-                    "psrf_root_height_c1sp1",
-                    "psrf_root_height_c2sp1",
-                    "psrf_root_height_c3sp1",
-                    ],
-            parameter_label = "PSRF of divergence time",
-            plot_file_prefix = "linkage-psrf-div-time",
-            parameter_discrete = False,
-            range_key = "range",
-            number_of_digits = 3,
-            include_all_sizes_fixed = True,
-            include_root_size_fixed = False,
-            include_variable_only = True,
-            linked_loci = True)
-    plot_ess_versus_error(
-            parameters = [
-                    "root_height_c1sp1",
-                    "root_height_c2sp1",
-                    "root_height_c3sp1",
-                    ],
-            parameter_label = "divergence time",
-            plot_file_prefix = "div-time",
-            include_all_sizes_fixed = True,
-            include_root_size_fixed = False)
+    # generate_scatter_plots(
+    #         parameters = [
+    #                 "root_height_c1sp1",
+    #                 "root_height_c2sp1",
+    #                 "root_height_c3sp1",
+    #                 ],
+    #         parameter_label = "divergence time",
+    #         parameter_symbol = "\\tau",
+    #         plot_file_prefix = "div-time",
+    #         include_all_sizes_fixed = True,
+    #         include_root_size_fixed = False)
+    # generate_scatter_plots(
+    #         parameters = [
+    #                 "root_height_c1sp1",
+    #                 "root_height_c2sp1",
+    #                 "root_height_c3sp1",
+    #                 ],
+    #         parameter_label = "divergence time",
+    #         parameter_symbol = "\\tau",
+    #         plot_file_prefix = "linkage-div-time",
+    #         include_all_sizes_fixed = True,
+    #         include_root_size_fixed = False,
+    #         linked_loci = True)
+    # generate_scatter_plots(
+    #         parameters = [
+    #                 "pop_size_root_c1sp1",
+    #                 "pop_size_root_c2sp1",
+    #                 "pop_size_root_c3sp1",
+    #                 ],
+    #         parameter_label = "root population size",
+    #         parameter_symbol = "N_e\\mu",
+    #         plot_file_prefix = "root-pop-size",
+    #         include_all_sizes_fixed = False,
+    #         include_root_size_fixed = False)
+    # generate_scatter_plots(
+    #         parameters = [
+    #                 "pop_size_root_c1sp1",
+    #                 "pop_size_root_c2sp1",
+    #                 "pop_size_root_c3sp1",
+    #                 ],
+    #         parameter_label = "root population size",
+    #         parameter_symbol = "N_e\\mu",
+    #         plot_file_prefix = "linkage-root-pop-size",
+    #         include_all_sizes_fixed = False,
+    #         include_root_size_fixed = False,
+    #         linked_loci = True)
+    # generate_scatter_plots(
+    #         parameters = [
+    #                 "pop_size_c1sp1",
+    #                 "pop_size_c2sp1",
+    #                 "pop_size_c3sp1",
+    #                 ],
+    #         parameter_label = "leaf population size",
+    #         parameter_symbol = "N_e\\mu",
+    #         plot_file_prefix = "leaf-pop-size",
+    #         include_all_sizes_fixed = False,
+    #         include_root_size_fixed = False)
+    # generate_scatter_plots(
+    #         parameters = [
+    #                 "pop_size_c1sp1",
+    #                 "pop_size_c2sp1",
+    #                 "pop_size_c3sp1",
+    #                 ],
+    #         parameter_label = "leaf population size",
+    #         parameter_symbol = "N_e\\mu",
+    #         plot_file_prefix = "linkage-leaf-pop-size",
+    #         include_all_sizes_fixed = False,
+    #         include_root_size_fixed = False,
+    #         linked_loci = True)
+    # generate_model_plots(
+    #         number_of_comparisons = 3,
+    #         include_all_sizes_fixed = True,
+    #         include_root_size_fixed = False)
+    # generate_model_plots(
+    #         number_of_comparisons = 3,
+    #         include_all_sizes_fixed = True,
+    #         include_root_size_fixed = False,
+    #         linked_loci = True)
+    # generate_histograms(
+    #         parameters = [
+    #                 "n_var_sites_c1",
+    #                 "n_var_sites_c2",
+    #                 "n_var_sites_c3",
+    #                 ],
+    #         parameter_label = "Number of variable sites",
+    #         plot_file_prefix = "number-of-variable-sites",
+    #         parameter_discrete = True,
+    #         range_key = "range",
+    #         number_of_digits = 0,
+    #         include_all_sizes_fixed = True,
+    #         include_root_size_fixed = False,
+    #         include_variable_only = False)
+    # generate_histograms(
+    #         parameters = [
+    #                 "n_var_sites_c1",
+    #                 "n_var_sites_c2",
+    #                 "n_var_sites_c3",
+    #                 ],
+    #         parameter_label = "Number of variable sites",
+    #         plot_file_prefix = "linkage-number-of-variable-sites",
+    #         parameter_discrete = True,
+    #         range_key = "range",
+    #         number_of_digits = 0,
+    #         include_all_sizes_fixed = True,
+    #         include_root_size_fixed = False,
+    #         include_variable_only = False,
+    #         linked_loci = True)
+    # generate_histograms(
+    #         parameters = [
+    #                 "ess_sum_ln_likelihood",
+    #                 ],
+    #         parameter_label = "Effective samples size of log likelihood",
+    #         plot_file_prefix = "ess-ln-likelihood",
+    #         parameter_discrete = False,
+    #         range_key = "range",
+    #         number_of_digits = 0,
+    #         include_all_sizes_fixed = True,
+    #         include_root_size_fixed = False,
+    #         include_variable_only = True)
+    # generate_histograms(
+    #         parameters = [
+    #                 "ess_sum_ln_likelihood",
+    #                 ],
+    #         parameter_label = "Effective samples size of log likelihood",
+    #         plot_file_prefix = "linkage-ess-ln-likelihood",
+    #         parameter_discrete = False,
+    #         range_key = "range",
+    #         number_of_digits = 0,
+    #         include_all_sizes_fixed = True,
+    #         include_root_size_fixed = False,
+    #         include_variable_only = True,
+    #         linked_loci = True)
+    # generate_histograms(
+    #         parameters = [
+    #                 "ess_sum_root_height_c1sp1",
+    #                 "ess_sum_root_height_c2sp1",
+    #                 "ess_sum_root_height_c3sp1",
+    #                 ],
+    #         parameter_label = "Effective samples size of divergence time",
+    #         plot_file_prefix = "ess-div-time",
+    #         parameter_discrete = False,
+    #         range_key = "range",
+    #         number_of_digits = 0,
+    #         include_all_sizes_fixed = True,
+    #         include_root_size_fixed = False,
+    #         include_variable_only = True)
+    # generate_histograms(
+    #         parameters = [
+    #                 "ess_sum_root_height_c1sp1",
+    #                 "ess_sum_root_height_c2sp1",
+    #                 "ess_sum_root_height_c3sp1",
+    #                 ],
+    #         parameter_label = "Effective samples size of divergence time",
+    #         plot_file_prefix = "linkage-ess-div-time",
+    #         parameter_discrete = False,
+    #         range_key = "range",
+    #         number_of_digits = 0,
+    #         include_all_sizes_fixed = True,
+    #         include_root_size_fixed = False,
+    #         include_variable_only = True,
+    #         linked_loci = True)
+    # generate_histograms(
+    #         parameters = [
+    #                 "ess_sum_pop_size_root_c1sp1",
+    #                 "ess_sum_pop_size_root_c2sp1",
+    #                 "ess_sum_pop_size_root_c3sp1",
+    #                 ],
+    #         parameter_label = "Effective samples size of root population size",
+    #         plot_file_prefix = "ess-root-pop-size",
+    #         parameter_discrete = False,
+    #         range_key = "range",
+    #         number_of_digits = 0,
+    #         include_all_sizes_fixed = False,
+    #         include_root_size_fixed = False,
+    #         include_variable_only = True)
+    # generate_histograms(
+    #         parameters = [
+    #                 "ess_sum_pop_size_root_c1sp1",
+    #                 "ess_sum_pop_size_root_c2sp1",
+    #                 "ess_sum_pop_size_root_c3sp1",
+    #                 ],
+    #         parameter_label = "Effective samples size of root population size",
+    #         plot_file_prefix = "linkage-ess-root-pop-size",
+    #         parameter_discrete = False,
+    #         range_key = "range",
+    #         number_of_digits = 0,
+    #         include_all_sizes_fixed = False,
+    #         include_root_size_fixed = False,
+    #         include_variable_only = True,
+    #         linked_loci = True)
+    # generate_histograms(
+    #         parameters = [
+    #                 "psrf_ln_likelihood",
+    #                 ],
+    #         parameter_label = "PSRF of log likelihood",
+    #         plot_file_prefix = "psrf-ln-likelihood",
+    #         parameter_discrete = False,
+    #         range_key = "range",
+    #         number_of_digits = 3,
+    #         include_all_sizes_fixed = True,
+    #         include_root_size_fixed = False,
+    #         include_variable_only = True)
+    # generate_histograms(
+    #         parameters = [
+    #                 "psrf_ln_likelihood",
+    #                 ],
+    #         parameter_label = "PSRF of log likelihood",
+    #         plot_file_prefix = "linkage-psrf-ln-likelihood",
+    #         parameter_discrete = False,
+    #         range_key = "range",
+    #         number_of_digits = 3,
+    #         include_all_sizes_fixed = True,
+    #         include_root_size_fixed = False,
+    #         include_variable_only = True,
+    #         linked_loci = True)
+    # generate_histograms(
+    #         parameters = [
+    #                 "psrf_root_height_c1sp1",
+    #                 "psrf_root_height_c2sp1",
+    #                 "psrf_root_height_c3sp1",
+    #                 ],
+    #         parameter_label = "PSRF of divergence time",
+    #         plot_file_prefix = "psrf-div-time",
+    #         parameter_discrete = False,
+    #         range_key = "range",
+    #         number_of_digits = 3,
+    #         include_all_sizes_fixed = True,
+    #         include_root_size_fixed = False,
+    #         include_variable_only = True)
+    # generate_histograms(
+    #         parameters = [
+    #                 "psrf_root_height_c1sp1",
+    #                 "psrf_root_height_c2sp1",
+    #                 "psrf_root_height_c3sp1",
+    #                 ],
+    #         parameter_label = "PSRF of divergence time",
+    #         plot_file_prefix = "linkage-psrf-div-time",
+    #         parameter_discrete = False,
+    #         range_key = "range",
+    #         number_of_digits = 3,
+    #         include_all_sizes_fixed = True,
+    #         include_root_size_fixed = False,
+    #         include_variable_only = True,
+    #         linked_loci = True)
+    # plot_ess_versus_error(
+    #         parameters = [
+    #                 "root_height_c1sp1",
+    #                 "root_height_c2sp1",
+    #                 "root_height_c3sp1",
+    #                 ],
+    #         parameter_label = "divergence time",
+    #         plot_file_prefix = "div-time",
+    #         include_all_sizes_fixed = True,
+    #         include_root_size_fixed = False)
+    # generate_bake_off_plots(
+    #         number_of_pairs = 3,
+    #         number_of_sims = 500,
+    #         posterior_sample_size = 2000,
+    #         prior_sample_size = 500000)
+    plot_nevents_estimated_vs_true_probs(
+            nevents = 1,
+            sim_dir = "03pairs-dpp-root-0100-100k",
+            nbins = 5,
+            plot_file_prefix = "100k-sites")
+    plot_nevents_estimated_vs_true_probs(
+            nevents = 1,
+            sim_dir = "03pairs-dpp-root-0100-100k-0100l",
+            nbins = 5,
+            plot_file_prefix = "linkage-100-100k-sites")
+    plot_nevents_estimated_vs_true_probs(
+            nevents = 1,
+            sim_dir = "03pairs-dpp-root-0100-100k-0500l",
+            nbins = 5,
+            plot_file_prefix = "linkage-500-100k-sites")
 
 
 if __name__ == "__main__":
