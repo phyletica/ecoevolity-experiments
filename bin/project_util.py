@@ -8,6 +8,8 @@ PROJECT_DIR = os.path.dirname(BIN_DIR)
 SIM_DIR = os.path.join(PROJECT_DIR, 'simulations')
 VAL_DIR = os.path.join(SIM_DIR, 'validation')
 BAKE_OFF_DIR = os.path.join(PROJECT_DIR, 'bake-off')
+CONFIG_DIR = os.path.join(PROJECT_DIR, 'configs')
+GEKKO_OUTPUT_DIR = os.path.join(PROJECT_DIR, 'gekko-output')
 
 def main():
     sys.stdout.write("{0}\n".format(PROJECT_DIR))
