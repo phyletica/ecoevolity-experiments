@@ -38,25 +38,39 @@ def write_qsub(config_path,
     config_name = os.path.basename(config_path)
     config_prefix = os.path.splitext(config_name)[0]
     qsub_path = "{0}-run-{1}-qsub.sh".format(config_prefix, run_number)
-    if os.path.exists(qsub_path):
-        return
+    no_data_qsub_path = "{0}-no-data-run-{1}-qsub.sh".format(config_prefix, run_number)
     seed = rng.randint(1, 999999999)
     prefix_dir = os.path.relpath(project_util.GEKKO_OUTPUT_DIR,
             project_util.BIN_DIR)
     prefix = os.path.join(prefix_dir, "run-{0}".format(run_number))
+    no_data_prefix = os.path.join(prefix_dir, "no-data-run-{0}".format(run_number))
     stdout_path = prefix + "-" + config_prefix + ".out"
-    assert(not os.path.exists(qsub_path))
-    with open(qsub_path, 'w') as out:
-        out.write(get_pbs_header(restrict_nodes, walltime))
-        out.write("prefix={0}\n\n".format(prefix))
-        out.write(
-                "ecoevolity --seed {seed} --prefix {prefix} "
-                "--relax-missing-sites --relax-constant-sites "
-                "{config_path} 1>{stdout_path} 2>&1\n".format(
-                seed = seed,
-                prefix = prefix,
-                config_path = config_path,
-                stdout_path = stdout_path))
+    no_data_stdout_path = no_data_prefix + "-" + config_prefix + ".out"
+    if not os.path.exists(qsub_path):
+        with open(qsub_path, 'w') as out:
+            out.write(get_pbs_header(restrict_nodes, walltime))
+            out.write("prefix={0}\n\n".format(prefix))
+            out.write(
+                    "ecoevolity --seed {seed} --prefix {prefix} "
+                    "--relax-missing-sites --relax-constant-sites "
+                    "{config_path} 1>{stdout_path} 2>&1\n".format(
+                    seed = seed,
+                    prefix = prefix,
+                    config_path = config_path,
+                    stdout_path = stdout_path))
+    if not os.path.exists(no_data_qsub_path):
+        with open(no_data_qsub_path, 'w') as out:
+            out.write(get_pbs_header(restrict_nodes, walltime))
+            out.write("prefix={0}\n\n".format(no_data_prefix))
+            out.write(
+                    "ecoevolity --seed {seed} --prefix {prefix} "
+                    "--ignore-data "
+                    "--relax-missing-sites --relax-constant-sites "
+                    "{config_path} 1>{stdout_path} 2>&1\n".format(
+                    seed = seed,
+                    prefix = no_data_prefix,
+                    config_path = config_path,
+                    stdout_path = no_data_stdout_path))
 
 def arg_is_positive_int(i):
     """
@@ -82,7 +96,7 @@ def main_cli(argv = sys.argv):
     parser.add_argument('--number-of-runs',
             action = 'store',
             type = int,
-            default = 5,
+            default = 10,
             help = 'Number of qsubs to generate per config (Default: 5).')
     parser.add_argument('--walltime',
             action = 'store',

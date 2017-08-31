@@ -11,6 +11,6 @@ then
     module load gcc/5.3.0
 fi
 
-prefix=../gekko-output/run-4
+prefix=../gekko-output/run-6
 
-ecoevolity --seed 354901386 --prefix ../gekko-output/run-4 --relax-missing-sites --relax-constant-sites ../configs/gekkocontrol-nopoly-varonly.yml 1>../gekko-output/run-4-gekkocontrol-nopoly-varonly.out 2>&1
+ecoevolity --seed 193661349 --prefix ../gekko-output/run-6 --relax-missing-sites --relax-constant-sites ../configs/gekkocontrol-nopoly.yml 1>../gekko-output/run-6-gekkocontrol-nopoly.out 2>&1
