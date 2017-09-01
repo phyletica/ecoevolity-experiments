@@ -28,7 +28,7 @@ operator_settings:
             weight: 3.0
             scale: 0.02
         TimeSizeRateScaler:
-            weight: 0.0
+            weight: 3.0
             scale: 0.02
         EventTimeScaler:
             weight: 1.0
