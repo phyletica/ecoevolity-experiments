@@ -16,6 +16,7 @@ except ImportError:
 
 logging.basicConfig(level=logging.INFO)
 _LOG = logging.getLogger(os.path.basename(__file__))
+_RNG = random.Random()
 
 _program_info = {
     'name': os.path.basename(__file__),
@@ -43,7 +44,6 @@ def arg_is_positive_int(i):
         raise argparse.ArgumentTypeError(msg)
     return int(i)
 
-
 def check_prefix_and_delimiter(prefix, delimiter):
     if len(delimiter) != 1:
         raise Exception("Delimiter must consist of a one character.")
@@ -56,7 +56,9 @@ def write_dummy_biallelic_alignment(
         ncharacters = 1000,
         prefix = "sp",
         delimiter = "-",
-        out = sys.stdout):
+        out = sys.stdout,
+        prob_missing = 0.0,
+        rng = _RNG):
     check_prefix_and_delimiter(prefix, delimiter)
     nspecies_padding = len(str(nspecies))
     ngenomes_padding = len(str(ngenomes))
@@ -74,9 +76,9 @@ def write_dummy_biallelic_alignment(
                     s = row_label,
                     padding = label_padding))
             if (row_idx % 2 == 0):
-                out.write("{0}\n".format("".join((str(0) for i in range(ncharacters)))))
+                out.write("{0}\n".format("".join((str(0) if rng.random() >= prob_missing else "?" for i in range(ncharacters)))))
             else:
-                out.write("{0}\n".format("".join((str(1) for i in range(ncharacters)))))
+                out.write("{0}\n".format("".join((str(1) if rng.random() >= prob_missing else "?" for i in range(ncharacters)))))
             row_idx += 1
 
 def write_dummy_biallelic_nexus_alignment(
@@ -85,7 +87,9 @@ def write_dummy_biallelic_nexus_alignment(
         ncharacters = 1000,
         prefix = "sp",
         delimiter = "-",
-        out = sys.stdout):
+        out = sys.stdout,
+        prob_missing = 0.0,
+        rng = _RNG):
     check_prefix_and_delimiter(prefix, delimiter)
     out.write("#NEXUS\n")
     out.write("Begin data;\n")
@@ -98,7 +102,9 @@ def write_dummy_biallelic_nexus_alignment(
         ncharacters = ncharacters,
         prefix = prefix,
         delimiter = delimiter,
-        out = out)
+        out = out,
+        prob_missing = prob_missing,
+        rng = rng)
     out.write("    ;\n")
     out.write("End;\n")
 
@@ -132,11 +138,23 @@ def main_cli(argv = sys.argv):
             type = str,
             default = "-", 
             help = ('Symbol used to delimit species label from genome label.'))
+    parser.add_argument('-m', '--missing-probability',
+            action = 'store',
+            type = float,
+            default = 0.0,
+            help = ('Probability that an allele is missing.'))
+    parser.add_argument('--seed',
+            action = 'store',
+            type = int,
+            help = 'Random number seed. Used for random missing data.')
 
     if argv == sys.argv:
         args = parser.parse_args()
     else:
         args = parser.parse_args(argv)
+    if not args.seed:
+        args.seed = random.randint(1, 999999999)
+    _RNG.seed(args.seed)
 
     write_dummy_biallelic_nexus_alignment(
             nspecies = args.nspecies,
@@ -144,7 +162,9 @@ def main_cli(argv = sys.argv):
             ncharacters = args.ncharacters,
             prefix = args.prefix,
             delimiter = args.delimiter,
-            out = sys.stdout)
+            out = sys.stdout,
+            prob_missing = args.missing_probability,
+            rng = _RNG)
     
 
 if __name__ == "__main__":
