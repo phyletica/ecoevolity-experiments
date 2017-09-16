@@ -44,6 +44,7 @@ def write_qsub(config_path,
         restrict_nodes = False,
         walltime = "2:00:00",
         asc = False,
+        relax_missing_sites = False,
         rng = _RNG):
     qsub_prefix = os.path.splitext(config_path)[0]
     qsub_path = "{0}-run-{1}-qsub.sh".format(qsub_prefix, run_number)
@@ -58,10 +59,16 @@ def write_qsub(config_path,
             out.write(get_asc_header())
         else:
             out.write(get_pbs_header(restrict_nodes, walltime))
-        out.write("ecoevolity --seed {0} --relax-constant-sites {1} 1>{2} 2>&1\n".format(
-                seed,
-                config_file,
-                stdout_path))
+        if relax_missing_sites:
+            out.write("ecoevolity --seed {0} --relax-constant-sites --relax-missing-sites {1} 1>{2} 2>&1\n".format(
+                    seed,
+                    config_file,
+                    stdout_path))
+        else:
+            out.write("ecoevolity --seed {0} --relax-constant-sites {1} 1>{2} 2>&1\n".format(
+                    seed,
+                    config_file,
+                    stdout_path))
 
 def arg_is_positive_int(i):
     """
@@ -101,6 +108,9 @@ def main_cli(argv = sys.argv):
     parser.add_argument('--restrict-nodes',
             action = 'store_true',
             help = 'Run only on lab nodes.')
+    parser.add_argument('--relax-missing-sites',
+            action = 'store_true',
+            help = 'Add relax-missing-sites option to scripts. Default: False')
     parser.add_argument('--asc',
             action = 'store_true',
             help = 'Format script for AL super computer.')
@@ -120,7 +130,8 @@ def main_cli(argv = sys.argv):
                     run_number = i + 1,
                     restrict_nodes = args.restrict_nodes,
                     walltime = args.walltime,
-                    asc = args.asc)
+                    asc = args.asc,
+                    relax_missing_sites = args.relax_missing_sites)
     
 
 if __name__ == "__main__":
