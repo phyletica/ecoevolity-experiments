@@ -26,4 +26,4 @@ nreps=100
 
 mkdir -p "$outputdir"
 
-simcoevolity --seed="$rngseed" -n "$nreps" -o "$outputdir" "$cfgpath"
+simcoevolity --relax-missing-sites --seed="$rngseed" -n "$nreps" -o "$outputdir" "$cfgpath"
