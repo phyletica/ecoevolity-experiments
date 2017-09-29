@@ -62,7 +62,7 @@ def write_qsub(config_path,
             out.write(
                     "ecoevolity --seed {seed} --prefix {prefix} "
                     "--ignore-data "
-                    "--relax-missing-sites --relax-constant-sites --relax-triallelic-sites"
+                    "--relax-missing-sites --relax-constant-sites --relax-triallelic-sites "
                     "{config_path} 1>{stdout_path} 2>&1\n".format(
                     seed = seed,
                     prefix = no_data_prefix,
