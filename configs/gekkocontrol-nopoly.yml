@@ -76,7 +76,7 @@ global_comparison_settings:
 
 comparisons:
 - comparison:
-    path: "../alignments/G-mindorensis-mindorensis-Caluya-Mindoro-polyallelic-sites-removed.nex"
+    path: "../alignments/G-crombota-rossi-BabuyanClaro-Calayan-polyallelic-sites-removed.nex"
 - comparison:
     path: "../alignments/G-mindorensis-mindorensis-Lubang-Luzon-polyallelic-sites-removed.nex"
 - comparison:

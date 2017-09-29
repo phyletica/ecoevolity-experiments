@@ -40,7 +40,7 @@ global_comparison_settings:
     markers_are_dominant: false
     population_name_delimiter: " "
     population_name_is_prefix: false
-    constant_sites_removed: true 
+    constant_sites_removed: true
     equal_population_sizes: false
     parameters:
         population_size:
@@ -76,7 +76,7 @@ global_comparison_settings:
 
 comparisons:
 - comparison:
-    path: "../alignments/G-mindorensis-mindorensis-Caluya-Mindoro-polyallelic-sites-removed.nex"
+    path: "../alignments/G-crombota-rossi-BabuyanClaro-Calayan-polyallelic-sites-removed.nex"
 - comparison:
     path: "../alignments/G-mindorensis-mindorensis-Lubang-Luzon-polyallelic-sites-removed.nex"
 - comparison:
