@@ -2,7 +2,6 @@
 #PBS -l nodes=1:ppn=1
 #PBS -l walltime=5:00:00
 #PBS -j oe
-#PBS -l jobflags=ADVRES:jro0014_lab.56281
 
 if [ -n "$PBS_JOBNAME" ]
 then
@@ -13,4 +12,4 @@ fi
 
 prefix=../gekko-output/no-data-run-3
 
-ecoevolity --seed 825206509 --prefix ../gekko-output/no-data-run-3 --ignore-data --relax-missing-sites --relax-constant-sites ../configs/gekkocontrol-nopoly.yml 1>../gekko-output/no-data-run-3-gekkocontrol-nopoly.out 2>&1
+ecoevolity --seed 553221086 --prefix ../gekko-output/no-data-run-3 --ignore-data --relax-missing-sites --relax-constant-sites ../configs/gekkocontrol-nopoly.yml 1>../gekko-output/no-data-run-3-gekkocontrol-nopoly.out 2>&1
