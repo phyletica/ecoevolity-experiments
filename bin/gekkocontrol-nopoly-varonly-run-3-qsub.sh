@@ -12,4 +12,4 @@ fi
 
 prefix=../gekko-output/run-3
 
-ecoevolity --seed 23521219 --prefix ../gekko-output/run-3 --relax-missing-sites --relax-constant-sites ../configs/gekkocontrol-nopoly-varonly.yml 1>../gekko-output/run-3-gekkocontrol-nopoly-varonly.out 2>&1
+ecoevolity --seed 23521219 --prefix ../gekko-output/run-3 --relax-missing-sites --relax-constant-sites --relax-triallelic-sites../configs/gekkocontrol-nopoly-varonly.yml 1>../gekko-output/run-3-gekkocontrol-nopoly-varonly.out 2>&1
