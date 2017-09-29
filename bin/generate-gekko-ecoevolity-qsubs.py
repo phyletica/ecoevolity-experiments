@@ -116,7 +116,7 @@ def main_cli(argv = sys.argv):
         for i in range(args.number_of_runs):
             write_qsub(
                     config_path = rel_config_path,
-                    run_number = i + 1,
+                    run_number = i,
                     walltime = args.walltime)
 
 
