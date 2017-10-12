@@ -5,6 +5,8 @@ import sys
 
 BIN_DIR = os.path.abspath(os.path.dirname(__file__))
 PROJECT_DIR = os.path.dirname(BIN_DIR)
+GEKKO_SCRIPT_DIR = os.path.join(BIN_DIR, 'gekko-scripts')
+GEKKO_NODATA_SCRIPT_DIR = os.path.join(BIN_DIR, 'gekko-no-data-scripts')
 SIM_DIR = os.path.join(PROJECT_DIR, 'simulations')
 VAL_DIR = os.path.join(SIM_DIR, 'validation')
 BAKE_OFF_DIR = os.path.join(PROJECT_DIR, 'bake-off')

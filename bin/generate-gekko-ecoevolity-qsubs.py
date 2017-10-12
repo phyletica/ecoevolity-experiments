@@ -34,11 +34,13 @@ def write_qsub(config_path,
         rng = _RNG):
     config_name = os.path.basename(config_path)
     config_prefix = os.path.splitext(config_name)[0]
-    qsub_path = "{0}-run-{1}-qsub.sh".format(config_prefix, run_number)
-    no_data_qsub_path = "{0}-no-data-run-{1}-qsub.sh".format(config_prefix, run_number)
+    qsub_name = "{0}-run-{1}-qsub.sh".format(config_prefix, run_number)
+    no_data_qsub_name = "{0}-no-data-run-{1}-qsub.sh".format(config_prefix, run_number)
+    qsub_path = os.path.join(project_util.GEKKO_SCRIPT_DIR, qsub_name)
+    no_data_qsub_path = os.path.join(project_util.GEKKO_NODATA_SCRIPT_DIR, no_data_qsub_name)
     seed = rng.randint(1, 999999999)
     prefix_dir = os.path.relpath(project_util.GEKKO_OUTPUT_DIR,
-            project_util.BIN_DIR)
+            project_util.GEKKO_SCRIPT_DIR)
     prefix = os.path.join(prefix_dir, "run-{0}".format(run_number))
     no_data_prefix = os.path.join(prefix_dir, "no-data-run-{0}".format(run_number))
     stdout_path = prefix + "-" + config_prefix + ".out"
@@ -57,7 +59,7 @@ def write_qsub(config_path,
                     stdout_path = stdout_path))
     if not os.path.exists(no_data_qsub_path):
         with open(no_data_qsub_path, 'w') as out:
-            out.write(get_pbs_header(walltime))
+            out.write(get_pbs_header(walltime = "1:00:00"))
             out.write("prefix={0}\n\n".format(no_data_prefix))
             out.write(
                     "ecoevolity --seed {seed} --prefix {prefix} "
@@ -94,12 +96,12 @@ def main_cli(argv = sys.argv):
             action = 'store',
             type = int,
             default = 10,
-            help = 'Number of qsubs to generate per config (Default: 5).')
+            help = 'Number of qsubs to generate per config (Default: 10).')
     parser.add_argument('--walltime',
             action = 'store',
             type = str,
-            default = '5:00:00',
-            help = 'Walltime for qsub scripts (Default: 5:00:00).')
+            default = '40:00:00',
+            help = 'Walltime for qsub scripts (Default: 40:00:00).')
 
     if argv == sys.argv:
         args = parser.parse_args()
@@ -109,10 +111,14 @@ def main_cli(argv = sys.argv):
 
     if not os.path.exists(project_util.GEKKO_OUTPUT_DIR):
         os.mkdir(project_util.GEKKO_OUTPUT_DIR)
+    if not os.path.exists(project_util.GEKKO_SCRIPT_DIR):
+        os.mkdir(project_util.GEKKO_SCRIPT_DIR)
+    if not os.path.exists(project_util.GEKKO_NODATA_SCRIPT_DIR):
+        os.mkdir(project_util.GEKKO_NODATA_SCRIPT_DIR)
 
-    config_path_pattern = os.path.join(project_util.CONFIG_DIR, "gekko*.yml") 
+    config_path_pattern = os.path.join(project_util.CONFIG_DIR, "gekko-*.yml") 
     for config_path in glob.glob(config_path_pattern):
-        rel_config_path = os.path.relpath(config_path, project_util.BIN_DIR)
+        rel_config_path = os.path.relpath(config_path, project_util.GEKKO_SCRIPT_DIR)
         for i in range(args.number_of_runs):
             write_qsub(
                     config_path = rel_config_path,
