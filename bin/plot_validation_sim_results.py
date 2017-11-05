@@ -10,7 +10,7 @@ import logging
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
 _LOG = logging.getLogger(os.path.basename(__file__))
 
-import sumcoevolity
+import pycoevolity
 import project_util
 
 import matplotlib as mpl
@@ -62,7 +62,7 @@ def get_nevents_probs(
     
     probs = []
     prob_key = "num_events_{0}_p".format(nevents)
-    for d in sumcoevolity.parsing.spreadsheet_iter(results_paths):
+    for d in pycoevolity.parsing.spreadsheet_iter(results_paths):
         probs.append((
                 float(d[prob_key]),
                 int(int(d["true_num_events"]) == nevents)
@@ -429,6 +429,8 @@ def get_linked_loci_results_paths(
     dpp_500k_sim_dirs.extend(sorted(glob.glob(os.path.join(
             validatition_sim_dir,
             "03pairs-dpp-root-0100-500k*"))))
+    dirs_to_keep = [d for d in dpp_500k_sim_dirs if not d.endswith("missing")]
+    dpp_500k_sim_dirs = dirs_to_keep
     dpp_500k_results_paths = []
     vo_dpp_500k_results_paths = []
     for sim_dir in dpp_500k_sim_dirs:
@@ -496,6 +498,53 @@ def get_linked_loci_results_paths(
             ]
     return row_keys, results_batches
 
+def get_missing_data_results_paths(
+        validatition_sim_dir,
+        include_variable_only = True):
+    dpp_500k_sim_dirs = []
+    dpp_500k_sim_dirs.extend(sorted(glob.glob(os.path.join(
+            validatition_sim_dir,
+            "03pairs-dpp-root-0100-500k*"))))
+    dirs_to_keep = [d for d in dpp_500k_sim_dirs if not d.endswith("l")]
+    dpp_500k_sim_dirs = dirs_to_keep
+    dpp_500k_results_paths = []
+    vo_dpp_500k_results_paths = []
+    for sim_dir in dpp_500k_sim_dirs:
+        sim_name = os.path.basename(sim_dir)
+        dpp_500k_results_paths.append(
+                (sim_name, sorted(glob.glob(os.path.join(
+                        sim_dir,
+                        "batch00[12345]",
+                        "results.csv.gz")))
+                )
+        )
+        vo_dpp_500k_results_paths.append(
+                (sim_name, sorted(glob.glob(os.path.join(
+                        sim_dir,
+                        "batch00[12345]",
+                        "var-only-results.csv.gz")))
+                )
+        )
+
+    if not include_variable_only:
+        results_batches = {
+                "500k":                 dpp_500k_results_paths,
+                }
+        row_keys = [
+                "500k",
+                ]
+        return row_keys, results_batches
+
+    results_batches = {
+            "500k":                 dpp_500k_results_paths,
+            "500k variable only":   vo_dpp_500k_results_paths,
+            }
+    row_keys = [
+            "500k",
+            "500k variable only",
+            ]
+    return row_keys, results_batches
+
 def ci_width_iter(results, parameter_str):
     n = len(results["eti_95_upper_{0}".format(parameter_str)])
     for i in range(n):
@@ -540,7 +589,7 @@ def plot_ess_versus_error(
     error_max = float('-inf')
     for key, results_batch in results_batches.items():
         for sim_dir, results_paths in results_batch:
-            results = sumcoevolity.parsing.get_dict_from_spreadsheets(
+            results = pycoevolity.parsing.get_dict_from_spreadsheets(
                     results_paths,
                     sep = "\t",
                     offset = 0)
@@ -581,7 +630,7 @@ def plot_ess_versus_error(
             assert(len(root_alpha_matches) == 1)
             root_alpha_setting = root_alpha_matches[0]
 
-            results = sumcoevolity.parsing.get_dict_from_spreadsheets(
+            results = pycoevolity.parsing.get_dict_from_spreadsheets(
                     results_paths,
                     sep = "\t",
                     offset = 0)
@@ -704,7 +753,7 @@ def plot_ess_versus_error(
             assert(len(root_alpha_matches) == 1)
             root_alpha_setting = root_alpha_matches[0]
 
-            results = sumcoevolity.parsing.get_dict_from_spreadsheets(
+            results = pycoevolity.parsing.get_dict_from_spreadsheets(
                     results_paths,
                     sep = "\t",
                     offset = 0)
@@ -816,10 +865,14 @@ def generate_scatter_plots(
         plot_file_prefix = None,
         include_all_sizes_fixed = True,
         include_root_size_fixed = False,
-        linked_loci = False):
+        linked_loci = False,
+        missing_data = False):
+    if linked_loci and missing_data:
+        raise Exception("Cannot specify both linked_loci and missing_data")
     _LOG.info("Generating scatter plots for {0}...".format(parameter_label))
     root_alpha_pattern = re.compile(r'root-(?P<alpha_setting>\S+)-\d00k')
     locus_size_pattern = re.compile(r'root-\d+-\d00k-(?P<locus_size>\d+)l')
+    missing_data_pattern = re.compile(r'root-\d+-\d00k-0(?P<p_missing>\d+)missing')
 
     assert(len(parameters) == len(set(parameters)))
     if not plot_file_prefix:
@@ -833,13 +886,17 @@ def generate_scatter_plots(
         row_keys, results_batches = get_linked_loci_results_paths(
                 project_util.VAL_DIR,
                 include_variable_only = True)
+    if missing_data:
+        row_keys, results_batches = get_missing_data_results_paths(
+                project_util.VAL_DIR,
+                include_variable_only = True)
 
     # Very inefficient, but parsing all results to get min/max for parameter
     parameter_min = float('inf')
     parameter_max = float('-inf')
     for key, results_batch in results_batches.items():
         for sim_dir, results_paths in results_batch:
-            results = sumcoevolity.parsing.get_dict_from_spreadsheets(
+            results = pycoevolity.parsing.get_dict_from_spreadsheets(
                     results_paths,
                     sep = "\t",
                     offset = 0)
@@ -857,7 +914,10 @@ def generate_scatter_plots(
     axis_max = parameter_max + axis_buffer
 
     plt.close('all')
-    fig = plt.figure(figsize = (9, 6.5))
+    if missing_data:
+        fig = plt.figure(figsize = (9, 4.0))
+    else:
+        fig = plt.figure(figsize = (9, 6.5))
     nrows = len(results_batches)
     ncols = len(results_batches.values()[0])
     gs = gridspec.GridSpec(nrows, ncols,
@@ -872,7 +932,7 @@ def generate_scatter_plots(
             assert(len(root_alpha_matches) == 1)
             root_alpha_setting = root_alpha_matches[0]
 
-            results = sumcoevolity.parsing.get_dict_from_spreadsheets(
+            results = pycoevolity.parsing.get_dict_from_spreadsheets(
                     results_paths,
                     sep = "\t",
                     offset = 0)
@@ -892,11 +952,11 @@ def generate_scatter_plots(
             assert(len(x) == len(y))
             assert(len(x) == len(y_lower))
             assert(len(x) == len(y_upper))
-            proportion_within_ci = sumcoevolity.stats.get_proportion_of_values_within_intervals(
+            proportion_within_ci = pycoevolity.stats.get_proportion_of_values_within_intervals(
                     x,
                     y_lower,
                     y_upper)
-            rmse = sumcoevolity.stats.root_mean_square_error(x, y)
+            rmse = pycoevolity.stats.root_mean_square_error(x, y)
             _LOG.info("p(within CI) = {0:.4f}".format(proportion_within_ci))
             _LOG.info("RMSE = {0:.2e}".format(rmse))
             ax = plt.subplot(gs[row_idx, col_idx])
@@ -961,6 +1021,14 @@ def generate_scatter_plots(
                         assert len(locus_size_matches) == 1
                         locus_size = int(locus_size_matches[0])
                     col_header = "$\\textrm{{\\sffamily Locus length}} = {0}$".format(locus_size)
+                elif missing_data:
+                    percent_missing = 0.0
+                    missing_matches = missing_data_pattern.findall(sim_dir)
+                    if missing_matches:
+                        assert len(missing_matches) == 1
+                        percent_missing = float("." + missing_matches[0]) * 100.0
+                    col_header = "{0:.0f}\\% missing data".format(percent_missing)
+
                 else:
                     if root_alpha_setting == "fixed-all":
                         pop_sizes = results["mean_pop_size_c1sp1"]
@@ -1038,13 +1106,16 @@ def generate_scatter_plots(
             verticalalignment = "bottom",
             size = 18.0)
     fig.text(0.005, 0.5,
-            "Estimated {0} ($\\bar{{{1}}}$)".format(parameter_label, parameter_symbol),
+            "Estimated {0} ($\\hat{{{1}}}$)".format(parameter_label, parameter_symbol),
             horizontalalignment = "left",
             verticalalignment = "center",
             rotation = "vertical",
             size = 18.0)
 
-    gs.update(left = 0.08, right = 0.98, bottom = 0.08, top = 0.97)
+    if missing_data:
+        gs.update(left = 0.08, right = 0.98, bottom = 0.1, top = 0.96)
+    else:
+        gs.update(left = 0.08, right = 0.98, bottom = 0.08, top = 0.97)
 
     plot_dir = os.path.join(project_util.VAL_DIR, "plots")
     if not os.path.exists(plot_dir):
@@ -1087,7 +1158,7 @@ def generate_histograms(
     parameter_max = float('-inf')
     for key, results_batch in results_batches.items():
         for sim_dir, results_paths in results_batch:
-            results = sumcoevolity.parsing.get_dict_from_spreadsheets(
+            results = pycoevolity.parsing.get_dict_from_spreadsheets(
                     results_paths,
                     sep = "\t",
                     offset = 0)
@@ -1121,7 +1192,7 @@ def generate_histograms(
             assert(len(root_alpha_matches) == 1)
             root_alpha_setting = root_alpha_matches[0]
 
-            results = sumcoevolity.parsing.get_dict_from_spreadsheets(
+            results = pycoevolity.parsing.get_dict_from_spreadsheets(
                     results_paths,
                     sep = "\t",
                     offset = 0)
@@ -1135,7 +1206,7 @@ def generate_histograms(
                 else:
                     x.extend(float(x) for x in results["{0}".format(parameter_str)])
 
-            summary = sumcoevolity.stats.get_summary(x)
+            summary = pycoevolity.stats.get_summary(x)
             _LOG.info("0.025, 0.975 quantiles: {0:.2f}, {1:.2f}".format(
                     summary["qi_95"][0],
                     summary["qi_95"][1]))
@@ -1281,10 +1352,14 @@ def generate_model_plots(
         number_of_comparisons = 3,
         include_all_sizes_fixed = True,
         include_root_size_fixed = False,
-        linked_loci = False):
+        linked_loci = False,
+        missing_data = False):
+    if linked_loci and missing_data:
+        raise Exception("Cannot specify both linked_loci and missing_data")
     _LOG.info("Generating model plots...")
     root_alpha_pattern = re.compile(r'root-(?P<alpha_setting>\S+)-\d00k')
     locus_size_pattern = re.compile(r'root-\d+-\d00k-(?P<locus_size>\d+)l')
+    missing_data_pattern = re.compile(r'root-\d+-\d00k-0(?P<p_missing>\d+)missing')
     dpp_pattern = re.compile(r'-dpp-')
     rj_pattern = re.compile(r'-rj-')
     var_only_pattern = re.compile(r'var-only-')
@@ -1300,9 +1375,16 @@ def generate_model_plots(
         row_keys, results_batches = get_linked_loci_results_paths(
                 project_util.VAL_DIR,
                 include_variable_only = True)
+    if missing_data:
+        row_keys, results_batches = get_missing_data_results_paths(
+                project_util.VAL_DIR,
+                include_variable_only = True)
 
     plt.close('all')
-    fig = plt.figure(figsize = (9, 6.5))
+    if missing_data:
+        fig = plt.figure(figsize = (9, 4.0))
+    else:
+        fig = plt.figure(figsize = (9, 6.5))
     nrows = len(results_batches)
     ncols = len(results_batches.values()[0])
     gs = gridspec.GridSpec(nrows, ncols,
@@ -1317,7 +1399,7 @@ def generate_model_plots(
             assert(len(root_alpha_matches) == 1)
             root_alpha_setting = root_alpha_matches[0]
 
-            results = sumcoevolity.parsing.get_dict_from_spreadsheets(
+            results = pycoevolity.parsing.get_dict_from_spreadsheets(
                     results_paths,
                     sep = "\t",
                     offset = 0)
@@ -1348,7 +1430,7 @@ def generate_model_plots(
             assert(len(true_nevents) == len(map_nevents_probs))
 
             mean_true_nevents_prob = sum(true_nevents_probs) / len(true_nevents_probs)
-            median_true_nevents_prob = sumcoevolity.stats.median(true_nevents_probs)
+            median_true_nevents_prob = pycoevolity.stats.median(true_nevents_probs)
 
             nevents_within_95_cred = 0
             model_within_95_cred = 0
@@ -1383,7 +1465,7 @@ def generate_model_plots(
                     #     n_probs = true_map_nevents_probs[i][j]
                     #     assert len(n_probs) == num_events
                     #     mean_p = sum(n_probs) / len(n_probs)
-                    #     median_p = sumcoevolity.stats.median(n_probs)
+                    #     median_p = pycoevolity.stats.median(n_probs)
                     #     ax.text(j, i,
                     #             "{0:d}\n{1:.3f}".format(num_events, median_p),
                     #             horizontalalignment = "center",
@@ -1420,6 +1502,13 @@ def generate_model_plots(
                         assert len(locus_size_matches) == 1
                         locus_size = int(locus_size_matches[0])
                     col_header = "$\\textrm{{\\sffamily Locus length}} = {0}$".format(locus_size)
+                elif missing_data:
+                    percent_missing = 0.0
+                    missing_matches = missing_data_pattern.findall(sim_dir)
+                    if missing_matches:
+                        assert len(missing_matches) == 1
+                        percent_missing = float("." + missing_matches[0]) * 100.0
+                    col_header = "{0:.0f}\\% missing data".format(percent_missing)
                 else:
                     if root_alpha_setting == "fixed-all":
                         pop_sizes = results["mean_pop_size_c1sp1"]
@@ -1497,7 +1586,10 @@ def generate_model_plots(
             rotation = "vertical",
             size = 18.0)
 
-    gs.update(left = 0.08, right = 0.98, bottom = 0.08, top = 0.97)
+    if missing_data:
+        gs.update(left = 0.08, right = 0.98, bottom = 0.1, top = 0.96)
+    else:
+        gs.update(left = 0.08, right = 0.98, bottom = 0.08, top = 0.97)
 
     plot_dir = os.path.join(project_util.VAL_DIR, "plots")
     if not os.path.exists(plot_dir):
@@ -1505,6 +1597,9 @@ def generate_model_plots(
     if linked_loci:
         plot_path = os.path.join(plot_dir,
                 "linkage-nevents.pdf")
+    elif missing_data:
+        plot_path = os.path.join(plot_dir,
+                "missing-data-nevents.pdf")
     else:
         plot_path = os.path.join(plot_dir,
                 "nevents.pdf")
@@ -1530,7 +1625,7 @@ def get_msbayes_results(
             'root population size': ("PRI.aTheta.",),
             'leaf population size': ("PRI.d1Theta.", "PRI.d2Theta."),
             }
-    true_values = sumcoevolity.parsing.get_dict_from_spreadsheets(
+    true_values = pycoevolity.parsing.get_dict_from_spreadsheets(
             [true_path],
             sep = '\t')
     nsims = len(true_values.values()[0])
@@ -1541,7 +1636,7 @@ def get_msbayes_results(
                         sim_num = sim_idx + 1,
                         prior_sample_size = prior_sample_size))
         _LOG.info("Parsing {0}".format(posterior_path))
-        posterior = sumcoevolity.parsing.get_dict_from_spreadsheets(
+        posterior = pycoevolity.parsing.get_dict_from_spreadsheets(
                 [posterior_path],
                 sep = '\t')
         for pair_idx in range(number_of_pairs):
@@ -1549,13 +1644,13 @@ def get_msbayes_results(
                 for header_prefix in header_prefixes:
                     header = "{0}{1}".format(header_prefix, pair_idx + 1)
                     true_val = float(true_values[header][sim_idx])
-                    post_sum = sumcoevolity.stats.get_summary(float(x) for x in posterior[header])
+                    post_sum = pycoevolity.stats.get_summary(float(x) for x in posterior[header])
                     results[parameter_key]['true'].append(true_val)
                     results[parameter_key]['mean'].append(post_sum['mean'])
                     results[parameter_key]['lower'].append(post_sum['qi_95'][0])
                     results[parameter_key]['upper'].append(post_sum['qi_95'][1])
         true_nevents = int(true_values["PRI.Psi"][sim_idx])
-        nevent_freqs = sumcoevolity.stats.get_freqs(int(x) for x in posterior["PRI.Psi"])
+        nevent_freqs = pycoevolity.stats.get_freqs(int(x) for x in posterior["PRI.Psi"])
         sorted_nevent_freqs = sorted(nevent_freqs.items(), reverse = True,
                 key = lambda x: x[1])
         map_nevents = sorted_nevent_freqs[0][0]
@@ -1626,7 +1721,7 @@ def generate_bake_off_plots(
             "03pairs-dpp-root-0100-040k-0200l",
             "batch00[12345]",
             "results.csv.gz"))
-    results = sumcoevolity.parsing.get_dict_from_spreadsheets(
+    results = pycoevolity.parsing.get_dict_from_spreadsheets(
             results_paths,
             sep = "\t",
             offset = 0)
@@ -1705,7 +1800,7 @@ def generate_bake_off_plots(
                 assert(len(true_nevents) == len(true_nevents_probs))
 
                 mean_true_nevents_prob = sum(true_nevents_probs) / len(true_nevents_probs)
-                median_true_nevents_prob = sumcoevolity.stats.median(true_nevents_probs)
+                median_true_nevents_prob = pycoevolity.stats.median(true_nevents_probs)
 
                 nevents_within_95_cred = 0
                 ncorrect = 0
@@ -1740,7 +1835,7 @@ def generate_bake_off_plots(
                         #     map_probs = true_map_probs[i][j]
                         #     assert len(map_probs) == num_events
                         #     mean_prob = sum(map_probs) / len(map_probs)
-                        #     median_prob = sumcoevolity.stats.median(map_probs)
+                        #     median_prob = pycoevolity.stats.median(map_probs)
                         #     ax.text(j, i,
                         #             "{0:d}\n{1:.3f}".format(num_events, median_prob),
                         #             horizontalalignment = "center",
@@ -1910,11 +2005,11 @@ def generate_bake_off_plots(
             assert(len(x) == len(y))
             assert(len(x) == len(y_lower))
             assert(len(x) == len(y_upper))
-            proportion_within_ci = sumcoevolity.stats.get_proportion_of_values_within_intervals(
+            proportion_within_ci = pycoevolity.stats.get_proportion_of_values_within_intervals(
                     x,
                     y_lower,
                     y_upper)
-            rmse = sumcoevolity.stats.root_mean_square_error(x, y)
+            rmse = pycoevolity.stats.root_mean_square_error(x, y)
             _LOG.info("p(within CI) = {0:.4f}".format(proportion_within_ci))
             _LOG.info("RMSE = {0:.2e}".format(rmse))
             ax = plt.subplot(gs[row_idx, col_idx])
@@ -2028,265 +2123,310 @@ def generate_bake_off_plots(
 
 
 def main_cli(argv = sys.argv):
-    # generate_scatter_plots(
-    #         parameters = [
-    #                 "root_height_c1sp1",
-    #                 "root_height_c2sp1",
-    #                 "root_height_c3sp1",
-    #                 ],
-    #         parameter_label = "divergence time",
-    #         parameter_symbol = "\\tau",
-    #         plot_file_prefix = "div-time",
-    #         include_all_sizes_fixed = True,
-    #         include_root_size_fixed = False)
-    # generate_scatter_plots(
-    #         parameters = [
-    #                 "root_height_c1sp1",
-    #                 "root_height_c2sp1",
-    #                 "root_height_c3sp1",
-    #                 ],
-    #         parameter_label = "divergence time",
-    #         parameter_symbol = "\\tau",
-    #         plot_file_prefix = "linkage-div-time",
-    #         include_all_sizes_fixed = True,
-    #         include_root_size_fixed = False,
-    #         linked_loci = True)
-    # generate_scatter_plots(
-    #         parameters = [
-    #                 "pop_size_root_c1sp1",
-    #                 "pop_size_root_c2sp1",
-    #                 "pop_size_root_c3sp1",
-    #                 ],
-    #         parameter_label = "root population size",
-    #         parameter_symbol = "N_e\\mu",
-    #         plot_file_prefix = "root-pop-size",
-    #         include_all_sizes_fixed = False,
-    #         include_root_size_fixed = False)
-    # generate_scatter_plots(
-    #         parameters = [
-    #                 "pop_size_root_c1sp1",
-    #                 "pop_size_root_c2sp1",
-    #                 "pop_size_root_c3sp1",
-    #                 ],
-    #         parameter_label = "root population size",
-    #         parameter_symbol = "N_e\\mu",
-    #         plot_file_prefix = "linkage-root-pop-size",
-    #         include_all_sizes_fixed = False,
-    #         include_root_size_fixed = False,
-    #         linked_loci = True)
-    # generate_scatter_plots(
-    #         parameters = [
-    #                 "pop_size_c1sp1",
-    #                 "pop_size_c2sp1",
-    #                 "pop_size_c3sp1",
-    #                 ],
-    #         parameter_label = "leaf population size",
-    #         parameter_symbol = "N_e\\mu",
-    #         plot_file_prefix = "leaf-pop-size",
-    #         include_all_sizes_fixed = False,
-    #         include_root_size_fixed = False)
-    # generate_scatter_plots(
-    #         parameters = [
-    #                 "pop_size_c1sp1",
-    #                 "pop_size_c2sp1",
-    #                 "pop_size_c3sp1",
-    #                 ],
-    #         parameter_label = "leaf population size",
-    #         parameter_symbol = "N_e\\mu",
-    #         plot_file_prefix = "linkage-leaf-pop-size",
-    #         include_all_sizes_fixed = False,
-    #         include_root_size_fixed = False,
-    #         linked_loci = True)
-    # generate_model_plots(
-    #         number_of_comparisons = 3,
-    #         include_all_sizes_fixed = True,
-    #         include_root_size_fixed = False)
-    # generate_model_plots(
-    #         number_of_comparisons = 3,
-    #         include_all_sizes_fixed = True,
-    #         include_root_size_fixed = False,
-    #         linked_loci = True)
-    # generate_histograms(
-    #         parameters = [
-    #                 "n_var_sites_c1",
-    #                 "n_var_sites_c2",
-    #                 "n_var_sites_c3",
-    #                 ],
-    #         parameter_label = "Number of variable sites",
-    #         plot_file_prefix = "number-of-variable-sites",
-    #         parameter_discrete = True,
-    #         range_key = "range",
-    #         number_of_digits = 0,
-    #         include_all_sizes_fixed = True,
-    #         include_root_size_fixed = False,
-    #         include_variable_only = False)
-    # generate_histograms(
-    #         parameters = [
-    #                 "n_var_sites_c1",
-    #                 "n_var_sites_c2",
-    #                 "n_var_sites_c3",
-    #                 ],
-    #         parameter_label = "Number of variable sites",
-    #         plot_file_prefix = "linkage-number-of-variable-sites",
-    #         parameter_discrete = True,
-    #         range_key = "range",
-    #         number_of_digits = 0,
-    #         include_all_sizes_fixed = True,
-    #         include_root_size_fixed = False,
-    #         include_variable_only = False,
-    #         linked_loci = True)
-    # generate_histograms(
-    #         parameters = [
-    #                 "ess_sum_ln_likelihood",
-    #                 ],
-    #         parameter_label = "Effective samples size of log likelihood",
-    #         plot_file_prefix = "ess-ln-likelihood",
-    #         parameter_discrete = False,
-    #         range_key = "range",
-    #         number_of_digits = 0,
-    #         include_all_sizes_fixed = True,
-    #         include_root_size_fixed = False,
-    #         include_variable_only = True)
-    # generate_histograms(
-    #         parameters = [
-    #                 "ess_sum_ln_likelihood",
-    #                 ],
-    #         parameter_label = "Effective samples size of log likelihood",
-    #         plot_file_prefix = "linkage-ess-ln-likelihood",
-    #         parameter_discrete = False,
-    #         range_key = "range",
-    #         number_of_digits = 0,
-    #         include_all_sizes_fixed = True,
-    #         include_root_size_fixed = False,
-    #         include_variable_only = True,
-    #         linked_loci = True)
-    # generate_histograms(
-    #         parameters = [
-    #                 "ess_sum_root_height_c1sp1",
-    #                 "ess_sum_root_height_c2sp1",
-    #                 "ess_sum_root_height_c3sp1",
-    #                 ],
-    #         parameter_label = "Effective samples size of divergence time",
-    #         plot_file_prefix = "ess-div-time",
-    #         parameter_discrete = False,
-    #         range_key = "range",
-    #         number_of_digits = 0,
-    #         include_all_sizes_fixed = True,
-    #         include_root_size_fixed = False,
-    #         include_variable_only = True)
-    # generate_histograms(
-    #         parameters = [
-    #                 "ess_sum_root_height_c1sp1",
-    #                 "ess_sum_root_height_c2sp1",
-    #                 "ess_sum_root_height_c3sp1",
-    #                 ],
-    #         parameter_label = "Effective samples size of divergence time",
-    #         plot_file_prefix = "linkage-ess-div-time",
-    #         parameter_discrete = False,
-    #         range_key = "range",
-    #         number_of_digits = 0,
-    #         include_all_sizes_fixed = True,
-    #         include_root_size_fixed = False,
-    #         include_variable_only = True,
-    #         linked_loci = True)
-    # generate_histograms(
-    #         parameters = [
-    #                 "ess_sum_pop_size_root_c1sp1",
-    #                 "ess_sum_pop_size_root_c2sp1",
-    #                 "ess_sum_pop_size_root_c3sp1",
-    #                 ],
-    #         parameter_label = "Effective samples size of root population size",
-    #         plot_file_prefix = "ess-root-pop-size",
-    #         parameter_discrete = False,
-    #         range_key = "range",
-    #         number_of_digits = 0,
-    #         include_all_sizes_fixed = False,
-    #         include_root_size_fixed = False,
-    #         include_variable_only = True)
-    # generate_histograms(
-    #         parameters = [
-    #                 "ess_sum_pop_size_root_c1sp1",
-    #                 "ess_sum_pop_size_root_c2sp1",
-    #                 "ess_sum_pop_size_root_c3sp1",
-    #                 ],
-    #         parameter_label = "Effective samples size of root population size",
-    #         plot_file_prefix = "linkage-ess-root-pop-size",
-    #         parameter_discrete = False,
-    #         range_key = "range",
-    #         number_of_digits = 0,
-    #         include_all_sizes_fixed = False,
-    #         include_root_size_fixed = False,
-    #         include_variable_only = True,
-    #         linked_loci = True)
-    # generate_histograms(
-    #         parameters = [
-    #                 "psrf_ln_likelihood",
-    #                 ],
-    #         parameter_label = "PSRF of log likelihood",
-    #         plot_file_prefix = "psrf-ln-likelihood",
-    #         parameter_discrete = False,
-    #         range_key = "range",
-    #         number_of_digits = 3,
-    #         include_all_sizes_fixed = True,
-    #         include_root_size_fixed = False,
-    #         include_variable_only = True)
-    # generate_histograms(
-    #         parameters = [
-    #                 "psrf_ln_likelihood",
-    #                 ],
-    #         parameter_label = "PSRF of log likelihood",
-    #         plot_file_prefix = "linkage-psrf-ln-likelihood",
-    #         parameter_discrete = False,
-    #         range_key = "range",
-    #         number_of_digits = 3,
-    #         include_all_sizes_fixed = True,
-    #         include_root_size_fixed = False,
-    #         include_variable_only = True,
-    #         linked_loci = True)
-    # generate_histograms(
-    #         parameters = [
-    #                 "psrf_root_height_c1sp1",
-    #                 "psrf_root_height_c2sp1",
-    #                 "psrf_root_height_c3sp1",
-    #                 ],
-    #         parameter_label = "PSRF of divergence time",
-    #         plot_file_prefix = "psrf-div-time",
-    #         parameter_discrete = False,
-    #         range_key = "range",
-    #         number_of_digits = 3,
-    #         include_all_sizes_fixed = True,
-    #         include_root_size_fixed = False,
-    #         include_variable_only = True)
-    # generate_histograms(
-    #         parameters = [
-    #                 "psrf_root_height_c1sp1",
-    #                 "psrf_root_height_c2sp1",
-    #                 "psrf_root_height_c3sp1",
-    #                 ],
-    #         parameter_label = "PSRF of divergence time",
-    #         plot_file_prefix = "linkage-psrf-div-time",
-    #         parameter_discrete = False,
-    #         range_key = "range",
-    #         number_of_digits = 3,
-    #         include_all_sizes_fixed = True,
-    #         include_root_size_fixed = False,
-    #         include_variable_only = True,
-    #         linked_loci = True)
-    # plot_ess_versus_error(
-    #         parameters = [
-    #                 "root_height_c1sp1",
-    #                 "root_height_c2sp1",
-    #                 "root_height_c3sp1",
-    #                 ],
-    #         parameter_label = "divergence time",
-    #         plot_file_prefix = "div-time",
-    #         include_all_sizes_fixed = True,
-    #         include_root_size_fixed = False)
-    # generate_bake_off_plots(
-    #         number_of_pairs = 3,
-    #         number_of_sims = 500,
-    #         posterior_sample_size = 2000,
-    #         prior_sample_size = 500000)
+    generate_scatter_plots(
+            parameters = [
+                    "root_height_c1sp1",
+                    "root_height_c2sp1",
+                    "root_height_c3sp1",
+                    ],
+            parameter_label = "divergence time",
+            parameter_symbol = "\\tau",
+            plot_file_prefix = "div-time",
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False)
+    generate_scatter_plots(
+            parameters = [
+                    "root_height_c1sp1",
+                    "root_height_c2sp1",
+                    "root_height_c3sp1",
+                    ],
+            parameter_label = "divergence time",
+            parameter_symbol = "\\tau",
+            plot_file_prefix = "linkage-div-time",
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            linked_loci = True)
+    generate_scatter_plots(
+            parameters = [
+                    "root_height_c1sp1",
+                    "root_height_c2sp1",
+                    "root_height_c3sp1",
+                    ],
+            parameter_label = "divergence time",
+            parameter_symbol = "\\tau",
+            plot_file_prefix = "missing-data-div-time",
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            linked_loci = False,
+            missing_data = True)
+    generate_scatter_plots(
+            parameters = [
+                    "pop_size_root_c1sp1",
+                    "pop_size_root_c2sp1",
+                    "pop_size_root_c3sp1",
+                    ],
+            parameter_label = "root population size",
+            parameter_symbol = "N_e\\mu",
+            plot_file_prefix = "root-pop-size",
+            include_all_sizes_fixed = False,
+            include_root_size_fixed = False)
+    generate_scatter_plots(
+            parameters = [
+                    "pop_size_root_c1sp1",
+                    "pop_size_root_c2sp1",
+                    "pop_size_root_c3sp1",
+                    ],
+            parameter_label = "root population size",
+            parameter_symbol = "N_e\\mu",
+            plot_file_prefix = "linkage-root-pop-size",
+            include_all_sizes_fixed = False,
+            include_root_size_fixed = False,
+            linked_loci = True)
+    generate_scatter_plots(
+            parameters = [
+                    "pop_size_root_c1sp1",
+                    "pop_size_root_c2sp1",
+                    "pop_size_root_c3sp1",
+                    ],
+            parameter_label = "root population size",
+            parameter_symbol = "N_e\\mu",
+            plot_file_prefix = "missing-data-root-pop-size",
+            include_all_sizes_fixed = False,
+            include_root_size_fixed = False,
+            linked_loci = False,
+            missing_data = True)
+    generate_scatter_plots(
+            parameters = [
+                    "pop_size_c1sp1",
+                    "pop_size_c2sp1",
+                    "pop_size_c3sp1",
+                    ],
+            parameter_label = "leaf population size",
+            parameter_symbol = "N_e\\mu",
+            plot_file_prefix = "leaf-pop-size",
+            include_all_sizes_fixed = False,
+            include_root_size_fixed = False)
+    generate_scatter_plots(
+            parameters = [
+                    "pop_size_c1sp1",
+                    "pop_size_c2sp1",
+                    "pop_size_c3sp1",
+                    ],
+            parameter_label = "leaf population size",
+            parameter_symbol = "N_e\\mu",
+            plot_file_prefix = "linkage-leaf-pop-size",
+            include_all_sizes_fixed = False,
+            include_root_size_fixed = False,
+            linked_loci = True)
+    generate_scatter_plots(
+            parameters = [
+                    "pop_size_c1sp1",
+                    "pop_size_c2sp1",
+                    "pop_size_c3sp1",
+                    ],
+            parameter_label = "leaf population size",
+            parameter_symbol = "N_e\\mu",
+            plot_file_prefix = "missing-data-leaf-pop-size",
+            include_all_sizes_fixed = False,
+            include_root_size_fixed = False,
+            linked_loci = False,
+            missing_data = True)
+    generate_model_plots(
+            number_of_comparisons = 3,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False)
+    generate_model_plots(
+            number_of_comparisons = 3,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            linked_loci = True)
+    generate_model_plots(
+            number_of_comparisons = 3,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            linked_loci = False,
+            missing_data = True)
+    generate_histograms(
+            parameters = [
+                    "n_var_sites_c1",
+                    "n_var_sites_c2",
+                    "n_var_sites_c3",
+                    ],
+            parameter_label = "Number of variable sites",
+            plot_file_prefix = "number-of-variable-sites",
+            parameter_discrete = True,
+            range_key = "range",
+            number_of_digits = 0,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            include_variable_only = False)
+    generate_histograms(
+            parameters = [
+                    "n_var_sites_c1",
+                    "n_var_sites_c2",
+                    "n_var_sites_c3",
+                    ],
+            parameter_label = "Number of variable sites",
+            plot_file_prefix = "linkage-number-of-variable-sites",
+            parameter_discrete = True,
+            range_key = "range",
+            number_of_digits = 0,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            include_variable_only = False,
+            linked_loci = True)
+    generate_histograms(
+            parameters = [
+                    "ess_sum_ln_likelihood",
+                    ],
+            parameter_label = "Effective samples size of log likelihood",
+            plot_file_prefix = "ess-ln-likelihood",
+            parameter_discrete = False,
+            range_key = "range",
+            number_of_digits = 0,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            include_variable_only = True)
+    generate_histograms(
+            parameters = [
+                    "ess_sum_ln_likelihood",
+                    ],
+            parameter_label = "Effective samples size of log likelihood",
+            plot_file_prefix = "linkage-ess-ln-likelihood",
+            parameter_discrete = False,
+            range_key = "range",
+            number_of_digits = 0,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            include_variable_only = True,
+            linked_loci = True)
+    generate_histograms(
+            parameters = [
+                    "ess_sum_root_height_c1sp1",
+                    "ess_sum_root_height_c2sp1",
+                    "ess_sum_root_height_c3sp1",
+                    ],
+            parameter_label = "Effective samples size of divergence time",
+            plot_file_prefix = "ess-div-time",
+            parameter_discrete = False,
+            range_key = "range",
+            number_of_digits = 0,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            include_variable_only = True)
+    generate_histograms(
+            parameters = [
+                    "ess_sum_root_height_c1sp1",
+                    "ess_sum_root_height_c2sp1",
+                    "ess_sum_root_height_c3sp1",
+                    ],
+            parameter_label = "Effective samples size of divergence time",
+            plot_file_prefix = "linkage-ess-div-time",
+            parameter_discrete = False,
+            range_key = "range",
+            number_of_digits = 0,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            include_variable_only = True,
+            linked_loci = True)
+    generate_histograms(
+            parameters = [
+                    "ess_sum_pop_size_root_c1sp1",
+                    "ess_sum_pop_size_root_c2sp1",
+                    "ess_sum_pop_size_root_c3sp1",
+                    ],
+            parameter_label = "Effective samples size of root population size",
+            plot_file_prefix = "ess-root-pop-size",
+            parameter_discrete = False,
+            range_key = "range",
+            number_of_digits = 0,
+            include_all_sizes_fixed = False,
+            include_root_size_fixed = False,
+            include_variable_only = True)
+    generate_histograms(
+            parameters = [
+                    "ess_sum_pop_size_root_c1sp1",
+                    "ess_sum_pop_size_root_c2sp1",
+                    "ess_sum_pop_size_root_c3sp1",
+                    ],
+            parameter_label = "Effective samples size of root population size",
+            plot_file_prefix = "linkage-ess-root-pop-size",
+            parameter_discrete = False,
+            range_key = "range",
+            number_of_digits = 0,
+            include_all_sizes_fixed = False,
+            include_root_size_fixed = False,
+            include_variable_only = True,
+            linked_loci = True)
+    generate_histograms(
+            parameters = [
+                    "psrf_ln_likelihood",
+                    ],
+            parameter_label = "PSRF of log likelihood",
+            plot_file_prefix = "psrf-ln-likelihood",
+            parameter_discrete = False,
+            range_key = "range",
+            number_of_digits = 3,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            include_variable_only = True)
+    generate_histograms(
+            parameters = [
+                    "psrf_ln_likelihood",
+                    ],
+            parameter_label = "PSRF of log likelihood",
+            plot_file_prefix = "linkage-psrf-ln-likelihood",
+            parameter_discrete = False,
+            range_key = "range",
+            number_of_digits = 3,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            include_variable_only = True,
+            linked_loci = True)
+    generate_histograms(
+            parameters = [
+                    "psrf_root_height_c1sp1",
+                    "psrf_root_height_c2sp1",
+                    "psrf_root_height_c3sp1",
+                    ],
+            parameter_label = "PSRF of divergence time",
+            plot_file_prefix = "psrf-div-time",
+            parameter_discrete = False,
+            range_key = "range",
+            number_of_digits = 3,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            include_variable_only = True)
+    generate_histograms(
+            parameters = [
+                    "psrf_root_height_c1sp1",
+                    "psrf_root_height_c2sp1",
+                    "psrf_root_height_c3sp1",
+                    ],
+            parameter_label = "PSRF of divergence time",
+            plot_file_prefix = "linkage-psrf-div-time",
+            parameter_discrete = False,
+            range_key = "range",
+            number_of_digits = 3,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            include_variable_only = True,
+            linked_loci = True)
+    plot_ess_versus_error(
+            parameters = [
+                    "root_height_c1sp1",
+                    "root_height_c2sp1",
+                    "root_height_c3sp1",
+                    ],
+            parameter_label = "divergence time",
+            plot_file_prefix = "div-time",
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False)
+    generate_bake_off_plots(
+            number_of_pairs = 3,
+            number_of_sims = 500,
+            posterior_sample_size = 2000,
+            prior_sample_size = 500000)
     plot_nevents_estimated_vs_true_probs(
             nevents = 1,
             sim_dir = "03pairs-dpp-root-0100-100k",
