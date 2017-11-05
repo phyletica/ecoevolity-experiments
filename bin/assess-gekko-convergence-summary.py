@@ -20,7 +20,7 @@ def get_worst_values(convergence_table_paths, burnin = 200):
                 max_psrf = float(d["psrf"])
             if float(d["ess_concat"]) < min_ess:
                 min_ess = float(d["ess_concat"])
-                print min_ess
+                sys.stderr.write("{0}\n".format(min_ess))
     return max_psrf, min_ess
 
 
