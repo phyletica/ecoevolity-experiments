@@ -14,20 +14,14 @@ import project_util
 
 _RNG = random.Random()
 
-def get_pbs_header(restrict_nodes = False, walltime = "5:00:00"):
+def get_pbs_header():
     s = ("#! /bin/sh\n"
-         "#PBS -l nodes=1:ppn=1\n"
-         "#PBS -l walltime={0}\n"
-         "#PBS -j oe\n".format(walltime))
-    if restrict_nodes:
-        s += "#PBS -l jobflags=ADVRES:jro0014_lab.56281\n"
-    s += ("\n"
-          "if [ -n \"$PBS_JOBNAME\" ]\n"
-          "then\n"
-          "    source \"${PBS_O_HOME}/.bash_profile\"\n"
-          "    cd \"$PBS_O_WORKDIR\"\n"
-          "    module load gcc/5.3.0\n"
-          "fi\n\n")
+         "\n"
+         "if [ -n \"$PBS_JOBNAME\" ]\n"
+         "then\n"
+         "    cd \"$PBS_O_WORKDIR\"\n"
+         "    module load gcc/5.3.0\n"
+         "fi\n\n")
     return s
 
 def get_asc_header():
@@ -41,8 +35,6 @@ def get_asc_header():
 
 def write_qsub(config_path,
         run_number = 1,
-        restrict_nodes = False,
-        walltime = "2:00:00",
         asc = False,
         relax_missing_sites = False,
         rng = _RNG):
@@ -58,7 +50,7 @@ def write_qsub(config_path,
         if asc:
             out.write(get_asc_header())
         else:
-            out.write(get_pbs_header(restrict_nodes, walltime))
+            out.write(get_pbs_header())
         if relax_missing_sites:
             out.write("ecoevolity --seed {0} --relax-constant-sites --relax-missing-sites {1} 1>{2} 2>&1\n".format(
                     seed,
@@ -69,23 +61,6 @@ def write_qsub(config_path,
                     seed,
                     config_file,
                     stdout_path))
-
-def arg_is_positive_int(i):
-    """
-    Returns int if argument is a positive integer; returns argparse error
-    otherwise.
-
-    >>> arg_is_positive_int(1) == 1
-    True
-    """
-
-    try:
-        if int(i) < 1:
-            raise
-    except:
-        msg = '{0!r} is not a positive integer'.format(i)
-        raise argparse.ArgumentTypeError(msg)
-    return int(i)
 
 
 def main_cli(argv = sys.argv):
@@ -98,16 +73,8 @@ def main_cli(argv = sys.argv):
     parser.add_argument('--number-of-runs',
             action = 'store',
             type = int,
-            default = 2,
-            help = 'Number of qsubs to generate per config (Default: 2).')
-    parser.add_argument('--walltime',
-            action = 'store',
-            type = str,
-            default = '2:00:00',
-            help = 'Walltime for qsub scripts (Default: 2:00:00).')
-    parser.add_argument('--restrict-nodes',
-            action = 'store_true',
-            help = 'Run only on lab nodes.')
+            default = 3,
+            help = 'Number of qsubs to generate per config (Default: 3).')
     parser.add_argument('--relax-missing-sites',
             action = 'store_true',
             help = 'Add relax-missing-sites option to scripts. Default: False')
@@ -128,8 +95,6 @@ def main_cli(argv = sys.argv):
         for i in range(args.number_of_runs):
             write_qsub(config_path = config_path,
                     run_number = i + 1,
-                    restrict_nodes = args.restrict_nodes,
-                    walltime = args.walltime,
                     asc = args.asc,
                     relax_missing_sites = args.relax_missing_sites)
     
