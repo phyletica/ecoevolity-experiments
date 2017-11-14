@@ -199,7 +199,7 @@ def main_cli(argv = sys.argv):
             action = 'store',
             type = int,
             default = 1,
-            help = 'Target run number for consolition.')
+            help = 'Target run number for consolidation.')
     parser.add_argument('-n', '--number-of-samples',
             action = 'store',
             type = int,
