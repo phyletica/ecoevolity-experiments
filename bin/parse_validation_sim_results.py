@@ -8,7 +8,7 @@ import logging
 import glob
 import argparse
 
-import sumcoevolity
+import pycoevolity
 
 import project_util
 
@@ -102,13 +102,13 @@ def get_results_from_sim_rep(
             assert(lc == line_count(posterior_paths[i]))
 
     results = {}
-    post_sample = sumcoevolity.posterior.PosteriorSample(
+    post_sample = pycoevolity.posterior.PosteriorSample(
             posterior_paths,
             burnin = burnin)
     nsamples_per_chain = expected_number_of_samples - burnin
     assert(post_sample.number_of_samples == nchains * nsamples_per_chain)
 
-    true_values = sumcoevolity.parsing.get_dict_from_spreadsheets(
+    true_values = pycoevolity.parsing.get_dict_from_spreadsheets(
             [true_path],
             sep = "\t",
             header = None)
@@ -119,14 +119,14 @@ def get_results_from_sim_rep(
     results["sim"] = sim_number
     results["sample_size"] = post_sample.number_of_samples
 
-    stdout = sumcoevolity.parsing.EcoevolityStdOut(stdout_paths[0])
+    stdout = pycoevolity.parsing.EcoevolityStdOut(stdout_paths[0])
     assert(number_of_comparisons == stdout.number_of_comparisons)
     results["mean_n_var_sites"] = stdout.get_mean_number_of_variable_sites()
     for i in range(number_of_comparisons):
         results["n_var_sites_c{0}".format(i + 1)] = stdout.get_number_of_variable_sites(i)
     run_times = [stdout.run_time]
     for i in range(1, len(stdout_paths)):
-        so = sumcoevolity.parsing.EcoevolityStdOut(stdout_paths[i])
+        so = pycoevolity.parsing.EcoevolityStdOut(stdout_paths[i])
         run_times.append(so.run_time)
         for j in range(number_of_comparisons):
             assert(results["n_var_sites_c{0}".format(j + 1)] == so.get_number_of_variable_sites(j))
@@ -164,20 +164,20 @@ def get_results_from_sim_rep(
     for p in parameter_names:
         true_val = float(true_values[p][0])
         true_val_rank = post_sample.get_rank(p, true_val)
-        ss = sumcoevolity.stats.get_summary(post_sample.parameter_samples[p])
-        ess = sumcoevolity.stats.effective_sample_size(
+        ss = pycoevolity.stats.get_summary(post_sample.parameter_samples[p])
+        ess = pycoevolity.stats.effective_sample_size(
                 post_sample.parameter_samples[p])
         ess_sum = 0.0
         samples_by_chain = []
         for i in range(nchains):
             chain_samples = post_sample.parameter_samples[p][i * nsamples_per_chain : (i + 1) * nsamples_per_chain]
             assert(len(chain_samples) == nsamples_per_chain)
-            ess_sum += sumcoevolity.stats.effective_sample_size(chain_samples)
+            ess_sum += pycoevolity.stats.effective_sample_size(chain_samples)
             if nchains > 1:
                 samples_by_chain.append(chain_samples)
         psrf = -1.0
         if nchains > 1:
-            psrf = sumcoevolity.stats.potential_scale_reduction_factor(samples_by_chain)
+            psrf = pycoevolity.stats.potential_scale_reduction_factor(samples_by_chain)
         results["true_{0}".format(p)] = true_val
         results["true_{0}_rank".format(p)] = true_val_rank
         results["mean_{0}".format(p)] = ss["mean"]
@@ -312,7 +312,7 @@ def parse_simulation_results(
             if not skipping_sim:
                 assert(not os.path.exists(results_path))
                 with open(results_path, 'w') as out:
-                    for line in sumcoevolity.parsing.dict_line_iter(
+                    for line in pycoevolity.parsing.dict_line_iter(
                             results,
                             sep = '\t',
                             header = header):
@@ -320,7 +320,7 @@ def parse_simulation_results(
             if var_only_present:
                 assert(not os.path.exists(var_only_results_path))
                 with open(var_only_results_path, 'w') as out:
-                    for line in sumcoevolity.parsing.dict_line_iter(
+                    for line in pycoevolity.parsing.dict_line_iter(
                             var_only_results,
                             sep = '\t',
                             header = header):
