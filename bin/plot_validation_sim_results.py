@@ -422,6 +422,30 @@ def get_results_paths(
             ]
     return row_keys, results_batches
 
+def get_root_1000_500k_results_paths(
+        validatition_sim_dir):
+    dpp_500k_sim_dirs = []
+    dpp_500k_sim_dirs.extend(sorted(glob.glob(os.path.join(
+            validatition_sim_dir,
+            "03pairs-dpp-root-1000-500k"))))
+    dpp_500k_results_paths = []
+    for sim_dir in dpp_500k_sim_dirs:
+        sim_name = os.path.basename(sim_dir)
+        dpp_500k_results_paths.append(
+                (sim_name, sorted(glob.glob(os.path.join(
+                        sim_dir,
+                        "batch00[12345]",
+                        "results.csv.gz")))
+                )
+        )
+    results_batches = {
+            "500k":                 dpp_500k_results_paths,
+            }
+    row_keys = [
+            "500k",
+            ]
+    return row_keys, results_batches
+
 def get_linked_loci_results_paths(
         validatition_sim_dir,
         include_variable_only = True):
@@ -429,7 +453,7 @@ def get_linked_loci_results_paths(
     dpp_500k_sim_dirs.extend(sorted(glob.glob(os.path.join(
             validatition_sim_dir,
             "03pairs-dpp-root-0100-500k*"))))
-    dirs_to_keep = [d for d in dpp_500k_sim_dirs if not d.endswith("missing")]
+    dirs_to_keep = [d for d in dpp_500k_sim_dirs if ((not d.endswith("missing")) and (not d.endswith("singleton")))]
     dpp_500k_sim_dirs = dirs_to_keep
     dpp_500k_results_paths = []
     vo_dpp_500k_results_paths = []
@@ -505,7 +529,56 @@ def get_missing_data_results_paths(
     dpp_500k_sim_dirs.extend(sorted(glob.glob(os.path.join(
             validatition_sim_dir,
             "03pairs-dpp-root-0100-500k*"))))
-    dirs_to_keep = [d for d in dpp_500k_sim_dirs if not d.endswith("l")]
+    dirs_to_keep = [d for d in dpp_500k_sim_dirs if ((not d.endswith("l")) and (not d.endswith("singleton")))]
+    dpp_500k_sim_dirs = dirs_to_keep
+    dpp_500k_results_paths = []
+    vo_dpp_500k_results_paths = []
+    for sim_dir in dpp_500k_sim_dirs:
+        sim_name = os.path.basename(sim_dir)
+        dpp_500k_results_paths.append(
+                (sim_name, sorted(glob.glob(os.path.join(
+                        sim_dir,
+                        "batch00[12345]",
+                        "results.csv.gz")))
+                )
+        )
+        vo_dpp_500k_results_paths.append(
+                (sim_name, sorted(glob.glob(os.path.join(
+                        sim_dir,
+                        "batch00[12345]",
+                        "var-only-results.csv.gz")))
+                )
+        )
+
+    if not include_variable_only:
+        results_batches = {
+                "500k":                 dpp_500k_results_paths,
+                }
+        row_keys = [
+                "500k",
+                ]
+        return row_keys, results_batches
+
+    results_batches = {
+            "500k":                 dpp_500k_results_paths,
+            "500k variable only":   vo_dpp_500k_results_paths,
+            }
+    row_keys = [
+            "500k",
+            "500k variable only",
+            ]
+    return row_keys, results_batches
+
+def get_filtered_data_results_paths(
+        validatition_sim_dir,
+        include_variable_only = True):
+    dpp_500k_sim_dirs = []
+    dpp_500k_sim_dirs.extend(sorted(glob.glob(os.path.join(
+            validatition_sim_dir,
+            "03pairs-dpp-root-0100-500k-*singleton"))))
+    
+    dirs_to_keep = sorted(dpp_500k_sim_dirs, reverse = True)
+    dirs_to_keep.insert(0, os.path.join(validatition_sim_dir, "03pairs-dpp-root-0100-500k"))
     dpp_500k_sim_dirs = dirs_to_keep
     dpp_500k_results_paths = []
     vo_dpp_500k_results_paths = []
@@ -866,13 +939,15 @@ def generate_scatter_plots(
         include_all_sizes_fixed = True,
         include_root_size_fixed = False,
         linked_loci = False,
-        missing_data = False):
-    if linked_loci and missing_data:
-        raise Exception("Cannot specify both linked_loci and missing_data")
+        missing_data = False,
+        filtered_data = False):
+    if int(linked_loci) + int(missing_data) + int(filtered_data) > 1:
+        raise Exception("Can only specify linked_loci, missing_data, or filtered_data")
     _LOG.info("Generating scatter plots for {0}...".format(parameter_label))
     root_alpha_pattern = re.compile(r'root-(?P<alpha_setting>\S+)-\d00k')
     locus_size_pattern = re.compile(r'root-\d+-\d00k-(?P<locus_size>\d+)l')
     missing_data_pattern = re.compile(r'root-\d+-\d00k-0(?P<p_missing>\d+)missing')
+    filtered_data_pattern = re.compile(r'root-\d+-\d00k-0(?P<p_singleton>\d+)singleton')
 
     assert(len(parameters) == len(set(parameters)))
     if not plot_file_prefix:
@@ -888,6 +963,10 @@ def generate_scatter_plots(
                 include_variable_only = True)
     if missing_data:
         row_keys, results_batches = get_missing_data_results_paths(
+                project_util.VAL_DIR,
+                include_variable_only = True)
+    if filtered_data:
+        row_keys, results_batches = get_filtered_data_results_paths(
                 project_util.VAL_DIR,
                 include_variable_only = True)
 
@@ -914,7 +993,7 @@ def generate_scatter_plots(
     axis_max = parameter_max + axis_buffer
 
     plt.close('all')
-    if missing_data:
+    if missing_data or filtered_data:
         fig = plt.figure(figsize = (9, 4.0))
     else:
         fig = plt.figure(figsize = (9, 6.5))
@@ -1028,6 +1107,13 @@ def generate_scatter_plots(
                         assert len(missing_matches) == 1
                         percent_missing = float("." + missing_matches[0]) * 100.0
                     col_header = "{0:.0f}\\% missing data".format(percent_missing)
+                elif filtered_data:
+                    percent_sampled = 100.0
+                    filtered_matches = filtered_data_pattern.findall(sim_dir)
+                    if filtered_matches:
+                        assert len(filtered_matches) == 1
+                        percent_sampled = float("." + filtered_matches[0]) * 100.0
+                    col_header = "{0:.0f}\\% singleton patterns".format(percent_sampled)
 
                 else:
                     if root_alpha_setting == "fixed-all":
@@ -1112,7 +1198,7 @@ def generate_scatter_plots(
             rotation = "vertical",
             size = 18.0)
 
-    if missing_data:
+    if missing_data or filtered_data:
         gs.update(left = 0.08, right = 0.98, bottom = 0.1, top = 0.96)
     else:
         gs.update(left = 0.08, right = 0.98, bottom = 0.08, top = 0.97)
@@ -1122,6 +1208,157 @@ def generate_scatter_plots(
         os.mkdir(plot_dir)
     plot_path = os.path.join(plot_dir,
             "{0}-scatter.pdf".format(plot_file_prefix))
+    plt.savefig(plot_path, dpi=600)
+    _LOG.info("Plots written to {0!r}\n".format(plot_path))
+
+def generate_root_1000_500k_scatter_plots(
+        parameters,
+        parameter_label = "divergence time",
+        parameter_symbol = "\\tau",
+        plot_file_prefix = None):
+    _LOG.info("Generating scatter plots for {0}...".format(parameter_label))
+    root_alpha_pattern = re.compile(r'root-(?P<alpha_setting>\S+)-\d00k')
+
+    assert(len(parameters) == len(set(parameters)))
+    if not plot_file_prefix:
+        plot_file_prefix = parameters[0] 
+
+    row_keys, results_batches = get_root_1000_500k_results_paths(project_util.VAL_DIR)
+
+    # Very inefficient, but parsing all results to get min/max for parameter
+    parameter_min = float('inf')
+    parameter_max = float('-inf')
+    for key, results_batch in results_batches.items():
+        for sim_dir, results_paths in results_batch:
+            results = pycoevolity.parsing.get_dict_from_spreadsheets(
+                    results_paths,
+                    sep = "\t",
+                    offset = 0)
+            for parameter_str in parameters:
+                parameter_min = min(parameter_min,
+                        min(float(x) for x in results["true_{0}".format(parameter_str)]))
+                parameter_max = max(parameter_max,
+                        max(float(x) for x in results["true_{0}".format(parameter_str)]))
+                parameter_min = min(parameter_min,
+                        min(float(x) for x in results["mean_{0}".format(parameter_str)]))
+                parameter_max = max(parameter_max,
+                        max(float(x) for x in results["mean_{0}".format(parameter_str)]))
+    axis_buffer = math.fabs(parameter_max - parameter_min) * 0.05
+    axis_min = parameter_min - axis_buffer
+    axis_max = parameter_max + axis_buffer
+
+    plt.close('all')
+    fig = plt.figure(figsize = (3.5, 3.0))
+    gs = gridspec.GridSpec(1, 1,
+            wspace = 0.0,
+            hspace = 0.0)
+
+    for row_idx, row_key in enumerate(row_keys):
+        results_batch = results_batches[row_key]
+        last_col_idx = len(results_batch) - 1
+        for col_idx, (sim_dir, results_paths) in enumerate(results_batch):
+            root_alpha_matches = root_alpha_pattern.findall(sim_dir)
+            assert(len(root_alpha_matches) == 1)
+            root_alpha_setting = root_alpha_matches[0]
+
+            results = pycoevolity.parsing.get_dict_from_spreadsheets(
+                    results_paths,
+                    sep = "\t",
+                    offset = 0)
+            _LOG.info("row {0}, col {1} : {2} ({3} batches)".format(
+                    row_idx, col_idx, sim_dir, len(results_paths)))
+
+            x = []
+            y = []
+            y_upper = []
+            y_lower = []
+            for parameter_str in parameters:
+                x.extend(float(x) for x in results["true_{0}".format(parameter_str)])
+                y.extend(float(x) for x in results["mean_{0}".format(parameter_str)])
+                y_lower.extend(float(x) for x in results["eti_95_lower_{0}".format(parameter_str)])
+                y_upper.extend(float(x) for x in results["eti_95_upper_{0}".format(parameter_str)])
+
+            assert(len(x) == len(y))
+            assert(len(x) == len(y_lower))
+            assert(len(x) == len(y_upper))
+            proportion_within_ci = pycoevolity.stats.get_proportion_of_values_within_intervals(
+                    x,
+                    y_lower,
+                    y_upper)
+            rmse = pycoevolity.stats.root_mean_square_error(x, y)
+            _LOG.info("p(within CI) = {0:.4f}".format(proportion_within_ci))
+            _LOG.info("RMSE = {0:.2e}".format(rmse))
+            ax = plt.subplot(gs[row_idx, col_idx])
+            line = ax.errorbar(
+                    x = x,
+                    y = y,
+                    yerr = get_errors(y, y_lower, y_upper),
+                    ecolor = '0.65',
+                    elinewidth = 0.5,
+                    capsize = 0.8,
+                    barsabove = False,
+                    marker = 'o',
+                    linestyle = '',
+                    markerfacecolor = 'none',
+                    markeredgecolor = '0.35',
+                    markeredgewidth = 0.7,
+                    markersize = 2.5,
+                    zorder = 100,
+                    rasterized = True)
+            ax.set_xlim(axis_min, axis_max)
+            ax.set_ylim(axis_min, axis_max)
+            identity_line, = ax.plot(
+                    [axis_min, axis_max],
+                    [axis_min, axis_max])
+            plt.setp(identity_line,
+                    color = '0.7',
+                    linestyle = '-',
+                    linewidth = 1.0,
+                    marker = '',
+                    zorder = 0)
+            ax.text(0.01, 1.01,
+                    "\\normalsize\\noindent$p({0:s} \\in \\textrm{{\\sffamily CI}}) = {1:.3f}$".format(
+                            parameter_symbol,
+                            proportion_within_ci),
+                    horizontalalignment = "left",
+                    verticalalignment = "bottom",
+                    transform = ax.transAxes,
+                    size = 6.0,
+                    zorder = 200)
+            ax.text(0.99, 1.01,
+                    "\\normalsize\\noindent RMSE = {0:.2e}".format(
+                            rmse),
+                    horizontalalignment = "right",
+                    verticalalignment = "bottom",
+                    transform = ax.transAxes,
+                    size = 6.0,
+                    zorder = 200)
+            ax.set_xlabel("True {0} (${1}$)".format(parameter_label, parameter_symbol))
+            ax.set_ylabel("Estimated {0} ($\\hat{{{1}}}$)".format(parameter_label, parameter_symbol))
+            if row_idx == 0:
+                root_shape, root_scale = get_root_gamma_parameters(root_alpha_setting)
+                col_header = "$\\textrm{{\\sffamily Gamma}}({0}, {1})$".format(int(root_shape), root_scale)
+                # ax.text(0.5, 1.0,
+                #         col_header,
+                #         horizontalalignment = "center",
+                #         verticalalignment = "bottom",
+                #         transform = ax.transAxes)
+            if col_idx == last_col_idx:
+                pass
+                # ax.text(1.0, 0.5,
+                #         row_key,
+                #         horizontalalignment = "left",
+                #         verticalalignment = "center",
+                #         rotation = 270.0,
+                #         transform = ax.transAxes)
+
+    gs.update(left = 0.19, right = 0.99, bottom = 0.14, top = 0.92)
+
+    plot_dir = os.path.join(project_util.VAL_DIR, "plots")
+    if not os.path.exists(plot_dir):
+        os.mkdir(plot_dir)
+    plot_path = os.path.join(plot_dir,
+            "root-1000-500k-{0}-scatter.pdf".format(plot_file_prefix))
     plt.savefig(plot_path, dpi=600)
     _LOG.info("Plots written to {0!r}\n".format(plot_path))
 
@@ -1353,13 +1590,15 @@ def generate_model_plots(
         include_all_sizes_fixed = True,
         include_root_size_fixed = False,
         linked_loci = False,
-        missing_data = False):
-    if linked_loci and missing_data:
-        raise Exception("Cannot specify both linked_loci and missing_data")
+        missing_data = False,
+        filtered_data = False):
+    if int(linked_loci) + int(missing_data) + int(filtered_data) > 1:
+        raise Exception("Can only specify linked_loci, missing_data, or filtered_data")
     _LOG.info("Generating model plots...")
     root_alpha_pattern = re.compile(r'root-(?P<alpha_setting>\S+)-\d00k')
     locus_size_pattern = re.compile(r'root-\d+-\d00k-(?P<locus_size>\d+)l')
     missing_data_pattern = re.compile(r'root-\d+-\d00k-0(?P<p_missing>\d+)missing')
+    filtered_data_pattern = re.compile(r'root-\d+-\d00k-0(?P<p_singleton>\d+)singleton')
     dpp_pattern = re.compile(r'-dpp-')
     rj_pattern = re.compile(r'-rj-')
     var_only_pattern = re.compile(r'var-only-')
@@ -1379,9 +1618,13 @@ def generate_model_plots(
         row_keys, results_batches = get_missing_data_results_paths(
                 project_util.VAL_DIR,
                 include_variable_only = True)
+    if filtered_data:
+        row_keys, results_batches = get_filtered_data_results_paths(
+                project_util.VAL_DIR,
+                include_variable_only = True)
 
     plt.close('all')
-    if missing_data:
+    if missing_data or filtered_data:
         fig = plt.figure(figsize = (9, 4.0))
     else:
         fig = plt.figure(figsize = (9, 6.5))
@@ -1509,6 +1752,13 @@ def generate_model_plots(
                         assert len(missing_matches) == 1
                         percent_missing = float("." + missing_matches[0]) * 100.0
                     col_header = "{0:.0f}\\% missing data".format(percent_missing)
+                elif filtered_data:
+                    percent_sampled = 100.0
+                    filtered_matches = filtered_data_pattern.findall(sim_dir)
+                    if filtered_matches:
+                        assert len(filtered_matches) == 1
+                        percent_sampled = float("." + filtered_matches[0]) * 100.0
+                    col_header = "{0:.0f}\\% singleton patterns".format(percent_sampled)
                 else:
                     if root_alpha_setting == "fixed-all":
                         pop_sizes = results["mean_pop_size_c1sp1"]
@@ -1586,7 +1836,7 @@ def generate_model_plots(
             rotation = "vertical",
             size = 18.0)
 
-    if missing_data:
+    if missing_data or filtered_data:
         gs.update(left = 0.08, right = 0.98, bottom = 0.1, top = 0.96)
     else:
         gs.update(left = 0.08, right = 0.98, bottom = 0.08, top = 0.97)
@@ -1600,9 +1850,177 @@ def generate_model_plots(
     elif missing_data:
         plot_path = os.path.join(plot_dir,
                 "missing-data-nevents.pdf")
+    elif filtered_data:
+        plot_path = os.path.join(plot_dir,
+                "filtered-data-nevents.pdf")
     else:
         plot_path = os.path.join(plot_dir,
                 "nevents.pdf")
+    plt.savefig(plot_path)
+    _LOG.info("Plots written to {0!r}\n".format(plot_path))
+
+def generate_root_1000_500k_model_plots(
+        number_of_comparisons = 3):
+    _LOG.info("Generating model plots...")
+    root_alpha_pattern = re.compile(r'root-(?P<alpha_setting>\S+)-\d00k')
+    dpp_pattern = re.compile(r'-dpp-')
+    rj_pattern = re.compile(r'-rj-')
+    number_of_comparisons = 3
+
+    cmap = truncate_color_map(plt.cm.binary, 0.0, 0.65, 100)
+
+    row_keys, results_batches = get_root_1000_500k_results_paths(project_util.VAL_DIR)
+
+    plt.close('all')
+    fig = plt.figure(figsize = (3.5, 3.0))
+    nrows = 1
+    ncols = 1 
+    gs = gridspec.GridSpec(nrows, ncols,
+            wspace = 0.0,
+            hspace = 0.0)
+
+    for row_idx, row_key in enumerate(row_keys):
+        results_batch = results_batches[row_key]
+        last_col_idx = len(results_batch) - 1
+        for col_idx, (sim_dir, results_paths) in enumerate(results_batch):
+            root_alpha_matches = root_alpha_pattern.findall(sim_dir)
+            assert(len(root_alpha_matches) == 1)
+            root_alpha_setting = root_alpha_matches[0]
+
+            results = pycoevolity.parsing.get_dict_from_spreadsheets(
+                    results_paths,
+                    sep = "\t",
+                    offset = 0)
+            _LOG.info("row {0}, col {1} : {2} ({3} batches)".format(
+                    row_idx, col_idx, sim_dir, len(results_paths)))
+
+            true_map_nevents = []
+            true_map_nevents_probs = []
+            for i in range(number_of_comparisons):
+                true_map_nevents.append([0 for i in range(number_of_comparisons)])
+                true_map_nevents_probs.append([[] for i in range(number_of_comparisons)])
+            true_nevents = tuple(int(x) for x in results["true_num_events"])
+            map_nevents = tuple(int(x) for x in results["map_num_events"])
+            true_nevents_cred_levels = tuple(float(x) for x in results["true_num_events_cred_level"])
+            true_model_cred_levels = tuple(float(x) for x in results["true_model_cred_level"])
+            assert(len(true_nevents) == len(map_nevents))
+            assert(len(true_nevents) == len(true_nevents_cred_levels))
+            assert(len(true_nevents) == len(true_model_cred_levels))
+
+            true_nevents_probs = []
+            map_nevents_probs = []
+            for i in range(len(true_nevents)):
+                true_nevents_probs.append(float(
+                    results["num_events_{0}_p".format(true_nevents[i])][i]))
+                map_nevents_probs.append(float(
+                    results["num_events_{0}_p".format(map_nevents[i])][i]))
+            assert(len(true_nevents) == len(true_nevents_probs))
+            assert(len(true_nevents) == len(map_nevents_probs))
+
+            mean_true_nevents_prob = sum(true_nevents_probs) / len(true_nevents_probs)
+            median_true_nevents_prob = pycoevolity.stats.median(true_nevents_probs)
+
+            nevents_within_95_cred = 0
+            model_within_95_cred = 0
+            ncorrect = 0
+            for i in range(len(true_nevents)):
+                true_map_nevents[map_nevents[i] - 1][true_nevents[i] - 1] += 1
+                true_map_nevents_probs[map_nevents[i] - 1][true_nevents[i] - 1].append(map_nevents_probs[i])
+                if true_nevents_cred_levels[i] <= 0.95:
+                    nevents_within_95_cred += 1
+                if true_model_cred_levels[i] <= 0.95:
+                    model_within_95_cred += 1
+                if true_nevents[i] == map_nevents[i]:
+                    ncorrect += 1
+            p_nevents_within_95_cred = nevents_within_95_cred / float(len(true_nevents))
+            p_model_within_95_cred = model_within_95_cred / float(len(true_nevents))
+            p_correct = ncorrect / float(len(true_nevents))
+
+            _LOG.info("p(nevents within CS) = {0:.4f}".format(p_nevents_within_95_cred))
+            _LOG.info("p(model within CS) = {0:.4f}".format(p_model_within_95_cred))
+            ax = plt.subplot(gs[row_idx, col_idx])
+
+            ax.imshow(true_map_nevents,
+                    origin = 'lower',
+                    cmap = cmap,
+                    interpolation = 'none',
+                    aspect = 'auto'
+                    )
+            for i, row_list in enumerate(true_map_nevents):
+                for j, num_events in enumerate(row_list):
+                    ax.text(j, i,
+                            str(num_events),
+                            horizontalalignment = "center",
+                            verticalalignment = "center")
+            # ax.text(0.99, 0.01,
+            #         "$p(k \\in 95\\% \\textrm{{\\sffamily CS}}) = {0:.3f}$".format(
+            #                 p_nevents_within_95_cred),
+            #         horizontalalignment = "right",
+            #         verticalalignment = "bottom",
+            #         transform = ax.transAxes)
+            ax.text(0.01, 1.01,
+                    "$p(\\hat{{k}} = k) = {0:.3f}$".format(
+                            p_correct),
+                    horizontalalignment = "left",
+                    verticalalignment = "bottom",
+                    transform = ax.transAxes)
+            ax.text(0.99, 1.01,
+                    "$\\widetilde{{p(k)}} = {0:.3f}$".format(
+                            median_true_nevents_prob),
+                    horizontalalignment = "right",
+                    verticalalignment = "bottom",
+                    transform = ax.transAxes)
+            ax.set_xlabel("True number of events ($k$)", labelpad = 8.0)
+            ax.set_ylabel("Estimated number of events ($\\hat{{k}}$)", labelpad = 8.0)
+            if row_idx == 0:
+                root_shape, root_scale = get_root_gamma_parameters(root_alpha_setting)
+                col_header = "$\\textrm{{\\sffamily Gamma}}({0}, {1})$".format(int(root_shape), root_scale)
+                # ax.text(0.5, 1.0,
+                #         col_header,
+                #         horizontalalignment = "center",
+                #         verticalalignment = "bottom",
+                #         transform = ax.transAxes)
+            if col_idx == last_col_idx:
+                pass
+                # ax.text(1.0, 0.5,
+                #         row_key,
+                #         horizontalalignment = "left",
+                #         verticalalignment = "center",
+                #         rotation = 270.0,
+                #         transform = ax.transAxes)
+
+    # show tick labels only for lower-left plot 
+    label_offset = float(number_of_comparisons) * 0.03 # 4% of axis range
+    label_offset += 0.5 # origin is at -0.5
+    all_axes = fig.get_axes()
+    for ax in all_axes:
+        xtick_labels = ["" for item in ax.get_xticklabels()]
+        ytick_labels = ["" for item in ax.get_yticklabels()]
+        ax.set_xticklabels(xtick_labels)
+        ax.set_yticklabels(ytick_labels)
+        if ax.is_last_row() and ax.is_first_col():
+            # get_xticklabels and set_xticklabels was not working.
+            # There was only 5 tick elements rather than 7, and so
+            # changing the last label from 2 to 3 was impossible.
+            # So, using hack of "erasing" tick labels and then using
+            # ax.text() to place labels manually.
+            for i in range(number_of_comparisons):
+                ax.text(i, -label_offset,
+                        str(i + 1),
+                        horizontalalignment = "center",
+                        verticalalignment = "top")
+                ax.text(-label_offset, i,
+                        str(i + 1),
+                        horizontalalignment = "right",
+                        verticalalignment = "center")
+
+    gs.update(left = 0.11, right = 0.99, bottom = 0.12, top = 0.92)
+
+    plot_dir = os.path.join(project_util.VAL_DIR, "plots")
+    if not os.path.exists(plot_dir):
+        os.mkdir(plot_dir)
+    plot_path = os.path.join(plot_dir,
+            "root-1000-500k-nevents.pdf")
     plt.savefig(plot_path)
     _LOG.info("Plots written to {0!r}\n".format(plot_path))
 
@@ -1864,7 +2282,7 @@ def generate_bake_off_plots(
                 #         verticalalignment = "top",
                 #         transform = ax.transAxes)
                 ax.text(0.99, 0.99,
-                        "\\scriptsize$\\widetilde{{pp(k)}} = {0:.3f}$".format(
+                        "\\scriptsize$\\widetilde{{p(k)}} = {0:.3f}$".format(
                                 median_true_nevents_prob),
                         horizontalalignment = "right",
                         verticalalignment = "top",
@@ -2161,6 +2579,29 @@ def main_cli(argv = sys.argv):
             missing_data = True)
     generate_scatter_plots(
             parameters = [
+                    "root_height_c1sp1",
+                    "root_height_c2sp1",
+                    "root_height_c3sp1",
+                    ],
+            parameter_label = "divergence time",
+            parameter_symbol = "\\tau",
+            plot_file_prefix = "filtered-data-div-time",
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            linked_loci = False,
+            missing_data = False,
+            filtered_data = True)
+    generate_root_1000_500k_scatter_plots(
+            parameters = [
+                    "root_height_c1sp1",
+                    "root_height_c2sp1",
+                    "root_height_c3sp1",
+                    ],
+            parameter_label = "divergence time",
+            parameter_symbol = "\\tau",
+            plot_file_prefix = "div-time")
+    generate_scatter_plots(
+            parameters = [
                     "pop_size_root_c1sp1",
                     "pop_size_root_c2sp1",
                     "pop_size_root_c3sp1",
@@ -2197,6 +2638,29 @@ def main_cli(argv = sys.argv):
             missing_data = True)
     generate_scatter_plots(
             parameters = [
+                    "pop_size_root_c1sp1",
+                    "pop_size_root_c2sp1",
+                    "pop_size_root_c3sp1",
+                    ],
+            parameter_label = "root population size",
+            parameter_symbol = "N_e\\mu",
+            plot_file_prefix = "filtered-data-root-pop-size",
+            include_all_sizes_fixed = False,
+            include_root_size_fixed = False,
+            linked_loci = False,
+            missing_data = False,
+            filtered_data = True)
+    generate_root_1000_500k_scatter_plots(
+            parameters = [
+                    "pop_size_root_c1sp1",
+                    "pop_size_root_c2sp1",
+                    "pop_size_root_c3sp1",
+                    ],
+            parameter_label = "root population size",
+            parameter_symbol = "N_e\\mu",
+            plot_file_prefix = "root-pop-size")
+    generate_scatter_plots(
+            parameters = [
                     "pop_size_c1sp1",
                     "pop_size_c2sp1",
                     "pop_size_c3sp1",
@@ -2231,6 +2695,29 @@ def main_cli(argv = sys.argv):
             include_root_size_fixed = False,
             linked_loci = False,
             missing_data = True)
+    generate_scatter_plots(
+            parameters = [
+                    "pop_size_c1sp1",
+                    "pop_size_c2sp1",
+                    "pop_size_c3sp1",
+                    ],
+            parameter_label = "leaf population size",
+            parameter_symbol = "N_e\\mu",
+            plot_file_prefix = "filtered-data-leaf-pop-size",
+            include_all_sizes_fixed = False,
+            include_root_size_fixed = False,
+            linked_loci = False,
+            missing_data = False,
+            filtered_data = True)
+    generate_root_1000_500k_scatter_plots(
+            parameters = [
+                    "pop_size_c1sp1",
+                    "pop_size_c2sp1",
+                    "pop_size_c3sp1",
+                    ],
+            parameter_label = "leaf population size",
+            parameter_symbol = "N_e\\mu",
+            plot_file_prefix = "leaf-pop-size")
     generate_model_plots(
             number_of_comparisons = 3,
             include_all_sizes_fixed = True,
@@ -2246,6 +2733,15 @@ def main_cli(argv = sys.argv):
             include_root_size_fixed = False,
             linked_loci = False,
             missing_data = True)
+    generate_model_plots(
+            number_of_comparisons = 3,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            linked_loci = False,
+            missing_data = False,
+            filtered_data = True)
+    generate_root_1000_500k_model_plots(
+            number_of_comparisons = 3)
     generate_histograms(
             parameters = [
                     "n_var_sites_c1",
