@@ -85,4 +85,13 @@ do
     done
 done
 
+
+cd "$plot_dir"
+
+for p in pyco-*.pdf
+do
+    pdfcrop "$p" "$p"
+done
+
+
 cd "$current_dir"
