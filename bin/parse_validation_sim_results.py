@@ -332,7 +332,7 @@ def main_cli(argv = sys.argv):
     parser.add_argument('-r', '--expected-number-of-runs',
             action = 'store',
             type = int,
-            default = 2,
+            default = 3,
             help = 'Number of MCMC chains that were run for each sim rep.')
     parser.add_argument('-s', '--expected-number-of-samples',
             action = 'store',
