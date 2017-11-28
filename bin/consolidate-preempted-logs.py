@@ -37,18 +37,18 @@ def consolidate_preempted_logs(
         batch_dirs = glob.glob(os.path.join(val_sim_dir, "batch*"))
         for batch_dir in sorted(batch_dirs):
             if batch_dir_name and (os.path.basename(batch_dir) != batch_dir_name):
-                sys.stdout.write("Skipping {0}\n".format(batch_dir))
+                sys.stderr.write("Skipping {0}\n".format(batch_dir))
                 continue
             batch_number_matches = batch_number_pattern.findall(batch_dir)
             assert len(batch_number_matches) == 1
             batch_number_str = batch_number_matches[0]
             batch_number = int(batch_number_str)
 
-            posterior_paths = glob.glob(os.path.join(batch_dir,
-                    "*simcoevolity-sim-*-config-state-run-{0}.log*".format(
+            sh_paths = glob.glob(os.path.join(batch_dir,
+                    "*simcoevolity-sim-*-config-run-{0}-qsub.sh".format(
                             target_run_number)))
-            if not posterior_paths:
-                sys.stderr.write("WARNING: No log files found for\n"
+            if not sh_paths:
+                sys.stderr.write("WARNING: No qsub files found for\n"
                         "    Simulation: {0}\n"
                         "    Batch: {1}\n"
                         "    Target run: {2}\n    Skipping!!\n".format(
@@ -56,7 +56,14 @@ def consolidate_preempted_logs(
                             batch_number,
                             target_run_number))
                 continue
-            for posterior_path in sorted(posterior_paths):
+            for sh_path in sorted(sh_paths):
+                posterior_path = sh_path.replace(
+                        "-run-{0}-qsub.sh".format(target_run_number),
+                        "-state-run-{0}.log".format(target_run_number))
+                if not os.path.exists(posterior_path):
+                    sys.stderr.write("WARNING: Missing log: {0}\n".format(posterior_path))
+                    sys.stdout.write("{0}\n".format(sh_path))
+                    continue
                 sim_number_matches = sim_number_pattern.findall(posterior_path)
                 assert len(sim_number_matches) == 1
                 sim_number_str = sim_number_matches[0]
@@ -118,6 +125,7 @@ def consolidate_preempted_logs(
                                         batch_number,
                                         sim_number,
                                         target_run_number))
+                        sys.stdout.write("{0}\n".format(sh_path))
                     continue
                 else:
                     if line_count(target_state_log_path) >= number_of_lines:
@@ -131,6 +139,7 @@ def consolidate_preempted_logs(
                                         batch_number,
                                         sim_number,
                                         target_run_number))
+                        sys.stdout.write("{0}\n".format(sh_path))
                         continue
                     completed_run_number = extra_run_numbers.pop(-1)
                     completed_state_log_pattern = os.path.join(batch_dir,
@@ -164,6 +173,7 @@ def consolidate_preempted_logs(
                                         batch_number,
                                         sim_number,
                                         target_run_number))
+                        sys.stdout.write("{0}\n".format(sh_path))
                         continue
                     os.rename(completed_state_log_path, target_state_log_path)
                     os.rename(completed_op_log_path, target_op_log_path)
