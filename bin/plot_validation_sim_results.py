@@ -125,7 +125,8 @@ def plot_nevents_estimated_vs_true_probs(
         nevents = 1,
         sim_dir = "03pairs-dpp-root-0100-100k",
         nbins = 20,
-        plot_file_prefix = ""):
+        plot_file_prefix = "",
+        include_unlinked_only = False):
     bins, est_true_probs = get_nevents_estimated_true_probs(
             nevents = nevents,
             sim_dir = sim_dir,
@@ -136,11 +137,21 @@ def plot_nevents_estimated_vs_true_probs(
             sim_dir = sim_dir,
             variable_only = True,
             nbins = nbins)
+    if include_unlinked_only:
+        uo_bins, uo_est_true_probs = get_nevents_estimated_true_probs(
+                nevents = nevents,
+                sim_dir = sim_dir.replace("0l", "0ul"),
+                variable_only = False,
+                nbins = nbins)
 
     plt.close('all')
-    fig = plt.figure(figsize = (5.2, 2.5))
+    if include_unlinked_only:
+        fig = plt.figure(figsize = (7.5, 2.5))
+        ncols = 3
+    else:
+        fig = plt.figure(figsize = (5.2, 2.5))
+        ncols = 2
     nrows = 1
-    ncols = 2
     gs = gridspec.GridSpec(nrows, ncols,
             wspace = 0.0,
             hspace = 0.0)
@@ -254,6 +265,59 @@ def plot_nevents_estimated_vs_true_probs(
             linewidth = 1.0,
             marker = '',
             zorder = 0)
+
+    if include_unlinked_only:
+        ax = plt.subplot(gs[0, 2])
+        x = [e for (e, t) in uo_est_true_probs]
+        y = [t for (e, t) in uo_est_true_probs]
+        sample_sizes = [len(b) for b in uo_bins]
+        line, = ax.plot(x, y)
+        plt.setp(line,
+                marker = 'o',
+                markerfacecolor = 'none',
+                markeredgecolor = '0.35',
+                markeredgewidth = 0.7,
+                markersize = 3.5,
+                linestyle = '',
+                zorder = 100,
+                rasterized = False)
+        ax.set_xlim(0.0, 1.0)
+        ax.set_ylim(0.0, 1.0)
+        for i, (label, lx, ly) in enumerate(zip(sample_sizes, x, y)):
+            if i == 0:
+                ax.annotate(
+                        str(label),
+                        xy = (lx, ly),
+                        xytext = (1, 1),
+                        textcoords = "offset points",
+                        horizontalalignment = "left",
+                        verticalalignment = "bottom")
+            elif i == len(x) - 1:
+                ax.annotate(
+                        str(label),
+                        xy = (lx, ly),
+                        xytext = (-1, -1),
+                        textcoords = "offset points",
+                        horizontalalignment = "right",
+                        verticalalignment = "top")
+            else:
+                ax.annotate(
+                        str(label),
+                        xy = (lx, ly),
+                        xytext = (-1, 1),
+                        textcoords = "offset points",
+                        horizontalalignment = "right",
+                        verticalalignment = "bottom")
+        uo_title_text = ax.set_title("Unlinked only")
+        identity_line, = ax.plot(
+                [0.0, 1.0],
+                [0.0, 1.0])
+        plt.setp(identity_line,
+                color = '0.8',
+                linestyle = '-',
+                linewidth = 1.0,
+                marker = '',
+                zorder = 0)
 
     # show only the outside ticks
     all_axes = fig.get_axes()
@@ -448,78 +512,59 @@ def get_root_1000_500k_results_paths(
 
 def get_linked_loci_results_paths(
         validatition_sim_dir,
-        include_variable_only = True):
-    dpp_500k_sim_dirs = []
-    dpp_500k_sim_dirs.extend(sorted(glob.glob(os.path.join(
+        data_set_size = "100k",
+        include_variable_only = True,
+        include_unlinked_only = True):
+    dpp_sim_dirs = []
+    dpp_sim_dirs.extend(sorted(glob.glob(os.path.join(
             validatition_sim_dir,
-            "03pairs-dpp-root-0100-500k*"))))
-    dirs_to_keep = [d for d in dpp_500k_sim_dirs if ((not d.endswith("missing")) and (not d.endswith("singleton")))]
-    dpp_500k_sim_dirs = dirs_to_keep
-    dpp_500k_results_paths = []
-    vo_dpp_500k_results_paths = []
-    for sim_dir in dpp_500k_sim_dirs:
+            "03pairs-dpp-root-0100-{0}-*0l".format(data_set_size)))))
+    dpp_results_paths = []
+    vo_dpp_results_paths = []
+    for sim_dir in dpp_sim_dirs:
         sim_name = os.path.basename(sim_dir)
-        dpp_500k_results_paths.append(
+        dpp_results_paths.append(
                 (sim_name, sorted(glob.glob(os.path.join(
                         sim_dir,
                         "batch00[12345]",
                         "results.csv.gz")))
                 )
         )
-        vo_dpp_500k_results_paths.append(
+        vo_dpp_results_paths.append(
                 (sim_name, sorted(glob.glob(os.path.join(
                         sim_dir,
                         "batch00[12345]",
                         "var-only-results.csv.gz")))
                 )
         )
-
-    dpp_100k_sim_dirs = []
-    dpp_100k_sim_dirs.extend(sorted(glob.glob(os.path.join(
+    dpp_unlinked_sim_dirs = []
+    dpp_unlinked_sim_dirs.extend(sorted(glob.glob(os.path.join(
             validatition_sim_dir,
-            "03pairs-dpp-root-0100-100k*"))))
-    dpp_100k_results_paths = []
-    vo_dpp_100k_results_paths = []
-    for sim_dir in dpp_100k_sim_dirs:
+            "03pairs-dpp-root-0100-{0}-*0ul".format(data_set_size)))))
+    uo_dpp_results_paths = []
+    for sim_dir in dpp_unlinked_sim_dirs:
         sim_name = os.path.basename(sim_dir)
-        dpp_100k_results_paths.append(
+        uo_dpp_results_paths.append(
                 (sim_name, sorted(glob.glob(os.path.join(
                         sim_dir,
                         "batch00[12345]",
                         "results.csv.gz")))
                 )
         )
-        vo_dpp_100k_results_paths.append(
-                (sim_name, sorted(glob.glob(os.path.join(
-                        sim_dir,
-                        "batch00[12345]",
-                        "var-only-results.csv.gz")))
-                )
-        )
-        
-    if not include_variable_only:
-        results_batches = {
-                "500k":                 dpp_500k_results_paths,
-                "100k":                 dpp_100k_results_paths,
-                }
-        row_keys = [
-                "500k",
-                "100k",
-                ]
-        return row_keys, results_batches
 
+    s = data_set_size
     results_batches = {
-            "500k":                 dpp_500k_results_paths,
-            "500k variable only":   vo_dpp_500k_results_paths,
-            "100k":                 dpp_100k_results_paths,
-            "100k variable only":   vo_dpp_100k_results_paths,
+            "{0}".format(s): dpp_results_paths,
             }
     row_keys = [
-            "500k",
-            "500k variable only",
-            "100k",
-            "100k variable only",
+            "{0}".format(s),
             ]
+    if include_variable_only:
+        results_batches["{0} variable only".format(s)] = vo_dpp_results_paths
+        row_keys.append("{0} variable only".format(s))
+    if include_unlinked_only:
+        results_batches["{0} unlinked only".format(s)] = uo_dpp_results_paths
+        row_keys.append("{0} unlinked only".format(s))
     return row_keys, results_batches
 
 def get_missing_data_results_paths(
@@ -938,14 +983,14 @@ def generate_scatter_plots(
         plot_file_prefix = None,
         include_all_sizes_fixed = True,
         include_root_size_fixed = False,
-        linked_loci = False,
+        linked_loci = None,
         missing_data = False,
         filtered_data = False):
-    if int(linked_loci) + int(missing_data) + int(filtered_data) > 1:
+    if int(bool(linked_loci)) + int(missing_data) + int(filtered_data) > 1:
         raise Exception("Can only specify linked_loci, missing_data, or filtered_data")
     _LOG.info("Generating scatter plots for {0}...".format(parameter_label))
     root_alpha_pattern = re.compile(r'root-(?P<alpha_setting>\S+)-\d00k')
-    locus_size_pattern = re.compile(r'root-\d+-\d00k-(?P<locus_size>\d+)l')
+    locus_size_pattern = re.compile(r'root-\d+-\d00k-(?P<locus_size>\d+)u?l')
     missing_data_pattern = re.compile(r'root-\d+-\d00k-0(?P<p_missing>\d+)missing')
     filtered_data_pattern = re.compile(r'root-\d+-\d00k-0(?P<p_singleton>\d+)singleton')
 
@@ -960,7 +1005,9 @@ def generate_scatter_plots(
     if linked_loci:
         row_keys, results_batches = get_linked_loci_results_paths(
                 project_util.VAL_DIR,
-                include_variable_only = True)
+                data_set_size = linked_loci,
+                include_variable_only = True,
+                include_unlinked_only = True)
     if missing_data:
         row_keys, results_batches = get_missing_data_results_paths(
                 project_util.VAL_DIR,
@@ -995,6 +1042,8 @@ def generate_scatter_plots(
     plt.close('all')
     if missing_data or filtered_data:
         fig = plt.figure(figsize = (9, 4.0))
+    elif linked_loci:
+        fig = plt.figure(figsize = (7.25, 6.5))
     else:
         fig = plt.figure(figsize = (9, 6.5))
     nrows = len(results_batches)
@@ -1094,11 +1143,11 @@ def generate_scatter_plots(
                     zorder = 200)
             if row_idx == 0:
                 if linked_loci:
-                    locus_size = 1
+                    # locus_size = 1
                     locus_size_matches = locus_size_pattern.findall(sim_dir)
-                    if locus_size_matches:
-                        assert len(locus_size_matches) == 1
-                        locus_size = int(locus_size_matches[0])
+                    # if locus_size_matches:
+                    assert len(locus_size_matches) == 1
+                    locus_size = int(locus_size_matches[0])
                     col_header = "$\\textrm{{\\sffamily Locus length}} = {0}$".format(locus_size)
                 elif missing_data:
                     percent_missing = 0.0
@@ -1373,13 +1422,13 @@ def generate_histograms(
         include_all_sizes_fixed = True,
         include_root_size_fixed = False,
         include_variable_only = True,
-        linked_loci = False):
+        linked_loci = None):
     _LOG.info("Generating histograms for {0}...".format(parameter_label))
     assert(len(parameters) == len(set(parameters)))
     if not plot_file_prefix:
         plot_file_prefix = parameters[0] 
     root_alpha_pattern = re.compile(r'root-(?P<alpha_setting>\S+)-\d00k')
-    locus_size_pattern = re.compile(r'root-\d+-\d00k-(?P<locus_size>\d+)l')
+    locus_size_pattern = re.compile(r'root-\d+-\d00k-(?P<locus_size>\d+)u?l')
 
     row_keys, results_batches = get_results_paths(project_util.VAL_DIR,
             include_all_sizes_fixed = include_all_sizes_fixed,
@@ -1388,7 +1437,9 @@ def generate_histograms(
     if linked_loci:
         row_keys, results_batches = get_linked_loci_results_paths(
                 project_util.VAL_DIR,
-                include_variable_only = include_variable_only)
+                data_set_size = linked_loci,
+                include_variable_only = include_variable_only,
+                include_unlinked_only = True)
 
     # Very inefficient, but parsing all results to get min/max for parameter
     parameter_min = float('inf')
@@ -1414,6 +1465,8 @@ def generate_histograms(
         fig = plt.figure(figsize = (9, 6.5))
     else:
         fig = plt.figure(figsize = (9, 3.25))
+    if linked_loci:
+        fig = plt.figure(figsize = (6, 3.5))
     nrows = len(results_batches)
     ncols = len(results_batches.values()[0])
     gs = gridspec.GridSpec(nrows, ncols,
@@ -1453,7 +1506,8 @@ def generate_histograms(
                 x_range = (int(parameter_min), int(parameter_max))
             ax = plt.subplot(gs[row_idx, col_idx])
             n, bins, patches = ax.hist(x,
-                    normed = True,
+                    # normed = True,
+                    weights = [1.0 / float(len(x))] * len(x),
                     bins = hist_bins,
                     range = x_range,
                     cumulative = False,
@@ -1490,11 +1544,11 @@ def generate_histograms(
 
             if row_idx == 0:
                 if linked_loci:
-                    locus_size = 1
+                    # locus_size = 1
                     locus_size_matches = locus_size_pattern.findall(sim_dir)
-                    if locus_size_matches:
-                        assert len(locus_size_matches) == 1
-                        locus_size = int(locus_size_matches[0])
+                    # if locus_size_matches:
+                    assert len(locus_size_matches) == 1
+                    locus_size = int(locus_size_matches[0])
                     col_header = "$\\textrm{{\\sffamily Locus length}} = {0}$".format(locus_size)
                 else:
                     if root_alpha_setting == "fixed-all":
@@ -1568,7 +1622,8 @@ def generate_histograms(
             verticalalignment = "bottom",
             size = 18.0)
     fig.text(0.005, 0.5,
-            "Density",
+            # "Density",
+            "Frequency",
             horizontalalignment = "left",
             verticalalignment = "center",
             rotation = "vertical",
@@ -1589,10 +1644,10 @@ def generate_model_plots(
         number_of_comparisons = 3,
         include_all_sizes_fixed = True,
         include_root_size_fixed = False,
-        linked_loci = False,
+        linked_loci = None,
         missing_data = False,
         filtered_data = False):
-    if int(linked_loci) + int(missing_data) + int(filtered_data) > 1:
+    if int(bool(linked_loci)) + int(missing_data) + int(filtered_data) > 1:
         raise Exception("Can only specify linked_loci, missing_data, or filtered_data")
     _LOG.info("Generating model plots...")
     root_alpha_pattern = re.compile(r'root-(?P<alpha_setting>\S+)-\d00k')
@@ -1613,7 +1668,9 @@ def generate_model_plots(
     if linked_loci:
         row_keys, results_batches = get_linked_loci_results_paths(
                 project_util.VAL_DIR,
-                include_variable_only = True)
+                data_set_size = linked_loci,
+                include_variable_only = True,
+                include_unlinked_only = True)
     if missing_data:
         row_keys, results_batches = get_missing_data_results_paths(
                 project_util.VAL_DIR,
@@ -1626,6 +1683,8 @@ def generate_model_plots(
     plt.close('all')
     if missing_data or filtered_data:
         fig = plt.figure(figsize = (9, 4.0))
+    elif linked_loci:
+        fig = plt.figure(figsize = (7.25, 6.5))
     else:
         fig = plt.figure(figsize = (9, 6.5))
     nrows = len(results_batches)
@@ -1739,11 +1798,11 @@ def generate_model_plots(
                     transform = ax.transAxes)
             if row_idx == 0:
                 if linked_loci:
-                    locus_size = 1
+                    # locus_size = 1
                     locus_size_matches = locus_size_pattern.findall(sim_dir)
-                    if locus_size_matches:
-                        assert len(locus_size_matches) == 1
-                        locus_size = int(locus_size_matches[0])
+                    # if locus_size_matches:
+                    assert len(locus_size_matches) == 1
+                    locus_size = int(locus_size_matches[0])
                     col_header = "$\\textrm{{\\sffamily Locus length}} = {0}$".format(locus_size)
                 elif missing_data:
                     percent_missing = 0.0
@@ -1846,7 +1905,7 @@ def generate_model_plots(
         os.mkdir(plot_dir)
     if linked_loci:
         plot_path = os.path.join(plot_dir,
-                "linkage-nevents.pdf")
+                "linkage-{0}-nevents.pdf".format(linked_loci))
     elif missing_data:
         plot_path = os.path.join(plot_dir,
                 "missing-data-nevents.pdf")
@@ -2560,10 +2619,22 @@ def main_cli(argv = sys.argv):
                     ],
             parameter_label = "divergence time",
             parameter_symbol = "\\tau",
-            plot_file_prefix = "linkage-div-time",
+            plot_file_prefix = "linkage-100k-div-time",
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
-            linked_loci = True)
+            linked_loci = "100k")
+    generate_scatter_plots(
+            parameters = [
+                    "root_height_c1sp1",
+                    "root_height_c2sp1",
+                    "root_height_c3sp1",
+                    ],
+            parameter_label = "divergence time",
+            parameter_symbol = "\\tau",
+            plot_file_prefix = "linkage-500k-div-time",
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            linked_loci = "500k")
     generate_scatter_plots(
             parameters = [
                     "root_height_c1sp1",
@@ -2575,7 +2646,7 @@ def main_cli(argv = sys.argv):
             plot_file_prefix = "missing-data-div-time",
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
-            linked_loci = False,
+            linked_loci = None,
             missing_data = True)
     generate_scatter_plots(
             parameters = [
@@ -2588,7 +2659,7 @@ def main_cli(argv = sys.argv):
             plot_file_prefix = "filtered-data-div-time",
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
-            linked_loci = False,
+            linked_loci = None,
             missing_data = False,
             filtered_data = True)
     generate_root_1000_500k_scatter_plots(
@@ -2619,10 +2690,22 @@ def main_cli(argv = sys.argv):
                     ],
             parameter_label = "root population size",
             parameter_symbol = "N_e\\mu",
-            plot_file_prefix = "linkage-root-pop-size",
+            plot_file_prefix = "linkage-100k-root-pop-size",
             include_all_sizes_fixed = False,
             include_root_size_fixed = False,
-            linked_loci = True)
+            linked_loci = "100k")
+    generate_scatter_plots(
+            parameters = [
+                    "pop_size_root_c1sp1",
+                    "pop_size_root_c2sp1",
+                    "pop_size_root_c3sp1",
+                    ],
+            parameter_label = "root population size",
+            parameter_symbol = "N_e\\mu",
+            plot_file_prefix = "linkage-500k-root-pop-size",
+            include_all_sizes_fixed = False,
+            include_root_size_fixed = False,
+            linked_loci = "500k")
     generate_scatter_plots(
             parameters = [
                     "pop_size_root_c1sp1",
@@ -2634,7 +2717,7 @@ def main_cli(argv = sys.argv):
             plot_file_prefix = "missing-data-root-pop-size",
             include_all_sizes_fixed = False,
             include_root_size_fixed = False,
-            linked_loci = False,
+            linked_loci = None,
             missing_data = True)
     generate_scatter_plots(
             parameters = [
@@ -2647,7 +2730,7 @@ def main_cli(argv = sys.argv):
             plot_file_prefix = "filtered-data-root-pop-size",
             include_all_sizes_fixed = False,
             include_root_size_fixed = False,
-            linked_loci = False,
+            linked_loci = None,
             missing_data = False,
             filtered_data = True)
     generate_root_1000_500k_scatter_plots(
@@ -2678,10 +2761,22 @@ def main_cli(argv = sys.argv):
                     ],
             parameter_label = "leaf population size",
             parameter_symbol = "N_e\\mu",
-            plot_file_prefix = "linkage-leaf-pop-size",
+            plot_file_prefix = "linkage-100k-leaf-pop-size",
             include_all_sizes_fixed = False,
             include_root_size_fixed = False,
-            linked_loci = True)
+            linked_loci = "100k")
+    generate_scatter_plots(
+            parameters = [
+                    "pop_size_c1sp1",
+                    "pop_size_c2sp1",
+                    "pop_size_c3sp1",
+                    ],
+            parameter_label = "leaf population size",
+            parameter_symbol = "N_e\\mu",
+            plot_file_prefix = "linkage-500k-leaf-pop-size",
+            include_all_sizes_fixed = False,
+            include_root_size_fixed = False,
+            linked_loci = "500k")
     generate_scatter_plots(
             parameters = [
                     "pop_size_c1sp1",
@@ -2693,7 +2788,7 @@ def main_cli(argv = sys.argv):
             plot_file_prefix = "missing-data-leaf-pop-size",
             include_all_sizes_fixed = False,
             include_root_size_fixed = False,
-            linked_loci = False,
+            linked_loci = None,
             missing_data = True)
     generate_scatter_plots(
             parameters = [
@@ -2706,7 +2801,7 @@ def main_cli(argv = sys.argv):
             plot_file_prefix = "filtered-data-leaf-pop-size",
             include_all_sizes_fixed = False,
             include_root_size_fixed = False,
-            linked_loci = False,
+            linked_loci = None,
             missing_data = False,
             filtered_data = True)
     generate_root_1000_500k_scatter_plots(
@@ -2726,18 +2821,23 @@ def main_cli(argv = sys.argv):
             number_of_comparisons = 3,
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
-            linked_loci = True)
+            linked_loci = "100k")
     generate_model_plots(
             number_of_comparisons = 3,
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
-            linked_loci = False,
+            linked_loci = "500k")
+    generate_model_plots(
+            number_of_comparisons = 3,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            linked_loci = None,
             missing_data = True)
     generate_model_plots(
             number_of_comparisons = 3,
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
-            linked_loci = False,
+            linked_loci = None,
             missing_data = False,
             filtered_data = True)
     generate_root_1000_500k_model_plots(
@@ -2763,14 +2863,29 @@ def main_cli(argv = sys.argv):
                     "n_var_sites_c3",
                     ],
             parameter_label = "Number of variable sites",
-            plot_file_prefix = "linkage-number-of-variable-sites",
+            plot_file_prefix = "linkage-100k-number-of-variable-sites",
             parameter_discrete = True,
             range_key = "range",
             number_of_digits = 0,
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
             include_variable_only = False,
-            linked_loci = True)
+            linked_loci = "100k")
+    generate_histograms(
+            parameters = [
+                    "n_var_sites_c1",
+                    "n_var_sites_c2",
+                    "n_var_sites_c3",
+                    ],
+            parameter_label = "Number of variable sites",
+            plot_file_prefix = "linkage-500k-number-of-variable-sites",
+            parameter_discrete = True,
+            range_key = "range",
+            number_of_digits = 0,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            include_variable_only = False,
+            linked_loci = "500k")
     generate_histograms(
             parameters = [
                     "ess_sum_ln_likelihood",
@@ -2788,14 +2903,27 @@ def main_cli(argv = sys.argv):
                     "ess_sum_ln_likelihood",
                     ],
             parameter_label = "Effective samples size of log likelihood",
-            plot_file_prefix = "linkage-ess-ln-likelihood",
+            plot_file_prefix = "linkage-100k-ess-ln-likelihood",
             parameter_discrete = False,
             range_key = "range",
             number_of_digits = 0,
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
             include_variable_only = True,
-            linked_loci = True)
+            linked_loci = "100k")
+    generate_histograms(
+            parameters = [
+                    "ess_sum_ln_likelihood",
+                    ],
+            parameter_label = "Effective samples size of log likelihood",
+            plot_file_prefix = "linkage-500k-ess-ln-likelihood",
+            parameter_discrete = False,
+            range_key = "range",
+            number_of_digits = 0,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            include_variable_only = True,
+            linked_loci = "500k")
     generate_histograms(
             parameters = [
                     "ess_sum_root_height_c1sp1",
@@ -2817,14 +2945,29 @@ def main_cli(argv = sys.argv):
                     "ess_sum_root_height_c3sp1",
                     ],
             parameter_label = "Effective samples size of divergence time",
-            plot_file_prefix = "linkage-ess-div-time",
+            plot_file_prefix = "linkage-100k-ess-div-time",
             parameter_discrete = False,
             range_key = "range",
             number_of_digits = 0,
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
             include_variable_only = True,
-            linked_loci = True)
+            linked_loci = "100k")
+    generate_histograms(
+            parameters = [
+                    "ess_sum_root_height_c1sp1",
+                    "ess_sum_root_height_c2sp1",
+                    "ess_sum_root_height_c3sp1",
+                    ],
+            parameter_label = "Effective samples size of divergence time",
+            plot_file_prefix = "linkage-500k-ess-div-time",
+            parameter_discrete = False,
+            range_key = "range",
+            number_of_digits = 0,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            include_variable_only = True,
+            linked_loci = "500k")
     generate_histograms(
             parameters = [
                     "ess_sum_pop_size_root_c1sp1",
@@ -2846,14 +2989,29 @@ def main_cli(argv = sys.argv):
                     "ess_sum_pop_size_root_c3sp1",
                     ],
             parameter_label = "Effective samples size of root population size",
-            plot_file_prefix = "linkage-ess-root-pop-size",
+            plot_file_prefix = "linkage-100k-ess-root-pop-size",
             parameter_discrete = False,
             range_key = "range",
             number_of_digits = 0,
             include_all_sizes_fixed = False,
             include_root_size_fixed = False,
             include_variable_only = True,
-            linked_loci = True)
+            linked_loci = "100k")
+    generate_histograms(
+            parameters = [
+                    "ess_sum_pop_size_root_c1sp1",
+                    "ess_sum_pop_size_root_c2sp1",
+                    "ess_sum_pop_size_root_c3sp1",
+                    ],
+            parameter_label = "Effective samples size of root population size",
+            plot_file_prefix = "linkage-500k-ess-root-pop-size",
+            parameter_discrete = False,
+            range_key = "range",
+            number_of_digits = 0,
+            include_all_sizes_fixed = False,
+            include_root_size_fixed = False,
+            include_variable_only = True,
+            linked_loci = "500k")
     generate_histograms(
             parameters = [
                     "psrf_ln_likelihood",
@@ -2871,14 +3029,27 @@ def main_cli(argv = sys.argv):
                     "psrf_ln_likelihood",
                     ],
             parameter_label = "PSRF of log likelihood",
-            plot_file_prefix = "linkage-psrf-ln-likelihood",
+            plot_file_prefix = "linkage-100k-psrf-ln-likelihood",
             parameter_discrete = False,
             range_key = "range",
             number_of_digits = 3,
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
             include_variable_only = True,
-            linked_loci = True)
+            linked_loci = "100k")
+    generate_histograms(
+            parameters = [
+                    "psrf_ln_likelihood",
+                    ],
+            parameter_label = "PSRF of log likelihood",
+            plot_file_prefix = "linkage-500k-psrf-ln-likelihood",
+            parameter_discrete = False,
+            range_key = "range",
+            number_of_digits = 3,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            include_variable_only = True,
+            linked_loci = "500k")
     generate_histograms(
             parameters = [
                     "psrf_root_height_c1sp1",
@@ -2900,14 +3071,29 @@ def main_cli(argv = sys.argv):
                     "psrf_root_height_c3sp1",
                     ],
             parameter_label = "PSRF of divergence time",
-            plot_file_prefix = "linkage-psrf-div-time",
+            plot_file_prefix = "linkage-100k-psrf-div-time",
             parameter_discrete = False,
             range_key = "range",
             number_of_digits = 3,
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
             include_variable_only = True,
-            linked_loci = True)
+            linked_loci = "100k")
+    generate_histograms(
+            parameters = [
+                    "psrf_root_height_c1sp1",
+                    "psrf_root_height_c2sp1",
+                    "psrf_root_height_c3sp1",
+                    ],
+            parameter_label = "PSRF of divergence time",
+            plot_file_prefix = "linkage-500k-psrf-div-time",
+            parameter_discrete = False,
+            range_key = "range",
+            number_of_digits = 3,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            include_variable_only = True,
+            linked_loci = "500k")
     plot_ess_versus_error(
             parameters = [
                     "root_height_c1sp1",
@@ -2918,11 +3104,11 @@ def main_cli(argv = sys.argv):
             plot_file_prefix = "div-time",
             include_all_sizes_fixed = True,
             include_root_size_fixed = False)
-    generate_bake_off_plots(
-            number_of_pairs = 3,
-            number_of_sims = 500,
-            posterior_sample_size = 2000,
-            prior_sample_size = 500000)
+    # generate_bake_off_plots(
+    #         number_of_pairs = 3,
+    #         number_of_sims = 500,
+    #         posterior_sample_size = 2000,
+    #         prior_sample_size = 500000)
     plot_nevents_estimated_vs_true_probs(
             nevents = 1,
             sim_dir = "03pairs-dpp-root-0100-100k",
@@ -2932,12 +3118,14 @@ def main_cli(argv = sys.argv):
             nevents = 1,
             sim_dir = "03pairs-dpp-root-0100-100k-0100l",
             nbins = 5,
-            plot_file_prefix = "linkage-100-100k-sites")
+            plot_file_prefix = "linkage-100-100k-sites",
+            include_unlinked_only = True)
     plot_nevents_estimated_vs_true_probs(
             nevents = 1,
             sim_dir = "03pairs-dpp-root-0100-100k-0500l",
             nbins = 5,
-            plot_file_prefix = "linkage-500-100k-sites")
+            plot_file_prefix = "linkage-500-100k-sites",
+            include_unlinked_only = True)
 
 
 if __name__ == "__main__":
