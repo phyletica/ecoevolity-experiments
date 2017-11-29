@@ -66,7 +66,7 @@ do
             pyco-sumtimes -f -z -x "" -y "" -b $burnin "${label_array[@]}" -p "${plot_dir}/pyco-sumtimes-conc${conc}-rate${rate}${suffix}-" run-?-gekko-conc${conc}-rate${rate}${suffix}-state-run-1.log
             pyco-sumsizes -f -x "" -y "" -b $burnin "${label_array[@]}" -p "${plot_dir}/pyco-sumsizes-conc${conc}-rate${rate}${suffix}-" run-?-gekko-conc${conc}-rate${rate}${suffix}-state-run-1.log
             sumcoevolity -b $burnin -n 1000000 -p "${plot_dir}/sumcoevolity-conc${conc}-rate${rate}${suffix}-" -c "../configs/gekko-conc${conc}-rate${rate}${suffix}.yml" run-?-gekko-conc${conc}-rate${rate}${suffix}-state-run-1.log
-            pyco-sumevents -p "${plot_dir}/pyco-sumevents-conc${conc}-rate${rate}${suffix}-" -f --no-legend "${plot_dir}/sumcoevolity-conc${conc}-rate${rate}${suffix}-sumcoevolity-results-nevents.txt"
+            pyco-sumevents -x "" -y "" -p "${plot_dir}/pyco-sumevents-conc${conc}-rate${rate}${suffix}-" -f --no-legend "${plot_dir}/sumcoevolity-conc${conc}-rate${rate}${suffix}-sumcoevolity-results-nevents.txt"
         done
     done
 done
@@ -80,7 +80,7 @@ do
             pyco-sumtimes -f -z -x "" -y "" -b $burnin "${label_array[@]}" -p "${plot_dir}/pyco-sumtimes-conc${conc}-rate${rate}${suffix}-" run-?-gekko-conc${conc}-rate${rate}${suffix}-state-run-1.log
             pyco-sumsizes -f -x "" -y "" -b $burnin "${label_array[@]}" -p "${plot_dir}/pyco-sumsizes-conc${conc}-rate${rate}${suffix}-" run-?-gekko-conc${conc}-rate${rate}${suffix}-state-run-1.log
             sumcoevolity -b $burnin -n 1000000 -p "${plot_dir}/sumcoevolity-conc${conc}-rate${rate}${suffix}-" -c "../configs/gekko-conc${conc}-rate${rate}${suffix}.yml" run-?-gekko-conc${conc}-rate${rate}${suffix}-state-run-1.log
-            pyco-sumevents -p "${plot_dir}/pyco-sumevents-conc${conc}-rate${rate}${suffix}-" -f --no-legend "${plot_dir}/sumcoevolity-conc${conc}-rate${rate}${suffix}-sumcoevolity-results-nevents.txt"
+            pyco-sumevents -x "" -y "" -p "${plot_dir}/pyco-sumevents-conc${conc}-rate${rate}${suffix}-" -f --no-legend "${plot_dir}/sumcoevolity-conc${conc}-rate${rate}${suffix}-sumcoevolity-results-nevents.txt"
         done
     done
 done
@@ -93,5 +93,9 @@ do
     pdfcrop "$p" "$p"
 done
 
+for p in *.tex
+do
+    latexmk -pdf "$p"
+done
 
 cd "$current_dir"
