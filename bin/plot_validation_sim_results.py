@@ -2153,29 +2153,32 @@ def generate_bake_off_plots(
         number_of_pairs = 3,
         number_of_sims = 500,
         posterior_sample_size = 2000,
-        prior_sample_size = 500000):
+        prior_sample_size = 500000,
+        include_msbayes = False):
     _LOG.info("Generating plots of bake-off results...")
     plot_dir = os.path.join(project_util.BAKE_OFF_DIR, "plots")
     if not os.path.exists(plot_dir):
         os.mkdir(plot_dir)
-    msbayes_results = get_msbayes_results(
-            true_path = os.path.join(project_util.BAKE_OFF_DIR,
-                    "results",
-                    "msbayes",
-                    "pymsbayes-results",
-                    "observed-summary-stats",
-                    "observed-1.txt"),
-            sim_dir = os.path.join(project_util.BAKE_OFF_DIR,
-                    "results",
-                    "msbayes",
-                    "pymsbayes-results",
-                    "pymsbayes-output",
-                    "d1",
-                    "m1"),
-            number_of_pairs = number_of_pairs,
-            number_of_sims = number_of_sims,
-            posterior_sample_size = posterior_sample_size,
-            prior_sample_size = prior_sample_size)
+    msbayes_results = None
+    if include_msbayes:
+        msbayes_results = get_msbayes_results(
+                true_path = os.path.join(project_util.BAKE_OFF_DIR,
+                        "results",
+                        "msbayes",
+                        "pymsbayes-results",
+                        "observed-summary-stats",
+                        "observed-1.txt"),
+                sim_dir = os.path.join(project_util.BAKE_OFF_DIR,
+                        "results",
+                        "msbayes",
+                        "pymsbayes-results",
+                        "pymsbayes-output",
+                        "d1",
+                        "m1"),
+                number_of_pairs = number_of_pairs,
+                number_of_sims = number_of_sims,
+                posterior_sample_size = posterior_sample_size,
+                prior_sample_size = prior_sample_size)
     dpp_msbayes_results = get_msbayes_results(
             true_path = os.path.join(project_util.BAKE_OFF_DIR,
                     "results",
@@ -2226,6 +2229,12 @@ def generate_bake_off_plots(
                     ],
             "nevents": [],
     }
+    col_headers = [
+            'ecoevolity',
+            'dpp-msbayes',
+            ]
+    if include_msbayes:
+        col_headers.append('msbayes')
     for parameter_key, parameters in parameter_dict.items():
         parameter_label = parameter_key 
         parameter_symbol = "\\tau"
@@ -2233,9 +2242,12 @@ def generate_bake_off_plots(
             parameter_symbol = "N_e\\mu"
 
         plt.close('all')
-        fig = plt.figure(figsize = (9, 3))
+        if include_msbayes:
+            fig = plt.figure(figsize = (9, 3))
+        else:
+            fig = plt.figure(figsize = (6, 3))
         nrows = 1
-        ncols = 3 
+        ncols = len(col_headers)
         gs = gridspec.GridSpec(nrows, ncols,
                 wspace = 0.0,
                 hspace = 0.0)
@@ -2256,14 +2268,12 @@ def generate_bake_off_plots(
             all_results = {
                 'ecoevolity' : ecoevolity_results,
                 'dpp-msbayes': dpp_msbayes_results[parameter_key],
-                'msbayes': msbayes_results[parameter_key],
                 }
+            if include_msbayes:
+                all_results['msbayes'] = msbayes_results[parameter_key]
 
             row_idx = 0
-            for col_idx, col_header in enumerate((
-                    'ecoevolity',
-                    'dpp-msbayes',
-                    'msbayes')):
+            for col_idx, col_header in enumerate(col_headers):
                 r = all_results[col_header]
                 true_nevents = r['true']
                 map_nevents = r['map']
@@ -2435,21 +2445,22 @@ def generate_bake_off_plots(
             parameter_max = max(parameter_max,
                     max(float(x) for x in results["mean_{0}".format(parameter_str)]))
         parameter_min = min(parameter_min,
-                min(msbayes_results[parameter_key]['true']))
-        parameter_min = min(parameter_min,
-                min(msbayes_results[parameter_key]['mean']))
-        parameter_min = min(parameter_min,
                 min(dpp_msbayes_results[parameter_key]['true']))
         parameter_min = min(parameter_min,
                 min(dpp_msbayes_results[parameter_key]['mean']))
         parameter_max = max(parameter_max,
-                max(msbayes_results[parameter_key]['true']))
-        parameter_max = max(parameter_max,
-                max(msbayes_results[parameter_key]['mean']))
-        parameter_max = max(parameter_max,
                 max(dpp_msbayes_results[parameter_key]['true']))
         parameter_max = max(parameter_max,
                 max(dpp_msbayes_results[parameter_key]['mean']))
+        if include_msbayes:
+            parameter_min = min(parameter_min,
+                    min(msbayes_results[parameter_key]['true']))
+            parameter_min = min(parameter_min,
+                    min(msbayes_results[parameter_key]['mean']))
+            parameter_max = max(parameter_max,
+                    max(msbayes_results[parameter_key]['true']))
+            parameter_max = max(parameter_max,
+                    max(msbayes_results[parameter_key]['mean']))
 
         axis_buffer = math.fabs(parameter_max - parameter_min) * 0.05
         axis_min = parameter_min - axis_buffer
@@ -2465,14 +2476,12 @@ def generate_bake_off_plots(
         all_results = {
             'ecoevolity' : ecoevolity_results,
             'dpp-msbayes': dpp_msbayes_results[parameter_key],
-            'msbayes': msbayes_results[parameter_key],
             }
+        if include_msbayes:
+            all_results['msbayes'] = msbayes_results[parameter_key]
 
         row_idx = 0
-        for col_idx, col_header in enumerate((
-                'ecoevolity',
-                'dpp-msbayes',
-                'msbayes')):
+        for col_idx, col_header in enumerate(col_headers):
             r = all_results[col_header]
             x = r['true']
             y = r['mean']
@@ -3104,11 +3113,11 @@ def main_cli(argv = sys.argv):
             plot_file_prefix = "div-time",
             include_all_sizes_fixed = True,
             include_root_size_fixed = False)
-    # generate_bake_off_plots(
-    #         number_of_pairs = 3,
-    #         number_of_sims = 500,
-    #         posterior_sample_size = 2000,
-    #         prior_sample_size = 500000)
+    generate_bake_off_plots(
+            number_of_pairs = 3,
+            number_of_sims = 500,
+            posterior_sample_size = 2000,
+            prior_sample_size = 500000)
     plot_nevents_estimated_vs_true_probs(
             nevents = 1,
             sim_dir = "03pairs-dpp-root-0100-100k",
