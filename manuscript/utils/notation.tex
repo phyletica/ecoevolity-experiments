@@ -6,6 +6,11 @@
 \newcommand{\parameters}[1][]{\ensuremath{\Theta_{#1}}\xspace}
 \newcommand{\diff}[1]{\ensuremath{\mathrm{d}#1}}
 
+\newcommand{\distgamma}{\ensuremath{\textrm{Gamma}}\xspace}
+\newcommand{\distexponential}{\ensuremath{\textrm{Exponential}}\xspace}
+\newcommand{\dgamma}[2]{\ensuremath{\distgamma(\textrm{shape} = #1, \textrm{mean} = #2)}}
+\newcommand{\dexponential}[1]{\ensuremath{\distexponential(\textrm{mean} = #1)}}
+
 \newcommand{\ncomparisons}{\ensuremath{n\xspace}}
 \newcommand{\nevents}[1][]{\ensuremath{k_{#1}\xspace}}
 \newcommand{\nloci}[1][]{\ensuremath{m_{#1}\xspace}}
@@ -34,6 +39,9 @@
 
 \newcommand{\dppmsbayes}{\upshape\texttt{dpp-msbayes}\xspace}
 \newcommand{\ecoevolity}{\upshape\texttt{ecoevolity}\xspace}
+\newcommand{\simcoevolity}{\upshape\texttt{simcoevolity}\xspace}
+\newcommand{\sumcoevolity}{\upshape\texttt{sumcoevolity}\xspace}
+\newcommand{\pycoevolity}{\upshape\texttt{pycoevolity}\xspace}
 
 \newcommand{\rgmurate}{\ensuremath{u}\xspace}
 \newcommand{\grmurate}{\ensuremath{v}\xspace}
@@ -52,11 +60,12 @@
 \newcommand{\sptree}[1][]{\ensuremath{S_{#1}}\xspace}
 \newcommand{\sptrees}[1][]{\ensuremath{\mathbf{S}_{#1}}\xspace}
 
-\newcommand{\descendantpopindex}[1]{\ensuremath{D{#1}}\xspace}
+\newcommand{\descendantpopindex}[1]{\ensuremath{D{#1}}}
 \newcommand{\rootpopindex}[1][]{\ensuremath{R{#1}}\xspace}
 \newcommand{\epopsize}[1][]{\ensuremath{N_{e}^{#1}}\xspace}
 \newcommand{\comparisonpopsizes}[1][]{\ensuremath{\mathbb{N_{e}}_{#1}}\xspace}
 \newcommand{\collectionpopsizes}[1][]{\ensuremath{\mathbf{N_{e}}_{#1}}\xspace}
+\newcommand{\rootrelativepopsize}[1][]{\ensuremath{R_{{\epopsize[\rootpopindex]}}_{#1}}\xspace}
 
 \newcommand{\dirp}{\ensuremath{\textrm{DP}}\xspace}
 \newcommand{\concentration}{\ensuremath{\alpha}\xspace}
