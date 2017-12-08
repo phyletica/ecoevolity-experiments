@@ -1422,7 +1422,8 @@ def generate_histograms(
         include_all_sizes_fixed = True,
         include_root_size_fixed = False,
         include_variable_only = True,
-        linked_loci = None):
+        linked_loci = None,
+        row_indices = None):
     _LOG.info("Generating histograms for {0}...".format(parameter_label))
     assert(len(parameters) == len(set(parameters)))
     if not plot_file_prefix:
@@ -1440,11 +1441,15 @@ def generate_histograms(
                 data_set_size = linked_loci,
                 include_variable_only = include_variable_only,
                 include_unlinked_only = True)
+    if not row_indices:
+        row_indices = list(range(len(row_keys)))
 
     # Very inefficient, but parsing all results to get min/max for parameter
     parameter_min = float('inf')
     parameter_max = float('-inf')
-    for key, results_batch in results_batches.items():
+    for row_idx in row_indices:
+        key = row_keys[row_idx]
+        results_batch = results_batches[key]
         for sim_dir, results_paths in results_batch:
             results = pycoevolity.parsing.get_dict_from_spreadsheets(
                     results_paths,
@@ -1461,20 +1466,20 @@ def generate_histograms(
     axis_max = parameter_max + axis_buffer
 
     plt.close('all')
-    if include_variable_only:
-        fig = plt.figure(figsize = (9, 6.5))
-    else:
-        fig = plt.figure(figsize = (9, 3.25))
-    if linked_loci:
-        fig = plt.figure(figsize = (6, 3.5))
-    nrows = len(results_batches)
+    nrows = len(row_indices)
     ncols = len(results_batches.values()[0])
+    w = 1.6
+    h = 1.5
+    fig_width = (ncols * w) + 1.0
+    fig_height = (nrows * h) + 0.7
+    fig = plt.figure(figsize = (fig_width, fig_height))
     gs = gridspec.GridSpec(nrows, ncols,
             wspace = 0.0,
             hspace = 0.0)
 
     hist_bins = None
-    for row_idx, row_key in enumerate(row_keys):
+    for fig_row_idx, row_idx in enumerate(row_indices):
+        row_key = row_keys[row_idx]
         results_batch = results_batches[row_key]
         last_col_idx = len(results_batch) - 1
         for col_idx, (sim_dir, results_paths) in enumerate(results_batch):
@@ -1487,7 +1492,7 @@ def generate_histograms(
                     sep = "\t",
                     offset = 0)
             _LOG.info("row {0}, col {1} : {2} ({3} batches)".format(
-                    row_idx, col_idx, sim_dir, len(results_paths)))
+                    fig_row_idx, col_idx, sim_dir, len(results_paths)))
 
             x = []
             for parameter_str in parameters:
@@ -1504,7 +1509,7 @@ def generate_histograms(
             x_range = (parameter_min, parameter_max)
             if parameter_discrete:
                 x_range = (int(parameter_min), int(parameter_max))
-            ax = plt.subplot(gs[row_idx, col_idx])
+            ax = plt.subplot(gs[fig_row_idx, col_idx])
             n, bins, patches = ax.hist(x,
                     # normed = True,
                     weights = [1.0 / float(len(x))] * len(x),
@@ -1542,7 +1547,7 @@ def generate_histograms(
                     transform = ax.transAxes,
                     zorder = 200)
 
-            if row_idx == 0:
+            if fig_row_idx == 0:
                 if linked_loci:
                     # locus_size = 1
                     locus_size_matches = locus_size_pattern.findall(sim_dir)
@@ -1565,7 +1570,7 @@ def generate_histograms(
                         horizontalalignment = "center",
                         verticalalignment = "bottom",
                         transform = ax.transAxes)
-            if col_idx == last_col_idx:
+            if (col_idx == last_col_idx) and (nrows > 1):
                 ax.text(1.0, 0.5,
                         row_key,
                         horizontalalignment = "left",
@@ -1629,7 +1634,15 @@ def generate_histograms(
             rotation = "vertical",
             size = 18.0)
 
-    gs.update(left = 0.09, right = 0.98, bottom = 0.12, top = 0.95)
+    if nrows == 1:
+        gs.update(left = 0.08, right = 0.995, bottom = 0.17, top = 0.92)
+    else:
+        gs.update(left = 0.07, right = 0.98, bottom = 0.08, top = 0.97)
+    if linked_loci:
+        if nrows == 3:
+            gs.update(left = 0.10, right = 0.97, bottom = 0.09, top = 0.97)
+        else:
+            gs.update(left = 0.11, right = 0.97, bottom = 0.12, top = 0.95)
 
     plot_dir = os.path.join(project_util.VAL_DIR, "plots")
     if not os.path.exists(plot_dir):
@@ -2858,13 +2871,29 @@ def main_cli(argv = sys.argv):
                     "n_var_sites_c3",
                     ],
             parameter_label = "Number of variable sites",
-            plot_file_prefix = "number-of-variable-sites",
+            plot_file_prefix = "number-of-variable-sites-500k",
             parameter_discrete = True,
             range_key = "range",
             number_of_digits = 0,
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
-            include_variable_only = False)
+            include_variable_only = False,
+            row_indices = [0])
+    generate_histograms(
+            parameters = [
+                    "n_var_sites_c1",
+                    "n_var_sites_c2",
+                    "n_var_sites_c3",
+                    ],
+            parameter_label = "Number of variable sites",
+            plot_file_prefix = "number-of-variable-sites-100k",
+            parameter_discrete = True,
+            range_key = "range",
+            number_of_digits = 0,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            include_variable_only = False,
+            row_indices = [1])
     generate_histograms(
             parameters = [
                     "n_var_sites_c1",
