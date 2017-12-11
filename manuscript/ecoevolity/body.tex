@@ -477,7 +477,7 @@ divergence events.
 Given \concentration, the prior probability that two pairs of populations, $i$
 and $j$ (assuming $i \neq j$), share the same divergence time is
 \begin{equation}
-    \pr(\comparisondivtimes[i] = \comparisondivtimes[j] \given \concentration)
+    \pr(\comparisondivtime[i] = \comparisondivtime[j] \given \concentration)
     =
     \frac{1}{1 + \concentration}
 \end{equation}
@@ -563,7 +563,7 @@ However, if the genetic markers are naturally biallelic, the frequencies of the
 two states can be meaningfully estimated, making the model a two-state general
 time-reversible model \citep{Tavare1986}.
 
-\subsection{Approximating the posterior with MCMC}
+\subsubsection{Approximating the posterior with MCMC}
 
 We use Markov chain Monte Carlo (MCMC) algorithms to numerically approximate
 the joint posterior in Equation~\ref{eq:bayesruleexpanded}.
@@ -576,7 +576,7 @@ To improve mixing of the chain when there are strong correlations between
 divergence times and effective population size, we designed multivariate
 Metropolis-Hastings algorithms \ldots
 
-\subsubsection{'TimeRootSizeMixer' proposal}
+\paragraph{`TimeRootSizeMixer' proposal}
 One case of poor mixing can occur for pairs that diverge long enough ago such
 that only a single coalescence occurs within the root for each locus.
 In this scenario there is very little information in the allele count patterns
@@ -593,7 +593,7 @@ This and a tuning parameter \tuningparameter determines the value of a multiplie
 Next, we propose a new value for the effective population size of the
 root population
 \[
-    \epopsize[\rootpopindex]\proposed = \multiplier\epopsize[\rootpopindex],
+    \epopsize[\rootpopindex]{}\proposed = \multiplier\epopsize[\rootpopindex],
 \]
 and use \sizechange to denote the change in size,
 \[
@@ -606,10 +606,10 @@ is currently mapped to,
 \]
 Notice, for each value of \multiplier that proposes a change from
 \epopsize[\rootpopindex] and \divtime to 
-\epopsize[\rootpopindex]\propsed and \divtime\proposed,
+\epopsize[\rootpopindex]{}\proposed and \divtime\proposed,
 there is exactly one corresponding value of \multiplier that
 changes \emph{both}
-\epopsize[\rootpopindex]\propsed and \divtime\proposed
+\epopsize[\rootpopindex]{}\proposed and \divtime\proposed
 back to 
 \epopsize[\rootpopindex] and \divtime.
 As a result, the probability of the proposed move and the corresponding move
@@ -629,7 +629,7 @@ The move proposes a \emph{change} in the expected time for the lineages to
 coalesce in the ancestral population of
 \[
     2\epopsize[\rootpopindex] - 2(\epopsize[\rootpopindex] - \sizechange) =
-    2\epopsize[\rootpopindex] - 2\epopsize[\rootpopindex] - 2\sizechange) =
+    2\epopsize[\rootpopindex] - 2\epopsize[\rootpopindex] - 2\sizechange =
     -2\sizechange.
 \]
 So, if we change the divergence time by $2\sizechange$, the root height of the
@@ -643,7 +643,7 @@ of all the pairs that currently share this divergence time with pair $i$.
 So, the efficiency of this move can be hindered when there is a lot of sharing
 of divergence times.
 
-\subsubsection{'TimeSizeRateMixer' proposal}
+\paragraph{`TimeSizeRateMixer' proposal}
 
 For a given divergence time, \divtime[i], draw a multiplier as
 \[
@@ -651,12 +651,12 @@ For a given divergence time, \divtime[i], draw a multiplier as
 \]
 and propose a new value for \divtime[i],
 \[
-    \divtime[i]\proposed = \multipler\divtime[i]
+    \divtime[i]\proposed = \multiplier\divtime[i]
 \]
 
 \ldots
 
-\subsubsection{Software implementation}
+\subsection{Software implementation}
 The method outlined above is implemented in the open-source software package,
 \ecoevolity, written in the \cpp language.
 The program is freely available from
@@ -850,8 +850,7 @@ For analyses of both \ecoevolity and \dppmsbayes, the settings were
         $\nevents = 2$ divergence events
     \item $\divtime \sim \dgamma{2}{0.05}$
     \item $\murate = 1$
-    \item $\epopsize[\descendantpopindex{1}] \sim \dgamma{5}{0.002}$
-    \item $\epopsize[\descendantpopindex{2}] \sim \dgamma{5}{0.002}$
+    \item $\epopsize[\descendantpopindex{}] \sim \dgamma{5}{0.002}$
 \end{enumerate}
 For analyses with \dppmsbayes, the effective size of the ancestral population,
 \epopsize[\rootpopindex], was also distributed as \dgamma{5}{0.002}, whereas
@@ -885,41 +884,197 @@ periods.
 Because these islands were never connected, the divergence between the
 populations of each pair is necessarily due to dispersal, the timing of which
 should be idiosyncratic to each pair.
+
+We analyzed the data with and without the constant characters.
+Also, there were a small number of sites that had more than two nucleotides
+represented, which cannot be handled directly by our model of biallelic
+data.
+We explored two ways of handling these sites:
+(1) excluding them, and
+(2) coding the first nucleotide in the alignment as 0 (``green''), and all
+other nucleotides for that site as 1 (``red'').
+Thus, between including/excluding the constant sites and removing/re-coding the
+polyallelic characters, we analyzed four versions of the RADseq data.
+
 To be conservative in assessing the ability of the new method to distinguish
 divergence times among the pairs, we set $\concentration = 0.44$, which places
 50\% of the prior probability on one divergence event (i.e., all four pairs
 sharing the same divergence).
+Furthermore, to assess the sensitivity of the results to the \concentration, we
+also tried $\concentration = 3.77$, which corresponds with a prior mean number
+of divergence events of three.
+Other settings that were shared by all analyses of the \spp{Gekko} RADseq data
+include:
+\begin{itemize}
+    \item $\epopsize[\descendantpopindex{}] \sim \dgamma{4}{0.004}$
+    \item $\rootrelativepopsize \sim \dgamma{100}{1}$
+    \item $\gfreq = 0.5$
+    \item $\murate = 1$ for all four pairs
+\end{itemize}
+
+The ABC methods of inferring shared divergence events are very sensitive to the
+prior divergence times
+\citep{Oaks2012,Hickerson2013,Oaks2014reply,Oaks2014dpp}.
+To assess whether results of our new method are also sensitivity of to the
+prior on divergence times, we analyzed the data sets that included constant
+characters under the following priors:
+\begin{enumerate}
+    \item $\divtime \sim \dexponential{0.005}$
+    \item $\divtime \sim \dexponential{0.01}$
+    \item $\divtime \sim \dexponential{0.05}$
+    \item $\divtime \sim \dexponential{0.1}$
+    \item $\divtime \sim \dexponential{0.2}$
+\end{enumerate}
+For the two versions of the \spp{Gekko} data that lacked the constant
+characters, we tried the following priors:
+\begin{enumerate}
+    \item $\divtime \sim \dexponential{0.01}$
+    \item $\divtime \sim \dexponential{0.05}$
+    \item $\divtime \sim \dexponential{0.1}$
+    \item $\divtime \sim \dexponential{0.2}$
+    \item $\divtime \sim \dexponential{0.5}$
+\end{enumerate}
+
+For all analyses, we ran 10 independent MCMC chains for 150,000 generations,
+sampling every 100th generation.
+Convergence and mixing of the chains was assessed by the potential scale
+reduction factor (the square root of Equation 1.1 in Brooks and Gelman
+\citeyear{Brooks1998}) and effective sample size \citep{Gong2014} of the
+likelihood and all parameters, and inspected visually with the program Tracer
+version 1.6
+\citep{Tracer16}.
 
 
 \section{Results}
 
-\subsection{Simulation-based analyses}
+\subsection{Analyses of simulated data}
 
 \subsubsection{Validation analyses}
 
 There were approximately 5,500 and 27,500, variable sites, on average, from the
-100,000 and 500,000-character data sets, repectively
-(Figure~S\ref{fig:numberofvariablesites}.
-However, the range of the number of varialbe sites was 515--21,676 
-and 4,670--105,373 for 100,000 and 500,000-character dat sets, respectively.
+100,000 and 500,000-character data sets, respectively
+(Figures S\ref{fig:valnumberofvariablesites100k} \&
+S\ref{fig:valnumberofvariablesites500k}).
+However, the range of the number of variable sites was 515--21,676 
+and 4,670--105,373 for 100,000 and 500,000-character data sets, respectively.
 As expected, the variance in the number variable sites increases with the
 variance in the distribution of the relative effective size of the root
-population.
+population
+(Figures S\ref{fig:valnumberofvariablesites100k} \&
+S\ref{fig:valnumberofvariablesites500k}).
 
 The MCMC chains for all analyses converged very quickly;
 we conservatively removed the first 401 samples, resulting in 3300 samples from
 the posterior (1100 samples from three chains) for each analysis.
-To assess convergence and mixing we plotted the potenetial scale reduction
+To assess convergence and mixing we plotted the potential scale reduction
 factor across the three independent chains and the effective sample size for
-the log likelihood and divergence times (Figures SXXXX).
-Mixing was poorer when there was more prior uncertainty in
-the root population size (Figures~SXX).
+the log likelihood and divergence times
+(Figures S\ref{fig:valpsrflikelihood}, S\ref{fig:valpsrfdivtimes},
+S\ref{fig:valesslikelihood}, \& S\ref{fig:valessdivtimes}).
+Mixing was poorer when there was more prior uncertainty in the root population
+size
+(Figures S\ref{fig:valesslikelihood} \& S\ref{fig:valessdivtimes}).
 However, given the expected frequentist behavior for how often the true
-parameter values were containted within the 95\% confidence intervals (see
+parameter values were contained within the 95\% confidence intervals (see
 below), and the weak relationship between the ESS and estimation error
-(Figures~SXX),
-we do not expect MCMC mixing had a large effect on our simulation
-results under extreme levels of uncertainty in the root populatoin size.
+(Figure~S\ref{fig:valessvserror}),
+we do not expect MCMC mixing had a large effect on our simulation results under
+extreme levels of uncertainty in the root population size.
 
+Figure~\ref{fig:valdivtimes}
+
+Figure~\ref{fig:valleafsizes}
+
+Figure~\ref{fig:valrootsizes}
+
+Figure~\ref{fig:valnevents}
+
+Figure~\ref{fig:valpostprobs}
+
+\subsubsection{Assessing effect of linkage violation}
+
+Report the average number of varialbe characters per locus.
+
+Figure~S\ref{fig:linkagenumberofvariablesites100k}
+
+Figure~S\ref{fig:linkagenumberofvariablesites100k}
+
+Figure~\ref{fig:linkagedivtimes100k}
+
+Figure~\ref{fig:linkagedivtimes500k}
+
+Figure~\ref{fig:linkagenevents100k}
+
+Figure~\ref{fig:linkagenevents500k}
+
+Figure~\ref{fig:linkagepostprobs}
+
+Figure~\ref{fig:linkageleafsizes100k}
+
+Figure~\ref{fig:linkageleafsizes500k}
+
+Figure~\ref{fig:linkagerootsizes100k}
+
+Figure~\ref{fig:linkagerootsizes500k}
+
+
+\subsubsection{Assessing the effect of missing data}
+
+Figure~\ref{fig:missingdivtimes}
+
+Figure~\ref{fig:missingnevents}
+
+Figure~S\ref{fig:missingleafsizes}
+
+Figure~S\ref{fig:missingrootsizes}
+
+
+\subsubsection{Assessing the effect of biases in character-pattern acquisition}
+
+Figure~\ref{fig:filtereddivtimes}
+
+Figure~\ref{fig:filterednevents}
+
+Figure~S\ref{fig:filteredleafsizes}
+
+Figure~S\ref{fig:filteredrootsizes}
+
+
+\subsubsection{Comparison to ABC methods}
+
+Figure~\ref{fig:bakeoffdivtimes}
+
+Figure~\ref{fig:bakeoffnevents}
+
+Figure~S\ref{fig:bakeoffleafsizes}
+
+Figure~S\ref{fig:bakeoffrootsizes}
+
+
+\subsection{Empirical application}
+
+Figure~\ref{fig:gekkodivtimes}
+
+Figure~\ref{fig:gekkosizes}
+
+Figure~\ref{fig:gekkonevents}
+
+Figure~S\ref{fig:gekkonopolydivtimes}
+
+Figure~S\ref{fig:gekkonopolysizes}
+
+Figure~S\ref{fig:gekkonopolynevents}
+
+Figure~S\ref{fig:gekkovaronlydivtimes}
+
+Figure~S\ref{fig:gekkovaronlysizes}
+
+Figure~S\ref{fig:gekkovaronlynevents}
+
+Figure~S\ref{fig:gekkonopolyvaronlydivtimes}
+
+Figure~S\ref{fig:gekkonopolyvaronlysizes}
+
+Figure~S\ref{fig:gekkonopolyvaronlynevents}
 
 \section{Discussion}
