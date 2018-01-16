@@ -1,6 +1,6 @@
 \section{Introduction}
 
-One of the primary goals of biodiversity research is to understand to what
+One of the primary challenges in biodiversity research is to understand to what
 degree the landscape, and changes to it, explain biological diversity within
 and among species, and across communities.
 A major component of this is understanding whether landscape-level processes
@@ -595,6 +595,8 @@ about the size of the ancestral population, and so the divergence time and root
 size become highly correlated (i.e., an older divergence time and smaller root
 size explain the data equally well as a younger divergence time and larger root
 size).
+We used expectations under the coalescent to design a proposal to better sample
+this colinear region of parameter space.
 
 For population pair $i$, we first draw a uniform random deviate, \uniformdeviate.
 This and a tuning parameter \tuningparameter determines the value of a multiplier
@@ -824,7 +826,7 @@ discrepancies in the estimated divergence times depending on whether or not the
 constant sites were removed from the analysis.
 This was not observed in the analyses of simulated data, because the likelihood
 is appropriately corrected for the missing constant sites.
-This suggests that there is additional character-pattern acquisition biases in
+This suggests that there are additional character-pattern acquisition biases in
 the empirical data, which are not corrected for.
 Such acquisition biases have been documented during the denovo assembly of
 RADseq loci \citep{Harvey2015,Linck2017}.
@@ -894,13 +896,13 @@ Each pair of populations inhabit two different oceanic islands in the
 Philippines that were never connected during lower sea levels of glacial
 periods.
 Because these islands were never connected, the divergence between the
-populations of each pair is necessarily due to dispersal, the timing of which
-should be idiosyncratic to each pair.
+populations of each pair is likely due to dispersal, the timing of which should
+be idiosyncratic to each pair.
 
 We analyzed the data with and without the constant characters.
 Also, there were a small number of sites that had more than two nucleotides
 represented, which cannot be handled directly by our model of biallelic
-data.
+characters.
 We explored two ways of handling these sites:
 (1) excluding them, and
 (2) coding the first nucleotide in the alignment as 0 (``green''), and all
@@ -927,7 +929,7 @@ include:
 The ABC methods of inferring shared divergence events are very sensitive to the
 prior divergence times
 \citep{Oaks2012,Hickerson2013,Oaks2014reply,Oaks2014dpp}.
-To assess whether results of our new method are also sensitivity of to the
+To assess whether results of our new method are also sensitivity to the
 prior on divergence times, we analyzed the data sets that included constant
 characters under the following priors:
 \begin{enumerate}
@@ -993,100 +995,248 @@ below), and the weak relationship between the ESS and estimation error
 we do not expect MCMC mixing had a large effect on our simulation results under
 extreme levels of uncertainty in the root population size.
 
-Figure~\ref{fig:valdivtimes}
+When there is no model mispecification, our new method has the desired
+frequenist behavior wherein 95\% of the time the true value of a parameter
+falls within the 95\% credibility interval.
+We see this for
+divergence times
+(Figure~\ref{fig:valdivtimes})
+and the effective sizes of
+descendant
+(Figure~S\ref{fig:valleafsizes})
+and ancestral
+(Figure~S\ref{fig:valrootsizes}).
+Our results also show that the estimated posterior probability of the single
+divergence model ($\nevents = 1$) also mirrors the probability that the model
+is correct 
+(Figure~\ref{fig:valpostprobs}).
+The accuracy in estimating parameter values and posterior
+probabilities is true even when constant characters are excluded, demonstrating
+that our likelihood correction for those missing constant characters is working
+correctly
+(Equation~\ref{eq:variablecomparisonlikelihood}).
 
-Figure~\ref{fig:valleafsizes}
+As expected, the precision of divergence time and population size estimates
+is greater when the constant sites are included, and also increases
+with the prior information about the ancestral population size
+(Figures \ref{fig:valdivtimes}, S\ref{fig:valleafsizes}, \&
+S\ref{fig:valrootsizes}).
+The increase in precision associated with the fivefold increase in 
+the number of sampled characters (100k to 500k) is relatively moderate
+(Figures \ref{fig:valdivtimes}, S\ref{fig:valleafsizes}, \&
+S\ref{fig:valrootsizes}),
+suggesting that the benefit of collecting more characters begins to plateau on
+the small side for modern high-throughput datasets (i.e., the 100k datasets had
+only 5,500 SNPs on average).
+Retaining the constant characters has a much larger increase in precision
+than collecting five times more characters.
 
-Figure~\ref{fig:valrootsizes}
+The true number of divergence events is included in the 95\% credibility set
+greater than 98\% of the time for all the simulation conditions
+(Figure~\ref{fig:valnevents}).
+The frequency at which the correct number of events has the largest posterior
+probability, and the median posterior probability of the correct number of
+events,
+increases when constant characters are retained and as prior information about
+the ancestral population size increases 
+(Figure~\ref{fig:valnevents}).
+Again, the performance increase associated with the increase from 100k to 500k
+sampled characters is relatively moderate; retaining the constant characters
+has a much bigger effect
+(Figure~\ref{fig:valnevents}).
+Reassuringly, when constant characters are used, the median posterior
+probability of the correct number of divergence event is very high; over 0.89
+for all all simulation conditions
+(Figure~\ref{fig:valnevents}).
 
-Figure~\ref{fig:valnevents}
 
-Figure~\ref{fig:valpostprobs}
 
 \subsubsection{Assessing effect of linkage violation}
 
-Report the average number of variable characters per locus.
+For simulated datasets with loci of length 100, 500, and 1000 base pairs, there
+were an average of 5.4, 27.1, and 54.1 variable characters per locus,
+respectively.
+As expected, the number of variable characters per 100k and 500k dataset
+was very similar to the unlinked simulated datasets, with an average of
+about
+5,500 variable characters per 100k dataset
+(Figure~S\ref{fig:linkagenumberofvariablesites100k}
+and
+27,100 variable characters per 500k dataset
+(Figure~S\ref{fig:linkagenumberofvariablesites500k}).
+When at most one variable character per locus is sampled per locus, the
+number of remaining characters is usually close to or equal to the
+number of loci;
+1000, 200, and 100 characters for the 100k datasets
+with 100, 500, and 1000 bp loci, respectively, and
+5000, 1000, and 500 characters for 500k datasets
+with 100, 500, and 1000 bp loci, respectively.
+(Figures
+S\ref{fig:linkagenumberofvariablesites100k}
+\&
+S\ref{fig:linkagenumberofvariablesites500k}).
 
-Figure~S\ref{fig:linkagenumberofvariablesites100k}
+The accuracy of divergence time estimates is not affected
+by the model violation of linked sites
+(Figures \ref{fig:linkagedivtimes500k}
+\&
+S\ref{fig:linkagedivtimes100k}).
+However,
+as the length of loci increases, we do see an under-estimation
+of posterior uncertainty (i.e., the 
+true divergence time is contained within the 95\% credibility interval 
+less frequently than 95\% of the time
+(Figures \ref{fig:linkagedivtimes500k}
+\&
+S\ref{fig:linkagedivtimes100k}).
+Importantly, this effect effect of underestimating posterior uncertainty is
+very small for datasets with 100bp loci, suggesting this violation of the model
+has little impact for high-throughput datasets with short loci, like RADseq.
+As expected, analyzing only one variable site per locus removes this underestimation
+of posterior uncertainty
+(See the last row of Figures \ref{fig:linkagedivtimes500k}
+\&
+S\ref{fig:linkagedivtimes100k}).
+, but at a large cost of much greater posterior uncertainty
+in parameter estimates due to the loss of data.
+We see the same behavior for estimation the effective sizes of the ancestral
+and descendant populations
+(Figures S\labelcref{fig:linkageleafsizes100k, fig:linkageleafsizes500k,
+    fig:linkagerootsizes100k, fig:linkagerootsizes500k}).
 
-Figure~S\ref{fig:linkagenumberofvariablesites100k}
-
-Figure~\ref{fig:linkagedivtimes100k}
-
-Figure~\ref{fig:linkagedivtimes500k}
-
-Figure~\ref{fig:linkagenevents100k}
-
-Figure~\ref{fig:linkagenevents500k}
-
-Figure~\ref{fig:linkagepostprobs}
-
-Figure~\ref{fig:linkageleafsizes100k}
-
-Figure~\ref{fig:linkageleafsizes500k}
-
-Figure~\ref{fig:linkagerootsizes100k}
-
-Figure~\ref{fig:linkagerootsizes500k}
+The cost of removing data to avoid violating the assumption of unlinked
+characters is also very pronounced for estimating the number of divergence
+events.
+The method estimates the correct number of events, and with much higher
+posterior probability, when the constant characters are retained 
+(Figures
+\ref{fig:linkagenevents500k}
+\&
+S\ref{fig:linkagenevents100k}).
+However, our results show that linked characters do introduce a bias in the
+estimated posterior probability of the one divergence model ($\nevents = 1$)
+(Figure~\ref{fig:linkagepostprobs}).
+Nonetheless, the bias is moderate and makes the method conservative in the
+sense that it tends to underestimate the posterior probability of shared
+divergence (Figure~\ref{fig:linkagepostprobs}).
 
 
 \subsubsection{Assessing the effect of missing data}
 
-Figure~\ref{fig:missingdivtimes}
-
-Figure~\ref{fig:missingnevents}
-
-Figure~S\ref{fig:missingleafsizes}
-
-Figure~S\ref{fig:missingrootsizes}
+As predicted by coalescent theory, our results show that random missing data
+has little effect on the performance of the method with respect to estimating
+divergence times
+(Figure~\ref{fig:missingdivtimes}),
+effective population sizes
+(Figures
+S\ref{fig:missingleafsizes}
+\&
+S\ref{fig:missingrootsizes}), or the number of divergence events
+(Figure~\ref{fig:missingnevents}).
 
 
 \subsubsection{Assessing the effect of biases in character-pattern acquisition}
 
-Figure~\ref{fig:filtereddivtimes}
+Biased character acquisition against singleton allele patterns does create
+bias in estimates of divergence times
+(Figure~\ref{fig:filtereddivtimes}) and
+population sizes
+(Figure
+S\ref{fig:filteredleafsizes}
+\&
+S\ref{fig:filteredrootsizes}), and the bias increases as the probability of
+missing a character with a singleton pattern increases.
+Notably, this bias is smaller when the constant patterns are retained in
+the dataset
+(Figure
+\ref{fig:filtereddivtimes},
+S\ref{fig:filteredleafsizes}
+\&
+S\ref{fig:filteredrootsizes}).
 
-Figure~\ref{fig:filterednevents}
-
-Figure~S\ref{fig:filteredleafsizes}
-
-Figure~S\ref{fig:filteredrootsizes}
+However, in the face of data-acquisition bias, the method still estimates the
+number of divergence events well, especially when constant characters are used
+(Figure~\ref{fig:filterednevents}).
+Even when the probability of sampling a character with a singleton pattern is
+0.4, the median posterior probability of the correct number of divergence
+events is 0.948.
+(Figure~\ref{fig:filterednevents}).
 
 
 \subsubsection{Comparison to ABC methods}
 
-Figure~\ref{fig:bakeoffdivtimes}
+Our new full-likelihood method, \ecoevolity, does a much better job of
+estimating divergence times
+(Figure~\ref{fig:bakeoffdivtimes})
+and effective population sizes
+(Figures
+S\ref{fig:bakeoffleafsizes}
+\&
+S\ref{fig:bakeoffrootsizes}),
+than the approximate-likelihood Bayesian method, \dppmsbayes.
+This is despite the simulated datasets being ``tailored'' for the ABC method
+(i.e., loci of 200 linked base pairs).
+Notably, the new method does not underestimate the older divergence times like
+the ABC method, which suffers from ``saturated'' population-genetic summary
+statistics that assume an infinite-sites model
+(Figure~\ref{fig:bakeoffdivtimes}).
 
-Figure~\ref{fig:bakeoffnevents}
-
-Figure~S\ref{fig:bakeoffleafsizes}
-
-Figure~S\ref{fig:bakeoffrootsizes}
+Also, the new method does a better job of estimating the number of divergence
+events (Figure~\ref{fig:bakeoffnevents}), with a median posterior probability
+of the correct number of events of 0.942 compared to 0.789.
+Importantly, the new method underestimates the number of events much less
+frequently,
+which should lead to fewer erroneous interpretations of shared processes of
+divergence.
 
 
 \subsection{Empirical application}
 
-Figure~\ref{fig:gekkodivtimes}
+When the new method is applied to all of the RADseq sites from the
+four pairs of \spp{Gekko} populations, the results strongly
+support that all of the pairs diverged independently
+(Figure~\ref{fig:gekkonevents}).
+The results are extremely robust to the priors on divergence times (\divtime)
+and the concentration parameter (\concentration) of the Dirichlet process, and
+to whether the polyallelic SNPs are recoded as binary
+(Figure~\ref{fig:gekkonevents})
+or removed
+(Figure~S\ref{fig:gekkonopolynevents}).
+Likewise, the estimates of divergence times and effective population sizes
+are nearly identical regardless of the prior on \divtime or \concentration,
+or whether polyallelic SNPs are recoded or removed
+(Figures
+\ref{fig:gekkodivtimes},
+\ref{fig:gekkosizes},
+S\ref{fig:gekkonopolydivtimes},
+\&
+S\ref{fig:gekkonopolysizes}).
 
-Figure~\ref{fig:gekkosizes}
+However, when only variable SNPs are analyzed, the behavior is much different.
+First, the estimated divergence times and population sizes are clearly far too
+large and more sensitive to the priors on the divergence times and the
+concentration parameter.
+(Figures
+S\ref{fig:gekkovaronlydivtimes}
+\&
+S\ref{fig:gekkovaronlysizes}).
+While the true values of these parameters are obviously unknown, given the
+variability of these data (Table~\ref{tab:gekkoData}), and other data from
+these species \citep{Siler2012, Siler2014kikuchii}, these values are clearly
+nonsensical.
+Also, the posterior probabilities of the number of divergences is also
+much more sensitive to the \divtime and \concentration priors,
+with some combinations yielding results for which three divergence events
+are preferred (although, Bayes factors always prefer four divergences)
+(Figure~S\ref{fig:gekkovaronlynevents}).
+These findings are similar when the polyallelic SNPs are removed
+(Figures
+S\labelref{fig:gekkonopolyvaronlydivtimes,fig:gekkonopolyvaronlysizes,fig:gekkonopolyvaronlynevents}).
 
-Figure~\ref{fig:gekkonevents}
-
-Figure~S\ref{fig:gekkonopolydivtimes}
-
-Figure~S\ref{fig:gekkonopolysizes}
-
-Figure~S\ref{fig:gekkonopolynevents}
-
-Figure~S\ref{fig:gekkovaronlydivtimes}
-
-Figure~S\ref{fig:gekkovaronlysizes}
-
-Figure~S\ref{fig:gekkovaronlynevents}
-
-Figure~S\ref{fig:gekkonopolyvaronlydivtimes}
-
-Figure~S\ref{fig:gekkonopolyvaronlysizes}
-
-Figure~S\ref{fig:gekkonopolyvaronlynevents}
+The large overestimation of divergence times and population sizes is consistent
+with our findings from the simulated dataset with an acquisition bias against
+rare allele patterns.
+In these analyses, we also saw dramatic overestimation of these parameters when
+constant characters were excluded.
 
 \section{Discussion}
