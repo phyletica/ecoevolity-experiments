@@ -1,7 +1,3 @@
-% \siFigure{../images/dummy.pdf}{
-%     Caption goes here \ldots
-% }{fig:sidummy}
-
 \siFigure{../../simulations/validation/plots/number-of-variable-sites-100k-histograms.pdf}{
     The number of variable sites in the simulated data sets with 100,000 total
     characters \ldots
@@ -40,6 +36,18 @@
     absolute errror of the divergence times \ldots
 }{fig:valessvserror}
 
+
+\siFigure{../../simulations/validation/plots/leaf-pop-size-scatter.pdf}{
+    Estimated versus true descendant population sizes
+    \ldots
+}{fig:valleafsizes}
+
+\siFigure{../../simulations/validation/plots/root-pop-size-scatter.pdf}{
+    Estimated versus true ancestral population sizes
+    \ldots
+}{fig:valrootsizes}
+
+
 \siFigure{../../simulations/validation/plots/linkage-100k-number-of-variable-sites-histograms.pdf}{
     The number of variable sites in the simulated data sets with linked 
     characters \ldots
@@ -49,6 +57,12 @@
     The number of variable sites in the simulated data sets with linked 
     characters \ldots
 }{fig:linkagenumberofvariablesites500k}
+
+\siFigure{../../simulations/validation/plots/linkage-100k-div-time-scatter.pdf}{
+    Estimated versus true divergence times when characters are linked.
+    100,000-character data sets
+    \ldots
+}{fig:linkagedivtimes100k}
 
 \siFigure{../../simulations/validation/plots/linkage-100k-leaf-pop-size-scatter.pdf}{
     Assessing the affect of linked characters on estimating descendant population
@@ -70,6 +84,13 @@
     size; 500,000-character data sets \ldots
 }{fig:linkagerootsizes500k}
 
+\siFigure{../../simulations/validation/plots/linkage-100k-nevents.pdf}{
+    Estimated versus true number of divergence events when characters are
+    100,000-character data sets
+    linked \ldots
+}{fig:linkagenevents100k}
+
+
 \siFigure{../../simulations/validation/plots/missing-data-leaf-pop-size-scatter.pdf}{
     Assessing the affect of missing data on estimating descendant population
     size \ldots
@@ -79,6 +100,7 @@
     Assessing the affect of missing data on estimating ancestral population
     size \ldots
 }{fig:missingrootsizes}
+
 
 \siFigure{../../simulations/validation/plots/filtered-data-leaf-pop-size-scatter.pdf}{
     Assessing the affect of data acquisition bias on estimating descendant population
@@ -90,6 +112,7 @@
     size \ldots
 }{fig:filteredrootsizes}
 
+
 \siFigure{../../bake-off/plots/leaf-population-size-scatter.pdf}{
     Comparing new and ABC method in estimating descendant population sizes
     \ldots
@@ -99,6 +122,20 @@
     Comparing new and ABC method in estimating ancestral population sizes
     \ldots
 }{fig:bakeoffrootsizes}
+
+
+\siFigure{../../gekko-results/sumevents-nopoly.pdf}{
+    Prior (light grey) and posterior (dark gray) probabilities for the number
+    of divergence events across the four pairs of \spp{Gekko} populations.
+    \ldots
+    No polyallelic sites.
+    Cite ggplot2
+}{fig:gekkonopolynevents}
+
+\siFigure{../../gekko-results/sumsizes.pdf}{
+    Estimated marginal posterior distributions of population sizes \ldots
+    Cite ggplot2 and ggridges.
+}{fig:gekkosizes}
 
 \siFigure{../../gekko-results/sumtimes-nopoly.pdf}{
     Estimated marginal posterior distributions of divergence times \ldots
@@ -111,14 +148,6 @@
     No polyallelic sites.
     Cite ggplot2 and ggridges.
 }{fig:gekkonopolysizes}
-
-\siFigure{../../gekko-results/sumevents-nopoly.pdf}{
-    Prior (light grey) and posterior (dark gray) probabilities for the number
-    of divergence events across the four pairs of \spp{Gekko} populations.
-    \ldots
-    No polyallelic sites.
-    Cite ggplot2
-}{fig:gekkonopolynevents}
 
 \siFigure{../../gekko-results/sumtimes-varonly.pdf}{
     Estimated marginal posterior distributions of divergence times \ldots
