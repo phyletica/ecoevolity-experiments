@@ -80,22 +80,23 @@ shared divergences have occurred.
 The latter is particularly relevant when multiple landscape changes are known
 to have occurred.
 More fundamentally, Papadopoulou and Knowles \citeyear{Papadopoulou2016}
-astutely pointed out that all of the pairs co-diverging is not the correct null
+astutely point out that all of the pairs co-diverging is not the correct null
 hypothesis.
 If we wish to test for shared divergences, it is more appropriate to consider
 all the pairs diverging independently as the null expectation.
 
 Here, our goal is to develop a new Bayeisan model-choice approach to this
 problem that simultaneously handles many more genetic loci, while also taking
-advantage of more information in those loci, in order to more reliably estimate
-the number of divergence events and the assigngment of taxa to those events.
+advantage of all the information in those loci, in order to more reliably
+estimate the number of divergence events and the assigngment of taxa to those
+events.
 % We introduce a new Bayesian model-choice method for inferring
 % shared divergence times across taxa.
 Our method leverages recent analytical work \citep{Bryant2012} to efficiently
 and directly compute the full-likelihood of divergence models from genomic
 data.
 By efficiently using all the information in the data, the new method is faster
-and more accurate and precise than previous approximate-likelihood methods for
+and more accurate and precise than approximate-likelihood methods for
 estimating shared divergences.
 We introduce the new method and its assumptions, assess its performance with
 simulated data, and apply it to genomic data from geckos from the Philippine
@@ -540,7 +541,7 @@ population size can help improve the precision of divergence-time estimates.
 In the model presented above, for each population pair, the divergence time
 (\divtime) and mutation rate (\murate) are inextricably linked.
 For a single pair of populations, if little is known about the mutation rate,
-this problem is easily sovlved by setting it to one ($\murate[1] = 1$) such
+this problem is easily solved by setting it to one ($\murate[1] = 1$) such
 that time is in units of expected mutations per site and the effective
 population sizes are scaled by \murate.
 However, what about the second pair of populations for which we wish to compare
@@ -590,19 +591,28 @@ We also use univariate Metropolis-Hastings algorithms
 \citep{Metropolis1953,Hastings1970} to update each parameter of the model
 during the MCMC.
 To improve mixing of the chain when there are strong correlations between
-divergence times, mutation rates, and effective population size, we use
-multivariate Metropolis-Hastings algorithms \ldots
+divergence times, effective population sizes, and mutation rates we use
+multivariate Metropolis-Hastings algorithms.
+The probability of accepting a Metropolis-Hastings proposal is determined
+by the product of three terms, the first two of which are the
+ratios of the likelihood and prior probability densities of the proposed
+state to the current state of the model.
+The third term, the Hastings ratio (HR), accounts for any difference in the
+probability of the proposed move versus the probability of the move that
+would exactly reverse the proposed state back to the current state of the
+model.
+Below, we detail the Hastings ratio for two of our multivariate moves.
 
-\paragraph{`TimeRootSizeMixer' proposal}
+\paragraph{\timerootsizemixer proposal}
 One case of poor mixing can occur for pairs that diverge long enough ago such
-that only a single coalescence occurs within the root for each locus.
+that only a single coalescence occurs within the root for most loci.
 In this scenario there is very little information in the allele count patterns
 about the size of the ancestral population, and so the divergence time and root
-size become highly correlated (i.e., an older divergence time and smaller root
-size explain the data equally well as a younger divergence time and larger root
-size).
+population size become highly correlated (i.e., an older divergence time and
+smaller root size explain the data equally well as a younger divergence time
+and larger root size).
 We used expectations under the coalescent to design a proposal to better sample
-this colinear region of parameter space.
+this correlated region of parameter space.
 To simplify notation, throughout this section we will use
 \sepopsize[\rootpopindex] in place of \epopsize[\rootpopindex] to denote the
 effective size of the ancestral population.
@@ -611,9 +621,9 @@ When coalescence of gene lineages is complete within a sampled pair of
 populations, only two lineages coalesce within the ancestral population.
 In this case, the expected height of the root of a gene tree is
 $\divtime\murate + 2\sepopsize[\rootpopindex]\murate$,
-in units of time determined by $\murate$ (e.g., expected subsitutions per site
+in units of time determined by $\murate$ (e.g., expected substitutions per site
 if $\murate = 1$).
-The motivation of our move is to keep the expected gene tree root height
+The purpose of our move is to keep the expected root height of a gene tree
 of the proposed state equal to the current state,
 \begin{equation}
     \divtime\proposed\murate + 2\sepopsize[\rootpopindex]{}\proposed\murate =
@@ -626,9 +636,9 @@ during our proposal,
     \divtime + 2\sepopsize[\rootpopindex].
     \label{eq:timerootsizeequality}
 \end{equation}
-This will allow us to jointly and efficiently explore the space of \divtime
-and \sepopsize[\rootpopindex] when there is little information in the data to
-tease them apart.
+This relationship will allow us to jointly and efficiently explore the space of
+\divtime and \sepopsize[\rootpopindex] when there is little information in the
+data to tease them apart.
 
 For population pair $i$, we first draw a uniform random deviate,
 $\uniformdeviate \sim \textrm{Uniform}(-\tuningparameter, \tuningparameter)$,
@@ -637,13 +647,13 @@ improve the acceptance rate of the proposal.
 Next, we propose a new value for the effective population size of the
 root population
 \[
-    \sepopsize[\rootpopindex]{}\proposed = \sepopsize[\rootpopindex]e^{\uniformdeviate}.
+    \sepopsize[\rootpopindex]{}_i\proposed = \sepopsize[\rootpopindex]{}_ie^{\uniformdeviate}.
 \]
 Now, we use the relationship in Equation~\ref{eq:timerootsizeequality} to
-determine the corrsponding proposed value of population divergence time,
+determine the corresponding proposed value for the population divergence time,
 \begin{equation}
     \divtime\proposed =
-    \divtime + 2\sepopsize[\rootpopindex] - 2\sepopsize[\rootpopindex]{}\proposed.
+    \divtime + 2\sepopsize[\rootpopindex]{}_i - 2\sepopsize[\rootpopindex]{}_i\proposed.
 \end{equation}
 The uniform deviate to reverse this move is simply
 $\uniformdeviate\proposed = -\uniformdeviate$.
@@ -653,28 +663,32 @@ To get the Hastings ratio for this move, we use the formula of
 \citet{Green1995},
 \begin{equation}
     \textrm{Hastings ratio} =
-    \frac{g(\uniformdeviate\proposed)}{g\proposed(\uniformdeviate)} |\det(J)|,
+    \frac{g\proposed(\uniformdeviate\proposed)}{g(\uniformdeviate)} |\det(J)|,
     \label{eq:greenhastings}
 \end{equation}
-which is the ratio of the probabilities of drawing the random
-deviates multiplied by the absolute value of the determinant
-of a matrix of Jacobian terms.
+which is the ratio of the probability of the drawing the random deviate that
+would reverse the proposed move to the probability of drawing the random
+deviate of the proposed move, multiplied by the absolute value of the
+determinant of a matrix of Jacobian terms.
 Because the forward and reverse random deviates are uniform,
-$\frac{g(\uniformdeviate\proposed)}{g\proposed(\uniformdeviate)} = 1$,
+$\frac{g\proposed(\uniformdeviate\proposed)}{g(\uniformdeviate)} = 1$,
 and the Hastings ratio reduces to just the Jacobian term,
-\begin{eqnarray}
-    J & = & \left|\begin{array}{ccc}
-        \frac{\partial \sepopsize[\rootpopindex]{}\proposed}{\partial \sepopsize[\rootpopindex]} &
-        \frac{\partial \sepopsize[\rootpopindex]{}\proposed}{\partial \divtime} &
-        \frac{\partial \sepopsize[\rootpopindex]{}\proposed}{\partial \uniformdeviate} \\
-        \frac{\partial \divtime\proposed}{\partial \sepopsize[\rootpopindex]} &
+\begin{equation}
+% \arraycolsep=4pt
+\def\arraystretch{1.5}
+\begin{split}
+    J & = \left|\begin{array}{ccc}
+        \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \sepopsize[\rootpopindex]{}_i} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \divtime} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \uniformdeviate} \\
+        \frac{\partial \divtime\proposed}{\partial \sepopsize[\rootpopindex]{}_i} &
         \frac{\partial \divtime\proposed}{\partial \divtime} &
         \frac{\partial \divtime\proposed}{\partial \uniformdeviate} \\
-        \frac{\partial \uniformdeviate\proposed}{\partial \sepopsize[\rootpopindex]} &
+        \frac{\partial \uniformdeviate\proposed}{\partial \sepopsize[\rootpopindex]{}_i} &
         \frac{\partial \uniformdeviate\proposed}{\partial \divtime} &
         \frac{\partial \uniformdeviate\proposed}{\partial \uniformdeviate}
     \end{array}\right| \\
-    & = & \left|\begin{array}{ccc}
+    & = \left|\begin{array}{ccc}
         e^{\uniformdeviate} &
         0 &
         \sepopsize[\rootpopindex]e^{\uniformdeviate} \\
@@ -685,7 +699,7 @@ and the Hastings ratio reduces to just the Jacobian term,
         0 &
         -1
     \end{array}\right| \\
-    \det(J) & = & e^{\uniformdeviate} \left|\begin{array}{cc}
+    \det(J) & = e^{\uniformdeviate} \left|\begin{array}{cc}
         1 &
         -2\sepopsize[\rootpopindex]e^{\uniformdeviate} \\
         0 &
@@ -701,39 +715,45 @@ and the Hastings ratio reduces to just the Jacobian term,
         0 &
         0 \\
     \end{array}\right| \\
-    & = & -e^{\uniformdeviate} \\
-    |\det(J)| & = & |-e^{\uniformdeviate}| = e^{\uniformdeviate}.
-\end{eqnarray}
-This give us $e^{\uniformdeviate}$ for the hasting ratio of this proposal.
-
+    & = -e^{\uniformdeviate} \\
+    |\det(J)| & = |-e^{\uniformdeviate}| = e^{\uniformdeviate} = \textrm{Hastings ratio}.
+\end{split}
+\end{equation}
 Notice that the change to \divtime also changes the divergence times
 of all the pairs that currently share this divergence time with pair $i$.
 So, the efficiency of this move can be hindered when there is a lot of sharing
 of divergence times.
-However, we can easily extend this move to change the size of the ancestral
-population size of pairs $j, k, \ldots n$ that share their divergence time with
+However, we can easily extend this move to change the sizes of the ancestral
+population of pairs $j, k, \ldots n$ that share their divergence time with
 pair $i$.
 To do this, we, again, adhere to the relationship in
 Equation~\ref{eq:timerootsizeequality}:
-\begin{eqnarray}
-    2\sepopsize[\rootpopindex]{}_j\proposed & = &
+\begin{equation}
+\begin{split}
+    2\sepopsize[\rootpopindex]{}_j\proposed
+    & =
     2\sepopsize[\rootpopindex]{}_j + \divtime - \divtime\proposed \\
-    \sepopsize[\rootpopindex]{}_j\proposed & = &
+    \sepopsize[\rootpopindex]{}_j\proposed
+    & =
     \sepopsize[\rootpopindex]{}_j + \frac{1}{2}(\divtime - \divtime\proposed) \\
-    & = &
+    & =
     \sepopsize[\rootpopindex]{}_j + \frac{1}{2}(\divtime - (\divtime + 2\sepopsize[\rootpopindex]{}_i - 2\sepopsize[\rootpopindex]{}_i\proposed)) \\
-    & = &
+    & =
     \sepopsize[\rootpopindex]{}_j + \frac{1}{2}(\divtime - \divtime - 2\sepopsize[\rootpopindex]{}_i + 2\sepopsize[\rootpopindex]{}_i\proposed) \\
-    & = &
+    & =
     \sepopsize[\rootpopindex]{}_j - (\sepopsize[\rootpopindex]{}_i - \sepopsize[\rootpopindex]{}_i\proposed) \\
-    & = &
+    & =
     \sepopsize[\rootpopindex]{}_j - (\sepopsize[\rootpopindex]{}_i - \sepopsize[\rootpopindex]{}_i e^{\uniformdeviate}) \\
-    & = &
+    & =
     \sepopsize[\rootpopindex]{}_j - \sepopsize[\rootpopindex]{}_i(1 - e^{\uniformdeviate}).
-\end{eqnarray}
-The Jacobian term becomes
-\begin{eqnarray}
-    J & = & \left|\begin{array}{ccccccc}
+\end{split}
+\end{equation}
+The Jacobian term then becomes
+\begin{equation}
+% \arraycolsep=4pt
+\def\arraystretch{1.5}
+\begin{split}
+    J & = \left|\begin{array}{ccccccc}
         \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \sepopsize[\rootpopindex]{}_i} &
         \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \divtime} &
         \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \sepopsize[\rootpopindex]{}_j} &
@@ -784,7 +804,7 @@ The Jacobian term becomes
         \frac{\partial \uniformdeviate\proposed}{\partial \sepopsize[\rootpopindex]{}_n} &
         \frac{\partial \uniformdeviate\proposed}{\partial \uniformdeviate}
     \end{array}\right| \\
-    & = & \left|\begin{array}{ccccccc}
+    & = \left|\begin{array}{ccccccc}
         e^{\uniformdeviate} &
         0 &
         0 &
@@ -835,40 +855,53 @@ The Jacobian term becomes
         0 &
         -1
     \end{array}\right| \\
-    \det(J) & = & -e^{\uniformdeviate} \\
-    |\det(J)| & = & |-e^{\uniformdeviate}| = e^{\uniformdeviate}.
-\end{eqnarray}
+    \det(J) & = -e^{\uniformdeviate} \\
+    |\det(J)| & = |-e^{\uniformdeviate}| = e^{\uniformdeviate} = \textrm{Hastings ratio}.
+\end{split}
+\end{equation}
 
-\paragraph{`TimeSizeRateMixer' proposal}
+\paragraph{\timesizeratemixer proposal}
+This proposal is designed to improve mixing of the MCMC chain when there are
+strong posterior correlations among divergence time, population size, and
+mutation rate parameters.
+It does so by jointly scaling these parameters according to the direction
+(positive or negative) of the posterior correlations we often observed when
+analyzing simulated data.
+The divergence time was often positively correlated with the effective size of
+the descendant populations, and negatively correlated with the mutation rate
+and effective population size of the ancestral population.
 
 For a given divergence time, \divtime[i],
 we first draw a random uniform deviate,
 $\uniformdeviate \sim \textrm{Uniform}(-\tuningparameter, \tuningparameter)$,
 where \tuningparameter is, again, a tuning parameter to adjust the proposal's
 acceptance rate.
-We use this random deviate to propse a new value for the divergence time,
+We use this random deviate to propose a new value for the divergence time,
 \[
     \divtime[i]\proposed = \divtime[i] e^{\uniformdeviate}.
 \]
 Next, we visit each population pair that is associated with this
 divergence time, and propose the following updates to the
 pair's parameters, if they are being estimated (i.e., not fixed):
-\begin{eqnarray}
-    \epopsize[\rootpopindex]{}\proposed & = & \epopsize[\rootpopindex]{} e^{-\uniformdeviate} \\
-    \epopsize[\descendantpopindex{1}]{}\proposed & = & \epopsize[\descendantpopindex{1}]{} e^{\uniformdeviate} \\
-    \epopsize[\descendantpopindex{2}]{}\proposed & = & \epopsize[\descendantpopindex{1}]{} e^{\uniformdeviate} \\
-    \murate\proposed & = & \murate e^{-\uniformdeviate}.
-\end{eqnarray}
+\begin{equation}
+    \begin{split}
+        \epopsize[\rootpopindex]{}\proposed & = \epopsize[\rootpopindex]{} e^{-\uniformdeviate} \\
+        \epopsize[\descendantpopindex{1}]{}\proposed & = \epopsize[\descendantpopindex{1}]{} e^{\uniformdeviate} \\
+        \epopsize[\descendantpopindex{2}]{}\proposed & = \epopsize[\descendantpopindex{1}]{} e^{\uniformdeviate} \\
+        \murate\proposed & = \murate e^{-\uniformdeviate}.
+    \end{split}
+\end{equation}
 When doing so, we keep track of the total number of parameters
-that have been scaled, denoted as $n$,
+that have been updated, denoted as $n$,
 and how many of these were scaled by
-$e^{\uniformdeviate}$, denoted $m$.
+$e^{\uniformdeviate}$, denoted $m$;
+the remaining $n-m$ parameters were scaled by $e^{-\uniformdeviate}$.
 
 Given $n$ and $m$, we can again use Green's \citeyear{Green1995} formula
 (Equation~\ref{eq:greenhastings}) to determine the Hastings ratio for this
 proposal.
 Once again, 
-$\frac{g(\uniformdeviate\proposed)}{g\proposed(\uniformdeviate)} = 1$,
+$\frac{g\proposed(\uniformdeviate\proposed)}{g(\uniformdeviate)} = 1$,
 because the random deviates are uniform.
 Using
 $\parameter[1], \ldots, \parameter[m]$
@@ -880,8 +913,11 @@ $e^{\uniformdeviate}$
 and
 $e^{-\uniformdeviate}$, respectively,
 the Jacobian term is
-\begin{eqnarray}
-    J & = & \left|\begin{array}{ccccccccccc}
+\begin{equation}
+% \arraycolsep=4pt
+\def\arraystretch{1.5}
+\begin{split}
+    J & = \left|\begin{array}{ccccccccccc}
         \frac{\partial \parameter[1]\proposed}{\partial \parameter[1]} &
         \frac{\partial \parameter[1]\proposed}{\partial \parameter[2]} &
         \ldots &
@@ -1004,7 +1040,7 @@ the Jacobian term is
         \frac{\partial \parameter[\uniformdeviate]\proposed}{\partial \parameter[n]} &
         \frac{\partial \parameter[\uniformdeviate]\proposed}{\partial \uniformdeviate} \\
     \end{array}\right| \\
-    & = & \left|\begin{array}{ccccccccccc}
+    & = \left|\begin{array}{ccccccccccc}
         e^{\uniformdeviate} &
         0 &
         \ldots &
@@ -1127,10 +1163,11 @@ the Jacobian term is
         0 &
         -1 \\
     \end{array}\right| \\
-    \det(J) & = & -e^{\uniformdeviate{}m}e^{-\uniformdeviate{}(n - m)} \\
-    & = & -e^{2\uniformdeviate{}m - \uniformdeviate{}n} \\
-    |\det(J)| & = & e^{\uniformdeviate{}(2m - n)}.
-\end{eqnarray}
+    \det(J) & = -e^{\uniformdeviate{}m}e^{-\uniformdeviate{}(n - m)} \\
+    & = -e^{2\uniformdeviate{}m - \uniformdeviate{}n} \\
+    |\det(J)| & = e^{\uniformdeviate{}(2m - n)} = \textrm{Hastings ratio}.
+\end{split}
+\end{equation}
 
 \subsection{Software implementation}
 The method outlined above is implemented in the open-source software package,
@@ -1139,6 +1176,26 @@ The source code is freely available from
 \url{https://github.com/phyletica/ecoevolity}, and documentation is available
 at
 \url{http://phyletica.org/ecoevolity/}.
+The software package is accompanied by an extensive test suite, which, among
+other aspects,
+validates that the likelihood code returns the same values
+as
+SNAPP \citep{Bryant2012},
+and all of our MCMC proposals sample from the expected prior distribution
+when data are ignored.
+
+All of our analyses were performed with
+Version 0.1 
+(commit 1d688a3)
+of \ecoevolity.
+The \timerootsizemixer algorithm implemented in this version of the software
+only updates one ancestral population size per proposal.
+In Version 0.2 (commit XXXXX), the default behavior is for the
+\timerootsizemixer proposal to update the ancestral population size for all
+other pairs associated with the same divergence time (see above).
+While this tends to improve mixing slightly, it does not change the results we
+present here in a meaningful way.
+Our results can be reproduced exactly with Version 0.1.
 
 
 \subsection{Analyses of simulated data}
@@ -1213,7 +1270,7 @@ probabilities that $\nevents = 1$ within a bin should approximately equal the
 proportion of the data sets for which that is true
 \citep{Huelsenbeck2004,Oaks2012,Oaks2014dpp}.
 
-\subsubsection{Assessing effect of linkage violation}
+\subsubsection{Assessing the effect of linked sites}
 The characters of most datasets being collected by high-throughput technologies
 do not all evolve along independent gene trees.
 Most consist of many putatively unlinked loci that each comprise sequences of
@@ -1428,6 +1485,60 @@ version 1.6
 
 \subsubsection{Validation analyses}
 
+When there is no model mispecification, our new method has the desired
+frequenist behavior wherein 95\% of the time the true value of a parameter
+falls within the 95\% credibility interval.
+We see this for
+divergence times
+(Figure~\ref{fig:valdivtimes})
+and the effective sizes of
+descendant
+(Figure~S\ref{fig:valleafsizes})
+and ancestral
+(Figure~S\ref{fig:valrootsizes})
+populations.
+Our results also show that the estimated posterior probability of the single
+divergence model ($\nevents = 1$) mirrors the probability that the model
+is correct 
+(Figure~\ref{fig:valpostprobs}).
+We see the same behaviors whether or not the constant characters are excluded,
+demonstrating that our likelihood correction for those missing constant
+characters is working correctly
+(Equation~\ref{eq:variablecomparisonlikelihood}).
+
+As expected, the precision of divergence time and population size estimates is
+greater when the constant sites are included and when there is greater prior
+information about the ancestral population size
+(Figures \ref{fig:valdivtimes}, S\ref{fig:valleafsizes}, \&
+S\ref{fig:valrootsizes}).
+The increase in precision associated with the fivefold increase in the number
+of sampled characters (100k to 500k) is relatively modest (Figures
+\ref{fig:valdivtimes}, S\ref{fig:valleafsizes}, \& S\ref{fig:valrootsizes});
+% suggesting that the benefit of collecting more characters begins to plateau
+% when data sets are small relative to the number of characters commonly
+% collected via modern high-throughput sequencing technologies (i.e., the
+% simulated 100k datasets had only 5,500 SNPs on average).
+Retaining the constant characters results a much larger increase in precision
+than collecting five times more characters.
+
+The true number of divergence events is included in the 95\% credibility set
+greater than 98\% of the time for all the simulation conditions
+(Figure~\ref{fig:valnevents}).
+The frequency at which the correct number of events has the largest posterior
+probability, and the median posterior probability of the correct number of
+events,
+increases when constant characters are retained and as prior information about
+the ancestral population size increases 
+(Figure~\ref{fig:valnevents}).
+Again, the performance increase associated with the increase from 100k to 500k
+sampled characters is moderate; retaining the constant characters
+has a much larger effect
+(Figure~\ref{fig:valnevents}).
+When constant characters are used, the median posterior
+probability of the correct number of divergence event is high; over 0.89
+for all simulation conditions
+(Figure~\ref{fig:valnevents}).
+
 For the data sets simulated with 100,000 and 500,000 characters,
 the number of variable sites ranged from
 515--21,676 
@@ -1448,9 +1559,9 @@ S\ref{fig:valnumberofvariablesites500k}).
 The MCMC chains for all analyses converged very quickly;
 we conservatively removed the first 401 samples, resulting in 3300 samples from
 the posterior (1100 samples from three chains) for each analysis.
-To assess convergence and mixing we plotted the potential scale reduction
-factor across the three independent chains and the effective sample size for
-the log likelihood and divergence times
+To assess convergence and mixing we plotted histograms of the potential scale
+reduction factor across the three independent chains and the effective sample
+size for the log likelihood and divergence times
 (Figures S\ref{fig:valpsrflikelihood}, S\ref{fig:valpsrfdivtimes},
 S\ref{fig:valesslikelihood}, \& S\ref{fig:valessdivtimes}).
 Mixing was poorer when there was more prior uncertainty in the root population
@@ -1465,85 +1576,9 @@ we do not expect MCMC mixing had a large effect on our simulation results under
 the extreme levels of uncertainty in the root population size that we
 simulated.
 
-When there is no model mispecification, our new method has the desired
-frequenist behavior wherein 95\% of the time the true value of a parameter
-falls within the 95\% credibility interval.
-We see this for
-divergence times
-(Figure~\ref{fig:valdivtimes})
-and the effective sizes of
-descendant
-(Figure~S\ref{fig:valleafsizes})
-and ancestral
-(Figure~S\ref{fig:valrootsizes}).
-Our results also show that the estimated posterior probability of the single
-divergence model ($\nevents = 1$) also mirrors the probability that the model
-is correct 
-(Figure~\ref{fig:valpostprobs}).
-We see the same behaviors whether or not the constant characters are excluded,
-demonstrating that our likelihood correction for those missing constant
-characters is working correctly
-(Equation~\ref{eq:variablecomparisonlikelihood}).
-
-As expected, the precision of divergence time and population size estimates is
-greater when the constant sites are included and when there is greater prior
-information about the ancestral population size
-(Figures \ref{fig:valdivtimes}, S\ref{fig:valleafsizes}, \&
-S\ref{fig:valrootsizes}).
-The increase in precision associated with the fivefold increase in 
-the number of sampled characters (100k to 500k) is relatively modest
-(Figures \ref{fig:valdivtimes}, S\ref{fig:valleafsizes}, \&
-S\ref{fig:valrootsizes}),
-suggesting that the benefit of collecting more characters begins to plateau on
-the small side for modern high-throughput datasets (i.e., the 100k datasets had
-only 5,500 SNPs on average).
-Retaining the constant characters has a much larger increase in precision
-than collecting five times more characters.
-
-The true number of divergence events is included in the 95\% credibility set
-greater than 98\% of the time for all the simulation conditions
-(Figure~\ref{fig:valnevents}).
-The frequency at which the correct number of events has the largest posterior
-probability, and the median posterior probability of the correct number of
-events,
-increases when constant characters are retained and as prior information about
-the ancestral population size increases 
-(Figure~\ref{fig:valnevents}).
-Again, the performance increase associated with the increase from 100k to 500k
-sampled characters is moderate; retaining the constant characters
-has a much larger effect
-(Figure~\ref{fig:valnevents}).
-Reassuringly, when constant characters are used, the median posterior
-probability of the correct number of divergence event is very high; over 0.89
-for all all simulation conditions
-(Figure~\ref{fig:valnevents}).
 
 
-
-\subsubsection{Assessing effect of linkage violation}
-
-For simulated datasets with loci of length 100, 500, and 1000 base pairs, there
-were an average of 5.4, 27.1, and 54.1 variable characters per locus,
-respectively.
-As expected, the number of variable characters per 100k and 500k dataset
-was very similar to the unlinked simulated datasets, with an average of
-about
-5,500 variable characters per 100k dataset
-(Figure~S\ref{fig:linkagenumberofvariablesites100k}
-and
-27,100 variable characters per 500k dataset
-(Figure~S\ref{fig:linkagenumberofvariablesites500k}).
-When at most one variable character per locus is sampled per locus, the
-number of remaining characters is usually close to or equal to the
-number of loci;
-1000, 200, and 100 characters for the 100k datasets
-with 100, 500, and 1000 bp loci, respectively, and
-5000, 1000, and 500 characters for 500k datasets
-with 100, 500, and 1000 bp loci, respectively.
-(Figures
-S\ref{fig:linkagenumberofvariablesites100k}
-\&
-S\ref{fig:linkagenumberofvariablesites500k}).
+\subsubsection{Assessing the effect of linked sites}
 
 The accuracy of divergence time estimates does not appear to be affected by the
 model violation of linked sites
@@ -1561,9 +1596,10 @@ S\ref{fig:linkagedivtimes100k}).
 This makes sense given that there is less coalescent variation in the data than
 the model expects if all the characters had evolved along independent gene
 trees.
-Importantly, this effect of underestimating posterior uncertainty is
-very small for datasets with 100bp loci, suggesting this violation of the model
-has little impact for high-throughput datasets with short loci, like RADseq.
+Importantly, this effect of underestimating posterior uncertainty is very small
+for datasets with 100bp loci, suggesting this violation of the model has little
+impact for high-throughput datasets with short loci, like those collected via
+RADseq.
 As expected, analyzing only one variable site per locus removes this underestimation
 of posterior uncertainty
 (See the last row of Figures \ref{fig:linkagedivtimes500k}
@@ -1578,7 +1614,7 @@ and descendant populations
 The cost of removing data to avoid violating the assumption of unlinked
 characters is also very pronounced for estimating the number of divergence
 events.
-The method estimates the correct number of events, and with much higher
+The method better estimates the correct number of events, and with much higher
 posterior probability, when the constant characters are retained 
 (Figures
 \ref{fig:linkagenevents500k}
@@ -1590,9 +1626,32 @@ over 0.95 for all 500k site datasets, even when loci were 1000bp long.
 However, our results show that linked characters do introduce a bias in the
 estimated posterior probability of the one divergence model ($\nevents = 1$)
 (Figure~\ref{fig:linkagepostprobs}).
-Nonetheless, the bias is moderate and makes the method conservative in the
-sense that it tends to underestimate the posterior probability of shared
-divergence (Figure~\ref{fig:linkagepostprobs}).
+However, the bias is moderate and makes the method conservative in the
+sense that it tends to underestimate the probability of shared
+divergence across datasets (Figure~\ref{fig:linkagepostprobs}).
+
+For simulated datasets with loci of length 100, 500, and 1000 base pairs, there
+were an average of 5.4, 27.1, and 54.1 variable characters per locus,
+respectively.
+As expected, the number of variable characters per 100k and 500k dataset
+was very similar to the unlinked simulated datasets, with an average of
+about
+5,500 variable characters per 100k dataset
+(Figure~S\ref{fig:linkagenumberofvariablesites100k}
+and
+27,100 variable characters per 500k dataset
+(Figure~S\ref{fig:linkagenumberofvariablesites500k}).
+When at most one variable character per locus is sampled per locus, the
+number of remaining characters is usually close or equal to the
+number of loci;
+1000, 200, and 100 characters for the 100k datasets
+with 100, 500, and 1000 bp loci, respectively, and
+5000, 1000, and 500 characters for 500k datasets
+with 100, 500, and 1000 bp loci, respectively.
+(Figures
+S\ref{fig:linkagenumberofvariablesites100k}
+\&
+S\ref{fig:linkagenumberofvariablesites500k}).
 
 
 \subsubsection{Assessing the effect of missing data}
@@ -1652,12 +1711,12 @@ This is despite the simulated datasets being ``tailored'' for the ABC method
 (i.e., loci of 200 linked base pairs).
 Notably, the new method does not underestimate the older divergence times like
 the ABC method, which suffers from saturated population-genetic summary
-statistics that assume an infinite-sites model
+statistics that assume an infinite-sites model of mutation
 (Figure~\ref{fig:bakeoffdivtimes}).
 
 Also, the new method does a better job of estimating the number of divergence
 events (Figure~\ref{fig:bakeoffnevents}), with a median posterior probability
-of the correct number of events of 0.942 compared to 0.789.
+of the correct number of events of 0.942, compared to 0.789 for the ABC method.
 Importantly, the new method underestimates the number of events much less
 frequently,
 which should lead to fewer erroneous interpretations of shared processes of
@@ -1728,11 +1787,12 @@ S\labelcref{fig:gekkonopolyvaronlydivtimes,fig:gekkonopolyvaronlysizes,fig:gekko
 The large overestimation of divergence times and population sizes is consistent
 with our findings from the datasets simulated with an acquisition bias against
 rare allele patterns.
-In these analyses, we also saw dramatic overestimation of these parameters when
-constant characters were excluded.
-Clearly, variable site patterns are being lost during the acquistion and
-assembly of the RADseq data, and the model is senstive to these missing
+In these simulation-based analyses, we also saw dramatic overestimation of
+these parameters when constant characters were excluded.
+Clearly, variable site patterns are being lost during the acquisition and
+assembly of the RADseq data, and the model is sensitive to these missing
 variable sites, especially when only variable characters are analyzed.
+
 
 \section{Discussion}
 
@@ -1743,25 +1803,27 @@ often over-clustered divergences with strong support
 Our goal was to increase the robustness of these inferences by leveraging all
 of the information in the data within a full-likelihood, Bayesian framework
 designed for genome-scale data.
-
-When there is no model mispecification, our new approach is accurate in
-estimating divergence times, effective population sizes, and divergence models
-across all the conditions we simulated, including missing data
+Using all the information in the data makes the new approach much
+more efficient.
+Increasing the number of characters from 100,000 to 500,000 resulted
+in only modest improvement in precision
 (Figures
-\labelcref{fig:valdivtimes,fig:valpostprobs,fig:valnevents}
-and
-S\labelcref{fig:valleafsizes,fig:valrootsizes}).
-We ee increased precision when we increase the number of sampled characters
-from 100,000 to 500,000, but the increase is modest relative to the five-fold
-increase in data,
-especially when compared to the increases in precision associated with keeping
-constant characters and increasing prior information about the relative
-effective size of the root population.
+\ref{fig:valdivtimes}, S\ref{fig:valleafsizes}, \& S\ref{fig:valrootsizes}).
+This suggests that the benefit of collecting more characters begins to plateau
+when data sets are small relative to the number of characters commonly
+collected via modern high-throughput sequencing technologies (i.e., the
+simulated 100k datasets had only 5,500 SNPs on average).
+Even with only 200 short (200 bp) loci, the median posterior probability
+of the correct number of divergence events was 0.94
+(Figure~\ref{fig:bakeoffnevents}).
+
 
 \subsection{To exclude linked sites or not to exclude?}
-The increased precision associated with retaining the constant characters
-creates an interesting question when analyzing DNA sequence data from
-reduced-representation genomic libraries:
+
+\thought{Compare to and cite Kubatko (SVDQuartets) and Knowles (IM, I think?)}
+The increased precision and robustness associated with retaining constant
+characters creates an interesting question when analyzing DNA sequence data
+from reduced-representation genomic libraries:
 Is it better to analyze all the data and violate the assumption that the sites
 are unlinked, or suffer a large loss of data to avoid violating that
 assumption?
@@ -1783,10 +1845,13 @@ libraries
 and
 Figures
 S\labelcref{fig:filteredleafsizes,fig:filteredrootsizes}).
-Third, the results from the \emph{Gekko} RADseq data are nonsensical when
-only variable characters are analyzed.
+Third, the results from the \emph{Gekko} RADseq data are
+reasonable and robust to prior assumptions when all data are analyzed,
+but nonsensical and sensitive to prior assumptions when only variable
+characters are analyzed.
 This appears to be due to the filtering of the character patterns that occurred
 when assembling these data.
+
 Perhaps most striking is how much better the method estimates the number
 of divergence events when all the data are used.
 For example, across the 500,000-character data sets, the
@@ -1797,210 +1862,61 @@ or pattern-acquisition biases we simulated
 \ref{fig:valnevents},
 \ref{fig:linkagenevents500k},
 \&
+\ref{fig:filterednevents});
+these values are as low as 0.41 when constant characters are removed
 \ref{fig:filterednevents}).
 
-
-The accuracy of divergence time estimates is not affected
-by the model violation of linked sites
-(Figures \ref{fig:linkagedivtimes500k}
-\&
-S\ref{fig:linkagedivtimes100k}).
-However,
-as the length of loci increases, we do see an under-estimation
-of posterior uncertainty (i.e., the 
-true divergence time is contained within the 95\% credibility interval 
-less frequently than 95\% of the time
-(Figures \ref{fig:linkagedivtimes500k}
-\&
-S\ref{fig:linkagedivtimes100k}).
-Importantly, this effect effect of underestimating posterior uncertainty is
-very small for datasets with 100bp loci, suggesting this violation of the model
-has little impact for high-throughput datasets with short loci, like RADseq.
-As expected, analyzing only one variable site per locus removes this underestimation
-of posterior uncertainty
-(See the last row of Figures \ref{fig:linkagedivtimes500k}
-\&
-S\ref{fig:linkagedivtimes100k}),
-but at a large cost of much greater posterior uncertainty in parameter
-estimates due to the loss of data.
-We see the same behavior for estimation the effective sizes of the ancestral
-and descendant populations
-(Figures S\labelcref{fig:linkageleafsizes100k,fig:linkageleafsizes500k,fig:linkagerootsizes100k,fig:linkagerootsizes500k}).
-
-The cost of removing data to avoid violating the assumption of unlinked
-characters is also very pronounced for estimating the number of divergence
-events.
-The method estimates the correct number of events, and with much higher
-posterior probability, when the constant characters are retained 
+\subsection{Philippine \spp{Gekko}}
+We used the new method to compare the divergence times of four pairs
+of populations of \spp{Gekko} inhabiting eight islands in the Philippines.
+Each pair of populations inhabit two different oceanic islands that were never
+connected, and thus never experienced the fragmentation associated with
+Pleistocene sea-level fluctuations.
+As a result, we do not expect that the populations diverged due to processes
+that were shared across the pairs.
+Our results show, despite all four pairs diverging very recently,
+their is strong support that they all diverged independently
 (Figures
-\ref{fig:linkagenevents500k}
-\&
-S\ref{fig:linkagenevents100k}).
-The median posterior probability of the correct number of divergence events is
-over 0.95 for all 500k site datasets, even when loci were 1000bp long.
-(Figure~\ref{fig:linkagenevents500k}).
-However, our results show that linked characters do introduce a bias in the
-estimated posterior probability of the one divergence model ($\nevents = 1$)
-(Figure~\ref{fig:linkagepostprobs}).
-Nonetheless, the bias is moderate and makes the method conservative in the
-sense that it tends to underestimate the posterior probability of shared
-divergence (Figure~\ref{fig:linkagepostprobs}).
+\ref{fig:gekkonevents}
+\& 
+\ref{fig:gekkodivtimes}).
+These results demonstrate that using the likelihood from genomic data provides
+enough information to unambiguously separate divergences across very narrow
+timescales.
 
-\subsubsection{Validation analyses}
+\subsection{Caveats}
+This method is subject to the caveats associated with all model-based
+statistical methods.
+However, there are at least two caveats that are worth emphasizing for the type
+of models we explored here.
+First, it is important to keep in mind that when modeling the divergence of two
+populations, the time of the divergence and the mutation rate are inextricably
+linked.
+Thus, we cannot learn about the relative rates of mutation among pairs of
+populations when also trying to estimate their divergence times.
+Unlike previous methods \citep{Hickerson2006,Huang2011,Oaks2014dpp},
+we allow priors to be placed on mutation rates, to allow uncertainty
+to be incorporated into the model.
+However, the priors on the mutation rates need to be informative if one hopes
+to be able to estimate the divergence times.
 
-When there is no model mispecification, our new method has the desired
-frequenist behavior wherein 95\% of the time the true value of a parameter
-falls within the 95\% credibility interval.
-We see this for
-divergence times
-(Figure~\ref{fig:valdivtimes})
-and the effective sizes of
-descendant
-(Figure~S\ref{fig:valleafsizes})
-and ancestral
-(Figure~S\ref{fig:valrootsizes}).
-Our results also show that the estimated posterior probability of the single
-divergence model ($\nevents = 1$) also mirrors the probability that the model
-is correct 
-(Figure~\ref{fig:valpostprobs}).
-The accuracy in estimating parameter values and posterior probabilities is true
-even when constant characters are excluded, demonstrating that our likelihood
-correction for those missing constant characters is working correctly
-(Equation~\ref{eq:variablecomparisonlikelihood}).
+Second, the new method does not allow migration after populations diverge.
+This is a weakness compared to ABC approaches to this problem
+\citep{Huang2011,Oaks2014dpp}.
+However, given the biases and prior sensitivity exhibited
+by the ABC methods, even when migration is ignored
+\citep{Oaks2012,Oaks2014reply,Oaks2014dpp},
+modeling migration with these methods is not advisable without thorough
+simulation-based analyses to assess their statistical behavior.
 
-As expected, the precision of divergence time and population size estimates is
-greater when the constant sites are included and when there is greater prior
-information about the ancestral population size
-(Figures \ref{fig:valdivtimes}, S\ref{fig:valleafsizes}, \&
-S\ref{fig:valrootsizes}).
-The increase in precision associated with the fivefold increase in 
-the number of sampled characters (100k to 500k) is relatively modest
-(Figures \ref{fig:valdivtimes}, S\ref{fig:valleafsizes}, \&
-S\ref{fig:valrootsizes}),
-suggesting that the benefit of collecting more characters begins to plateau on
-the small side for modern high-throughput datasets (i.e., the 100k datasets had
-only 5,500 SNPs on average).
-Retaining the constant characters has a much larger increase in precision
-than collecting five times more characters.
+\section{Conclusions}
+We introduced a new Bayesian model-choice method for estimating shared
+divergence times across taxa, which are predicted by landscape-level processes
+of diversification.
+By using the full likelihood and genome-scale data, the new method is much more
+accurate, precise, and robust than existing methods based on approximate
+likelihoods.
+This new tool will allow biologists to leverage comparative genomic data to
+learn and test hypotheses about the affects of the landscape on
+diversification.
 
-The true number of divergence events is included in the 95\% credibility set
-greater than 98\% of the time for all the simulation conditions
-(Figure~\ref{fig:valnevents}).
-The frequency at which the correct number of events has the largest posterior
-probability, and the median posterior probability of the correct number of
-events,
-increases when constant characters are retained and as prior information about
-the ancestral population size increases 
-(Figure~\ref{fig:valnevents}).
-Again, the performance increase associated with the increase from 100k to 500k
-sampled characters is relatively moderate; retaining the constant characters
-has a much bigger effect
-(Figure~\ref{fig:valnevents}).
-Reassuringly, when constant characters are used, the median posterior
-probability of the correct number of divergence event is very high; over 0.89
-for all all simulation conditions
-(Figure~\ref{fig:valnevents}).
-
-
-
-\subsubsection{Assessing effect of linkage violation}
-
-
-
-\subsubsection{Assessing the effect of biases in character-pattern acquisition}
-
-This bias is smaller when the constant patterns are retained in
-the dataset
-(Figure
-\ref{fig:filtereddivtimes},
-S\ref{fig:filteredleafsizes}
-\&
-S\ref{fig:filteredrootsizes}).
-
-However, in the face of data-acquisition bias, the method still estimates the
-number of divergence events well, especially when constant characters are used
-(Figure~\ref{fig:filterednevents}).
-Even when the probability of sampling a character with a singleton pattern is
-0.4, the median posterior probability of the correct number of divergence
-events is 0.948.
-(Figure~\ref{fig:filterednevents}).
-
-
-\subsubsection{Comparison to ABC methods}
-
-Our new full-likelihood method, \ecoevolity, does a much better job of
-estimating divergence times
-(Figure~\ref{fig:bakeoffdivtimes})
-and effective population sizes
-(Figures
-S\ref{fig:bakeoffleafsizes}
-\&
-S\ref{fig:bakeoffrootsizes}),
-than the approximate-likelihood Bayesian method, \dppmsbayes.
-This is despite the simulated datasets being ``tailored'' for the ABC method
-(i.e., loci of 200 linked base pairs).
-Notably, the new method does not underestimate the older divergence times like
-the ABC method, which suffers from ``saturated'' population-genetic summary
-statistics that assume an infinite-sites model
-(Figure~\ref{fig:bakeoffdivtimes}).
-
-Also, the new method does a better job of estimating the number of divergence
-events (Figure~\ref{fig:bakeoffnevents}), with a median posterior probability
-of the correct number of events of 0.942 compared to 0.789.
-Importantly, the new method underestimates the number of events much less
-frequently,
-which should lead to fewer erroneous interpretations of shared processes of
-divergence.
-
-
-\subsection{Empirical application}
-
-When the new method is applied to all of the RADseq sites from the
-four pairs of \spp{Gekko} populations, the results strongly
-support that all of the pairs diverged independently
-(Figure~\ref{fig:gekkonevents}).
-The results are extremely robust to the priors on divergence times (\divtime)
-and the concentration parameter (\concentration) of the Dirichlet process, and
-to whether the polyallelic SNPs are recoded as binary
-(Figure~\ref{fig:gekkonevents})
-or removed
-(Figure~S\ref{fig:gekkonopolynevents}).
-Likewise, the estimates of divergence times and effective population sizes
-are nearly identical regardless of the prior on \divtime or \concentration,
-or whether polyallelic SNPs are recoded or removed
-(Figures
-\ref{fig:gekkodivtimes},
-S\ref{fig:gekkosizes},
-S\ref{fig:gekkonopolydivtimes},
-\&
-S\ref{fig:gekkonopolysizes}).
-
-However, when only variable SNPs are analyzed, the behavior is much different.
-First, the estimated divergence times and population sizes are clearly far too
-large and more sensitive to the priors on the divergence times and the
-concentration parameter.
-(Figures
-S\ref{fig:gekkovaronlydivtimes}
-\&
-S\ref{fig:gekkovaronlysizes}).
-While the true values of these parameters are obviously unknown, given the
-variability of these data (Table~\ref{table:gekkocomparisons}), and other data
-from these species \citep{Siler2012, Siler2014kikuchii}, these values are
-clearly nonsensical.
-Also, the posterior probabilities of the number of divergences is also
-much more sensitive to the \divtime and \concentration priors,
-with some combinations yielding results for which three divergence events
-are preferred (although, Bayes factors always prefer four divergences)
-(Figure~S\ref{fig:gekkovaronlynevents}).
-These findings are similar when the polyallelic SNPs are removed
-(Figures
-S\labelcref{fig:gekkonopolyvaronlydivtimes,fig:gekkonopolyvaronlysizes,fig:gekkonopolyvaronlynevents}).
-
-The large overestimation of divergence times and population sizes is consistent
-with our findings from the datasets simulated with an acquisition bias against
-rare allele patterns.
-In these analyses, we also saw dramatic overestimation of these parameters when
-constant characters were excluded.
-Clearly, variable site patterns are being lost during the acquistion and
-assembly of the RADseq data, and the model is extremely senstive to these
-missing variable sites when only variable characters are analyzed.
