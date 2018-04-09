@@ -52,3 +52,37 @@
 
 \newcommand{\mFigure}[3]{\smartFigure{#1}{listformat=figList}{#2}{#3}\clearpage}
 \newcommand{\siFigure}[3]{\smartFigure{#1}{name=Figure S, labelformat=noSpace, listformat=sFigList}{#2}{#3}\clearpage}
+
+\newcommand{\validationfiguregriddescription}{The first four columns show the
+    results from different distributions on the relative effective size of the
+    ancestral population, decreasing in variance from left to right.
+    The fifth column shows results when the effective size
+    ($\epopsize{}\murate{}$) of all populations are fixed to 0.002.
+    For the first two and last two rows, the simulated character matrix for
+    each population had 500,000 and 100,000 characters, respectively.
+    The first and third rows show the results of analyses using all characters,
+    whereas the second and fourth rows show the results when only variable
+    characters are used.
+}
+\newcommand{\weusedmatplotlib}{We generated the plot using matplotlib Version
+    2.0.0 \citep{matplotlib}.}
+\newcommand{\weusedggplot}{We generated the plots with ggplot2 Version 2.2.1
+    \citep{ggplot2}.}
+\newcommand{\weusedggridges}{We generated the plots with ggridges Version 0.4.1
+    \citep{ggridges041} and ggplot2 Version 2.2.1 \citep{ggplot2}.}
+\newcommand{\neventplotannotations}{For each plot,
+    the proportion of \datasets for which the number of events with the largest
+    posterior probability matched the true number of events---$p(\hat{\nevents}
+    = \nevents)$---is shown in the upper left corner,
+    the median posterior probability of the correct number of events across all
+    \datasets---$\widetilde{p(\nevents)}$---is shown in the upper right corner,
+    and
+    the proportion of \datasets for which the true divergence model was
+    included in the 95\% posterior credibility set---$p(\nevents \in 95\%
+    \textrm{CS})$---is shown in the lower right.
+}
+\newcommand{\accuracyscatterplotannotations}[1]{For each plot, the
+    root-mean-square error (RMSE) and the proportion of divergence-time
+    estimates for which the 95\% posterior credibility interval contained the
+    true divergence time---$p(#1 \in \textrm{CI})$---is given.
+}

@@ -9,11 +9,8 @@
     diverged.
     Each plot consists of 1500 estimates---500 simulated \datasets, each with
     three pairs of populations.
-    For each plot, the root-mean-square error (RMSE) and the proportion of
-    divergence-time estimates for which the 95\% posterior credibility interval
-    contained the true divergence time---$p(\comparisondivtime \in
-    \textrm{CI})$---is given.
-    We generated the plot using matplotlib Version 2.0.0 \citep{matplotlib}.
+    \accuracyscatterplotannotations{\comparisondivtime{}}
+    \weusedmatplotlib
 }{fig:valdivtimes}
 
 \mFigure{../../simulations/validation/plots/100k-sites-est-vs-true-prob-nevent-1.pdf}{
@@ -32,7 +29,7 @@
     analyzed.
     All simulated \datasets had three pairs of populations, each with 100,000
     characters.
-    We generated the plot using matplotlib Version 2.0.0 \citep{matplotlib}.
+    \weusedmatplotlib
 }{fig:valpostprobs}
 
 \mFigure{../../simulations/validation/plots/nevents.pdf}{
@@ -41,21 +38,13 @@
     under the same model
     (i.e., no model misspecification).
     \validationfiguregriddescription
-    Each plot shows the results of the analyses of 500 simulated \datasets;
+    Each plot shows the results of the analyses of 500 simulated \datasets,
+    each with three population pairs;
     the number of \datasets that fall within each possible cell
     of true versus estimated numbers of events is shown, and cells with
     more \datasets are shaded darker.
-    For each plot,
-    the proportion of \datasets for which the number of events with the largest
-    posterior probability matched the true number of events---$p(\hat{\nevents}
-    = \nevents)$---is shown in the upper left corner,
-    the median posterior probability of the correct number of events across all
-    \datasets---$\widetilde{p(\nevents)}$---is shown in the upper right corner,
-    and
-    the proportion of \datasets for which the true divergence model was
-    included in the 95\% posterior credibility set---$p(\nevents \in 95\%
-    \textrm{CS})$---is shown in the lower right.
-    We generated the plot using matplotlib Version 2.0.0 \citep{matplotlib}.
+    \neventplotannotations
+    \weusedmatplotlib
 }{fig:valnevents}
 
 
@@ -69,11 +58,8 @@
     500,000 sites total.
     The rows show the results when (top) all sites, (middle) all variable
     sites, and (bottom) at most one variable site per locus are analyzed.
-    For each plot, the root-mean-square error (RMSE) and the proportion of
-    divergence-time estimates for which the 95\% posterior credibility interval
-    contained the true divergence time---$p(\comparisondivtime \in
-    \textrm{CI})$---is given.
-    We generated the plot using matplotlib Version 2.0.0 \citep{matplotlib}.
+    \accuracyscatterplotannotations{\comparisondivtime{}}
+    \weusedmatplotlib
 }{fig:linkagedivtimes500k}
 
 \mFigure{../../simulations/validation/plots/linkage-500k-nevents.pdf}{
@@ -85,17 +71,8 @@
     500,000 sites total.
     The rows show the results when (top) all sites, (middle) all variable
     sites, and (bottom) at most one variable site per locus are analyzed.
-    For each plot,
-    the proportion of \datasets for which the number of events with the largest
-    posterior probability matched the true number of events---$p(\hat{\nevents}
-    = \nevents)$---is shown in the upper left corner,
-    the median posterior probability of the correct number of events across all
-    \datasets---$\widetilde{p(\nevents)}$---is shown in the upper right corner,
-    and
-    the proportion of \datasets for which the true divergence model was
-    included in the 95\% posterior credibility set---$p(\nevents \in 95\%
-    \textrm{CS})$---is shown in the lower right.
-    We generated the plot using matplotlib Version 2.0.0 \citep{matplotlib}.
+    \neventplotannotations
+    \weusedmatplotlib
 }{fig:linkagenevents500k}
 
 \mFigure{../../simulations/validation/plots/linkage-100-100k-sites-est-vs-true-prob-nevent-1.pdf}{
@@ -113,7 +90,7 @@
     The plots show the results when (left) all characters, (middle) all
     variable characters, and (right) at most one variable character per locus
     is analyzed.
-    We generated the plot using matplotlib Version 2.0.0 \citep{matplotlib}.
+    \weusedmatplotlib
 }{fig:linkagepostprobs}
 
 
@@ -126,12 +103,9 @@
     missing cells.
     The rows show the results when (top) all sites and (bottom) only variable
     sites are analyzed.
-    For each plot, the root-mean-square error (RMSE) and the proportion of
-    divergence-time estimates for which the 95\% posterior credibility interval
-    contained the true divergence time---$p(\comparisondivtime \in
-    \textrm{CI})$---is given.
+    \accuracyscatterplotannotations{\comparisondivtime{}}
     All simulated \datasets had three pairs of populations.
-    We generated the plot using matplotlib Version 2.0.0 \citep{matplotlib}.
+    \weusedmatplotlib
 }{fig:missingdivtimes}
 
 \mFigure{../../simulations/validation/plots/missing-data-nevents.pdf}{
@@ -142,18 +116,9 @@
     missing cells.
     The rows show the results when (top) all sites and (bottom) only variable
     sites are analyzed.
-    For each plot,
-    the proportion of \datasets for which the number of events with the largest
-    posterior probability matched the true number of events---$p(\hat{\nevents}
-    = \nevents)$---is shown in the upper left corner,
-    the median posterior probability of the correct number of events across all
-    \datasets---$\widetilde{p(\nevents)}$---is shown in the upper right corner,
-    and
-    the proportion of \datasets for which the true divergence model was
-    included in the 95\% posterior credibility set---$p(\nevents \in 95\%
-    \textrm{CS})$---is shown in the lower right.
+    \neventplotannotations
     All simulated \datasets had three pairs of populations.
-    We generated the plot using matplotlib Version 2.0.0 \citep{matplotlib}.
+    \weusedmatplotlib
 }{fig:missingnevents}
 
 
@@ -169,12 +134,9 @@
     allele.
     The rows show the results when (top) all sites and (bottom) only variable
     sites are analyzed.
-    For each plot, the root-mean-square error (RMSE) and the proportion of
-    divergence-time estimates for which the 95\% posterior credibility interval
-    contained the true divergence time---$p(\comparisondivtime \in
-    \textrm{CI})$---is given.
+    \accuracyscatterplotannotations{\comparisondivtime{}}
     All simulated \datasets had three pairs of populations.
-    We generated the plot using matplotlib Version 2.0.0 \citep{matplotlib}.
+    \weusedmatplotlib
 }{fig:filtereddivtimes}
 
 \mFigure{../../simulations/validation/plots/filtered-data-nevents.pdf}{
@@ -189,18 +151,9 @@
     allele.
     The rows show the results when (top) all sites and (bottom) only variable
     sites are analyzed.
-    For each plot,
-    the proportion of \datasets for which the number of events with the largest
-    posterior probability matched the true number of events---$p(\hat{\nevents}
-    = \nevents)$---is shown in the upper left corner,
-    the median posterior probability of the correct number of events across all
-    \datasets---$\widetilde{p(\nevents)}$---is shown in the upper right corner,
-    and
-    the proportion of \datasets for which the true divergence model was
-    included in the 95\% posterior credibility set---$p(\nevents \in 95\%
-    \textrm{CS})$---is shown in the lower right.
+    \neventplotannotations
     All simulated \datasets had three pairs of populations.
-    We generated the plot using matplotlib Version 2.0.0 \citep{matplotlib}.
+    \weusedmatplotlib
 }{fig:filterednevents}
 
 
@@ -215,11 +168,8 @@
     three pairs of populations.
     The simulated character matrix for each population pair consisted of 200 loci,
     each with 200 linked sites (40,000 characters total).
-    For each plot, the root-mean-square error (RMSE) and the proportion of
-    divergence-time estimates for which the 95\% posterior credibility interval
-    contained the true divergence time---$p(\comparisondivtime \in
-    \textrm{CI})$---is given.
-    We generated the plot using matplotlib Version 2.0.0 \citep{matplotlib}.
+    \accuracyscatterplotannotations{\comparisondivtime{}}
+    \weusedmatplotlib
 }{fig:bakeoffdivtimes}
 
 \mFigure{../../bake-off/plots/nevents.pdf}{
@@ -233,17 +183,8 @@
     Each simulated \dataset contained three pairs of populations, and the
     simulated character matrix for each pair consisted of 200 loci, each with
     200 linked sites (40,000 characters total).
-    For each plot,
-    the proportion of \datasets for which the number of events with the largest
-    posterior probability matched the true number of events---$p(\hat{\nevents}
-    = \nevents)$---is shown in the upper left corner,
-    the median posterior probability of the correct number of events across all
-    \datasets---$\widetilde{p(\nevents)}$---is shown in the upper right corner,
-    and
-    the proportion of \datasets for which the true divergence model was
-    included in the 95\% posterior credibility set---$p(\nevents \in 95\%
-    \textrm{CS})$---is shown in the lower right.
-    We generated the plot using matplotlib Version 2.0.0 \citep{matplotlib}.
+    \neventplotannotations
+    \weusedmatplotlib
 }{fig:bakeoffnevents}
 
 
@@ -252,11 +193,13 @@
     of the number of divergence events across \spp{Gekko} pairs of populations,
     under eight different combinations of priors on the divergence times (rows)
     and the concentration parameter of the Dirichlet process (columns).
+    For these analyses, constant characters were included, and all characters
+    with more than two alleles were recoded as biallelic.
     The Bayes factor for each number of divergence times is given above the
     corresponding bars.
     Each Bayes factor compares the corresponding number of events 
     to all other possible numbers of divergence events.
-    We generated the plots with ggplot2 Version 2.2.1 \citep{ggplot2}.
+    \weusedggplot
 }{fig:gekkonevents}
 
 \mFigure{../../gekko-results/sumtimes.pdf}{
@@ -264,6 +207,7 @@
     \spp{Gekko} pair of populations,
     under eight different combinations of priors on the divergence times (rows)
     and the concentration parameter of the Dirichlet process (columns).
-    We generated the plots with ggridges Version 0.4.1 \citep{ggridges041} and
-    ggplot2 Version 2.2.1 \citep{ggplot2}.
+    For these analyses, constant characters were included, and all characters
+    with more than two alleles were recoded as biallelic.
+    \weusedggridges
 }{fig:gekkodivtimes}
