@@ -199,11 +199,18 @@ def plot_nevents_estimated_vs_true_probs(
                     verticalalignment = "bottom")
     title_text = ax.set_title("All sites")
     ylabel_text = ax.set_ylabel("True probability", size = 14.0)
-    ax.text(1.0, -0.14,
-            "Posterior probability of one divergence",
-            horizontalalignment = "center",
-            verticalalignment = "top",
-            size = 14.0)
+    if include_unlinked_only:
+        ax.text(1.5, -0.14,
+                "Posterior probability of one divergence",
+                horizontalalignment = "center",
+                verticalalignment = "top",
+                size = 14.0)
+    else:
+        ax.text(1.0, -0.14,
+                "Posterior probability of one divergence",
+                horizontalalignment = "center",
+                verticalalignment = "top",
+                size = 14.0)
     identity_line, = ax.plot(
             [0.0, 1.0],
             [0.0, 1.0])
@@ -1247,8 +1254,10 @@ def generate_scatter_plots(
             rotation = "vertical",
             size = 18.0)
 
-    if missing_data or filtered_data:
-        gs.update(left = 0.08, right = 0.98, bottom = 0.1, top = 0.96)
+    if linked_loci:
+        gs.update(left = 0.11, right = 0.98, bottom = 0.08, top = 0.97)
+    elif missing_data or filtered_data:
+        gs.update(left = 0.09, right = 0.98, bottom = 0.1, top = 0.96)
     else:
         gs.update(left = 0.08, right = 0.98, bottom = 0.08, top = 0.97)
 
@@ -1670,7 +1679,6 @@ def generate_model_plots(
     dpp_pattern = re.compile(r'-dpp-')
     rj_pattern = re.compile(r'-rj-')
     var_only_pattern = re.compile(r'var-only-')
-    number_of_comparisons = 3
 
     cmap = truncate_color_map(plt.cm.binary, 0.0, 0.65, 100)
 
@@ -1865,13 +1873,16 @@ def generate_model_plots(
     # show tick labels only for lower-left plot 
     all_axes = fig.get_axes()
     for ax in all_axes:
+        # Make sure ticks correspond only with number of events
+        ax.xaxis.set_ticks(range(number_of_comparisons))
+        ax.yaxis.set_ticks(range(number_of_comparisons))
         if ax.is_last_row() and ax.is_first_col():
             xtick_labels = [item for item in ax.get_xticklabels()]
-            for i in range(1, len(xtick_labels) - 1):
-                xtick_labels[i].set_text(str(i))
+            for i in range(len(xtick_labels)):
+                xtick_labels[i].set_text(str(i + 1))
             ytick_labels = [item for item in ax.get_yticklabels()]
-            for i in range(1, len(ytick_labels) - 1):
-                ytick_labels[i].set_text(str(i))
+            for i in range(len(ytick_labels)):
+                ytick_labels[i].set_text(str(i + 1))
             ax.set_xticklabels(xtick_labels)
             ax.set_yticklabels(ytick_labels)
         else:
@@ -2062,29 +2073,24 @@ def generate_root_1000_500k_model_plots(
                 #         transform = ax.transAxes)
 
     # show tick labels only for lower-left plot 
-    label_offset = float(number_of_comparisons) * 0.03 # 4% of axis range
-    label_offset += 0.5 # origin is at -0.5
     all_axes = fig.get_axes()
     for ax in all_axes:
-        xtick_labels = ["" for item in ax.get_xticklabels()]
-        ytick_labels = ["" for item in ax.get_yticklabels()]
-        ax.set_xticklabels(xtick_labels)
-        ax.set_yticklabels(ytick_labels)
+        ax.xaxis.set_ticks(range(number_of_comparisons))
+        ax.yaxis.set_ticks(range(number_of_comparisons))
         if ax.is_last_row() and ax.is_first_col():
-            # get_xticklabels and set_xticklabels was not working.
-            # There was only 5 tick elements rather than 7, and so
-            # changing the last label from 2 to 3 was impossible.
-            # So, using hack of "erasing" tick labels and then using
-            # ax.text() to place labels manually.
-            for i in range(number_of_comparisons):
-                ax.text(i, -label_offset,
-                        str(i + 1),
-                        horizontalalignment = "center",
-                        verticalalignment = "top")
-                ax.text(-label_offset, i,
-                        str(i + 1),
-                        horizontalalignment = "right",
-                        verticalalignment = "center")
+            xtick_labels = [item for item in ax.get_xticklabels()]
+            for i in range(len(xtick_labels)):
+                xtick_labels[i].set_text(str(i + 1))
+            ytick_labels = [item for item in ax.get_yticklabels()]
+            for i in range(len(ytick_labels)):
+                ytick_labels[i].set_text(str(i + 1))
+            ax.set_xticklabels(xtick_labels)
+            ax.set_yticklabels(ytick_labels)
+        else:
+            xtick_labels = ["" for item in ax.get_xticklabels()]
+            ytick_labels = ["" for item in ax.get_yticklabels()]
+            ax.set_xticklabels(xtick_labels)
+            ax.set_yticklabels(ytick_labels)
 
     gs.update(left = 0.11, right = 0.99, bottom = 0.12, top = 0.92)
 
@@ -2386,29 +2392,24 @@ def generate_bake_off_plots(
                     ax.set_yticks([])
 
             # show tick labels only for lower-left plot 
-            label_offset = float(number_of_pairs) * 0.04 # 4% of axis range
-            label_offset += 0.5 # origin is at -0.5
             all_axes = fig.get_axes()
             for ax in all_axes:
-                xtick_labels = ["" for item in ax.get_xticklabels()]
-                ytick_labels = ["" for item in ax.get_yticklabels()]
-                ax.set_xticklabels(xtick_labels)
-                ax.set_yticklabels(ytick_labels)
+                ax.xaxis.set_ticks(range(number_of_pairs))
+                ax.yaxis.set_ticks(range(number_of_pairs))
                 if ax.is_last_row() and ax.is_first_col():
-                    # get_xticklabels and set_xticklabels was not working.
-                    # There was only 5 tick elements rather than 7, and so
-                    # changing the last label from 2 to 3 was impossible.
-                    # So, using hack of "erasing" tick labels and then using
-                    # ax.text() to place labels manually.
-                    for i in range(number_of_pairs):
-                        ax.text(i, -label_offset,
-                                str(i + 1),
-                                horizontalalignment = "center",
-                                verticalalignment = "top")
-                        ax.text(-label_offset, i,
-                                str(i + 1),
-                                horizontalalignment = "right",
-                                verticalalignment = "center")
+                    xtick_labels = [item for item in ax.get_xticklabels()]
+                    for i in range(len(xtick_labels)):
+                        xtick_labels[i].set_text(str(i + 1))
+                    ytick_labels = [item for item in ax.get_yticklabels()]
+                    for i in range(len(ytick_labels)):
+                        ytick_labels[i].set_text(str(i + 1))
+                    ax.set_xticklabels(xtick_labels)
+                    ax.set_yticklabels(ytick_labels)
+                else:
+                    xtick_labels = ["" for item in ax.get_xticklabels()]
+                    ytick_labels = ["" for item in ax.get_yticklabels()]
+                    ax.set_xticklabels(xtick_labels)
+                    ax.set_yticklabels(ytick_labels)
 
             # avoid doubled spines
             all_axes = fig.get_axes()
@@ -2438,7 +2439,7 @@ def generate_bake_off_plots(
                     rotation = "vertical",
                     size = 12.0)
 
-            gs.update(left = 0.06, right = 0.995, bottom = 0.14, top = 0.92)
+            gs.update(left = 0.08, right = 0.995, bottom = 0.14, top = 0.92)
 
             plot_path = os.path.join(plot_dir,
                     "nevents.pdf")
@@ -2605,13 +2606,13 @@ def generate_bake_off_plots(
                 verticalalignment = "bottom",
                 size = 14.0)
         fig.text(0.005, 0.5,
-                "Estimated {0} ($\\bar{{{1}}}$)".format(parameter_label, parameter_symbol),
+                "Estimated {0} ($\\hat{{{1}}}$)".format(parameter_label, parameter_symbol),
                 horizontalalignment = "left",
                 verticalalignment = "center",
                 rotation = "vertical",
                 size = 12.0)
 
-        gs.update(left = 0.10, right = 0.995, bottom = 0.17, top = 0.925)
+        gs.update(left = 0.11, right = 0.995, bottom = 0.17, top = 0.925)
 
         plot_file_prefix = parameter_label.replace(" ", "-")
         plot_path = os.path.join(plot_dir,
@@ -2629,7 +2630,7 @@ def main_cli(argv = sys.argv):
                     "root_height_c3sp1",
                     ],
             parameter_label = "divergence time",
-            parameter_symbol = "\\tau",
+            parameter_symbol = "t",
             plot_file_prefix = "div-time",
             include_all_sizes_fixed = True,
             include_root_size_fixed = False)
@@ -2640,7 +2641,7 @@ def main_cli(argv = sys.argv):
                     "root_height_c3sp1",
                     ],
             parameter_label = "divergence time",
-            parameter_symbol = "\\tau",
+            parameter_symbol = "t",
             plot_file_prefix = "linkage-100k-div-time",
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
@@ -2652,7 +2653,7 @@ def main_cli(argv = sys.argv):
                     "root_height_c3sp1",
                     ],
             parameter_label = "divergence time",
-            parameter_symbol = "\\tau",
+            parameter_symbol = "t",
             plot_file_prefix = "linkage-500k-div-time",
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
@@ -2664,7 +2665,7 @@ def main_cli(argv = sys.argv):
                     "root_height_c3sp1",
                     ],
             parameter_label = "divergence time",
-            parameter_symbol = "\\tau",
+            parameter_symbol = "t",
             plot_file_prefix = "missing-data-div-time",
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
@@ -2677,7 +2678,7 @@ def main_cli(argv = sys.argv):
                     "root_height_c3sp1",
                     ],
             parameter_label = "divergence time",
-            parameter_symbol = "\\tau",
+            parameter_symbol = "t",
             plot_file_prefix = "filtered-data-div-time",
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
@@ -2691,7 +2692,7 @@ def main_cli(argv = sys.argv):
                     "root_height_c3sp1",
                     ],
             parameter_label = "divergence time",
-            parameter_symbol = "\\tau",
+            parameter_symbol = "t",
             plot_file_prefix = "div-time")
     generate_scatter_plots(
             parameters = [
