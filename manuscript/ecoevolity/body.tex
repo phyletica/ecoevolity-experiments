@@ -1238,11 +1238,11 @@ interest, the divergence time.
 Thus, our choice of simulation settings is designed to assess how uncertainty
 in the root population size affects inference.
 
-Under each of the five scenarios we simulated 500 data sets of 100,000
-characters and 500 data sets of 500,000 characters.
+Under each of the five scenarios we simulated 500 \datasets of 100,000
+characters and 500 \datasets of 500,000 characters.
 This includes constant characters; the mean number of variable SNPs were
 approximately 5,500 and 27,500, respectively.
-We then analyzed all 5,000 simulated datasets in \ecoevolity both with and
+We then analyzed all 5,000 simulated \datasets in \ecoevolity both with and
 without constant characters included.
 For analyses where 
 $\epopsize[\rootpopindex] = 
@@ -1258,20 +1258,20 @@ chain, including the initial state).
 
 In order to assess the frequentist behavior of the posterior probabilities of
 divergence models approximated by \ecoevolity, we simulated an additional
-20,000 data sets of 100,000 characters under the setting where
+20,000 \datasets of 100,000 characters under the setting where
 $\rootrelativepopsize \sim \dgamma{100}{1}$.
-All 20,500 data sets were analyzed with \ecoevolity and binned based on the
+All 20,500 \datasets were analyzed with \ecoevolity and binned based on the
 inferred posterior probability that $\nevents = 1$.
 The mean posterior probability that $\nevents = 1$ for each bin was plotted
-against the proportion of data sets within the bin for which the true
+against the proportion of \datasets within the bin for which the true
 divergence model was $\nevents = 1$.
 If the new method is unbiased, in a frequentist sense, the inferred posterior
 probabilities that $\nevents = 1$ within a bin should approximately equal the
-proportion of the data sets for which that is true
+proportion of the \datasets for which that is true
 \citep{Huelsenbeck2004,Oaks2012,Oaks2014dpp}.
 
 \subsubsection{Assessing the effect of linked sites}
-The characters of most datasets being collected by high-throughput technologies
+The characters of most \datasets being collected by high-throughput technologies
 do not all evolve along independent gene trees.
 Most consist of many putatively unlinked loci that each comprise sequences of
 linked nucleotides.
@@ -1297,11 +1297,11 @@ assumption result in better or worse inferences than throwing out the
 data?
 
 To address this question, 
-we simulated datasets composed of loci of linked sites that were 100, 500, and
+we simulated \datasets composed of loci of linked sites that were 100, 500, and
 1000 characters long.
 The characters for each locus were simulated along the same gene tree (i.e., no
 intra-locus recombination).
-Simulated datasets were analyzed with \ecoevolity in one of three ways:
+Simulated \datasets were analyzed with \ecoevolity in one of three ways:
 (1) All characters were included,
 (2) only variable characters were included,
 and
@@ -1309,18 +1309,18 @@ and
 Only the last option avoids violating the assumption of unlinked characters,
 but throws out the most data.
 
-For all three locus lengths, we simulated 500 data sets with a total of 100,000
+For all three locus lengths, we simulated 500 \datasets with a total of 100,000
 and 500,000 characters.
 The settings of the simulations performed with \simcoevolity, and subsequent
 analyses with \ecoevolity, correspond with the validation analyses described
 above where the relative size of the root population was distributed as
 \dgamma{100}{1}.
 Furthermore, to assess the affect of linked characters on the posterior
-probabilities of divergence models, we simulated an additional 10,000 datasets
+probabilities of divergence models, we simulated an additional 10,000 \datasets
 with 1,000, 100-character loci (100,000 total characters each).
 As described above, to assess the frequentist behavior of approximated
 posterior probabilities, we binned the results of the analyses of these 10,500
-data sets based on the posterior probability that $\nevents = 1$.
+\datasets based on the posterior probability that $\nevents = 1$.
 
 \subsubsection{Assessing the effect of missing data}
 Our method should be robust to missing data, because it is simply treated as a
@@ -1331,12 +1331,12 @@ gene tree, the identity of each gene copy within a population does not matter.
 Thus, some loci having fewer sampled gene copies from some populations should
 result in more variance in parameter estimates, but is not expected to create
 bias.
-To confirm this behavior, we simulated datasets with different probabilities of
+To confirm this behavior, we simulated \datasets with different probabilities of
 sampling each gene copy.
-Specifically, we simulated datasets for which the probability of sampling each
-gene copy was 90\%, 75\%, or 50\%, which resulted in datasets with
+Specifically, we simulated \datasets for which the probability of sampling each
+gene copy was 90\%, 75\%, or 50\%, which resulted in \datasets with
 approximately 10\%, 25\%, or 50\% missing data.
-For each sampling probability, we simulated 100 data sets with 500,000
+For each sampling probability, we simulated 100 \datasets with 500,000
 characters; the settings were the same as described above where
 $\rootrelativepopsize \sim \dgamma{100}{1}$.
 
@@ -1361,10 +1361,10 @@ accounted for in the likelihood calculation, this should create an upward bias
 in the divergence time estimates.
 
 To explore whether data acquisition bias can explain the discrepancy we
-observed for the \spp{Gekko} data, we simulated datasets where the probability
+observed for the \spp{Gekko} data, we simulated \datasets where the probability
 of sampling singleton site patterns (i.e., one gene copy is different from all
 the others) was 80\%, 60\%, and 40\%.
-For each, we simulated 100 data sets for which the settings were
+For each, we simulated 100 \datasets for which the settings were
 the same as described above where
 $\rootrelativepopsize \sim \dgamma{100}{1}$.
 
@@ -1373,9 +1373,9 @@ $\rootrelativepopsize \sim \dgamma{100}{1}$.
 We wanted to compare the performance of the new method to the existing
 approximate-likelihood Bayesian computation (ABC) method \dppmsbayes 
 \citep{Oaks2014dpp}.
-In order to do this, we had to simulate relatively small data sets that the ABC
+In order to do this, we had to simulate relatively small \datasets that the ABC
 methods could handle in a reasonable amount of time.
-Accordingly, we simulated data sets with 200 loci, each with 200 linked
+Accordingly, we simulated \datasets with 200 loci, each with 200 linked
 characters (40,000 total characters).
 For analyses of both \ecoevolity and \dppmsbayes, the settings were
 \begin{enumerate}
@@ -1396,10 +1396,10 @@ For analyses with \dppmsbayes, we assumed a Jukes-Cantor model of nucleotide
 substitution, whereas for the \ecoevolity, we assumed the two-state equivalent
 (i.e., $\gfreq = 0.5$).
 
-Each method was applied to 100 data sets simulated under its own model.
+Each method was applied to 500 \datasets simulated under its own model.
 Thus, there were no model violations, except for the new method, for which the
 assumption of unlinked characters was violated by the 200-character loci.
-For the analysis of each simulated data set with \ecoevolity, three independent
+For the analysis of each simulated \dataset with \ecoevolity, three independent
 MCMC chains were run for 75,000 generations, sampling every 50th generation.
 For the \dppmsbayes analyses, 500,000 samples were simulated from the joint
 prior distribution, 2,000 of which were retained for the approximate posterior
@@ -1450,7 +1450,7 @@ The ABC methods of inferring shared divergence events are very sensitive to the
 prior divergence times
 \citep{Oaks2012,Hickerson2013,Oaks2014reply,Oaks2014dpp}.
 To assess whether results of our new method are also sensitivity to the
-prior on divergence times, we analyzed the data sets that included constant
+prior on divergence times, we analyzed the \datasets that included constant
 characters under the following priors:
 \begin{enumerate}
     \item $\divtime \sim \dexponential{0.005}$
@@ -1515,9 +1515,9 @@ The increase in precision associated with the fivefold increase in the number
 of sampled characters (100k to 500k) is relatively modest (Figures
 \ref{fig:valdivtimes}, S\ref{fig:valleafsizes}, \& S\ref{fig:valrootsizes});
 % suggesting that the benefit of collecting more characters begins to plateau
-% when data sets are small relative to the number of characters commonly
+% when \datasets are small relative to the number of characters commonly
 % collected via modern high-throughput sequencing technologies (i.e., the
-% simulated 100k datasets had only 5,500 SNPs on average).
+% simulated 100k \datasets had only 5,500 SNPs on average).
 Retaining the constant characters results a much larger increase in precision
 than collecting five times more characters.
 
@@ -1539,7 +1539,7 @@ probability of the correct number of divergence event is high; over 0.89
 for all simulation conditions
 (Figure~\ref{fig:valnevents}).
 
-For the data sets simulated with 100,000 and 500,000 characters,
+For the \datasets simulated with 100,000 and 500,000 characters,
 the number of variable sites ranged from
 515--21,676 
 and
@@ -1597,8 +1597,8 @@ This makes sense given that there is less coalescent variation in the data than
 the model expects if all the characters had evolved along independent gene
 trees.
 Importantly, this effect of underestimating posterior uncertainty is very small
-for datasets with 100bp loci, suggesting this violation of the model has little
-impact for high-throughput datasets with short loci, like those collected via
+for \datasets with 100bp loci, suggesting this violation of the model has little
+impact for high-throughput \datasets with short loci, like those collected via
 RADseq.
 As expected, analyzing only one variable site per locus removes this underestimation
 of posterior uncertainty
@@ -1621,32 +1621,32 @@ posterior probability, when the constant characters are retained
 \&
 S\ref{fig:linkagenevents100k}).
 The median posterior probability of the correct number of divergence events is
-over 0.95 for all 500k site datasets, even when loci were 1000bp long.
+over 0.95 for all 500k site \datasets, even when loci were 1000bp long.
 (Figure~\ref{fig:linkagenevents500k}).
 However, our results show that linked characters do introduce a bias in the
 estimated posterior probability of the one divergence model ($\nevents = 1$)
 (Figure~\ref{fig:linkagepostprobs}).
 However, the bias is moderate and makes the method conservative in the
 sense that it tends to underestimate the probability of shared
-divergence across datasets (Figure~\ref{fig:linkagepostprobs}).
+divergence across \datasets (Figure~\ref{fig:linkagepostprobs}).
 
-For simulated datasets with loci of length 100, 500, and 1000 base pairs, there
+For simulated \datasets with loci of length 100, 500, and 1000 base pairs, there
 were an average of 5.4, 27.1, and 54.1 variable characters per locus,
 respectively.
-As expected, the number of variable characters per 100k and 500k dataset
-was very similar to the unlinked simulated datasets, with an average of
+As expected, the number of variable characters per 100k and 500k \dataset
+was very similar to the unlinked simulated \datasets, with an average of
 about
-5,500 variable characters per 100k dataset
+5,500 variable characters per 100k \dataset
 (Figure~S\ref{fig:linkagenumberofvariablesites100k}
 and
-27,100 variable characters per 500k dataset
+27,100 variable characters per 500k \dataset
 (Figure~S\ref{fig:linkagenumberofvariablesites500k}).
 When at most one variable character per locus is sampled per locus, the
 number of remaining characters is usually close or equal to the
 number of loci;
-1000, 200, and 100 characters for the 100k datasets
+1000, 200, and 100 characters for the 100k \datasets
 with 100, 500, and 1000 bp loci, respectively, and
-5000, 1000, and 500 characters for 500k datasets
+5000, 1000, and 500 characters for 500k \datasets
 with 100, 500, and 1000 bp loci, respectively.
 (Figures
 S\ref{fig:linkagenumberofvariablesites100k}
@@ -1680,7 +1680,7 @@ S\ref{fig:filteredleafsizes}
 S\ref{fig:filteredrootsizes}), and the bias increases as the probability of
 missing a character with a singleton pattern increases.
 Notably, this bias is smaller when the constant patterns are retained in
-the dataset
+the \dataset
 (Figure
 \ref{fig:filtereddivtimes},
 S\ref{fig:filteredleafsizes}
@@ -1707,7 +1707,7 @@ S\ref{fig:bakeoffleafsizes}
 \&
 S\ref{fig:bakeoffrootsizes}),
 than the approximate-likelihood Bayesian method, \dppmsbayes.
-This is despite the simulated datasets being ``tailored'' for the ABC method
+This is despite the simulated \datasets being ``tailored'' for the ABC method
 (i.e., loci of 200 linked base pairs).
 Notably, the new method does not underestimate the older divergence times like
 the ABC method, which suffers from saturated population-genetic summary
@@ -1727,7 +1727,7 @@ given that \ecoevolity is collecting autocorrelated samples from
 the full posterior, whereas \dppmsbayes is collecting independent samples
 from a different distribution we hope is similar to the posterior.
 To compare the overall amount of computation required by the two approaches
-we look at the average time it takes to analyze a simulated data set
+we look at the average time it takes to analyze a simulated \dataset
 on a single processor 
 (2.6GHz Intel Xeon CPU E5-2660 v3).
 This was 34.6 days for the approximate-likelihood method (2,991,304 seconds)
@@ -1785,7 +1785,7 @@ These findings are similar when the polyallelic SNPs are removed
 S\labelcref{fig:gekkonopolyvaronlydivtimes,fig:gekkonopolyvaronlysizes,fig:gekkonopolyvaronlynevents}).
 
 The large overestimation of divergence times and population sizes is consistent
-with our findings from the datasets simulated with an acquisition bias against
+with our findings from the \datasets simulated with an acquisition bias against
 rare allele patterns.
 In these simulation-based analyses, we also saw dramatic overestimation of
 these parameters when constant characters were excluded.
@@ -1810,9 +1810,9 @@ in only modest improvement in precision
 (Figures
 \ref{fig:valdivtimes}, S\ref{fig:valleafsizes}, \& S\ref{fig:valrootsizes}).
 This suggests that the benefit of collecting more characters begins to plateau
-when data sets are small relative to the number of characters commonly
+when \datasets are small relative to the number of characters commonly
 collected via modern high-throughput sequencing technologies (i.e., the
-simulated 100k datasets had only 5,500 SNPs on average).
+simulated 100k \datasets had only 5,500 SNPs on average).
 Even with only 200 short (200 bp) loci, the median posterior probability
 of the correct number of divergence events was 0.94
 (Figure~\ref{fig:bakeoffnevents}).
@@ -1854,7 +1854,7 @@ when assembling these data.
 
 Perhaps most striking is how much better the method estimates the number
 of divergence events when all the data are used.
-For example, across the 500,000-character data sets, the
+For example, across the 500,000-character \datasets, the
 median posterior probability of the correct number of divergence events
 is over 0.94 regardless of the linked characters
 or pattern-acquisition biases we simulated
