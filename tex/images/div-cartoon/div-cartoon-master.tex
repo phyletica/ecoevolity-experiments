@@ -1,0 +1,77 @@
+\documentclass[11pt,a4paper]{scrartcl}
+% \documentclass[border=0pt]{standalone}
+\pagestyle{empty}
+\usepackage{tikz}
+\usetikzlibrary{calc,math,positioning,arrows}
+\usepackage{sfmath}
+\usepackage{ifthen}
+\usepackage{xspace}
+\usepackage{xcolor}
+\pgfrealjobname{master}
+\usepackage[width=9.2cm, height=8.7cm,noheadfoot]{geometry}
+
+\input{../../utils/notation.tex}
+
+%% Set up color palettes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Color palette GreenOrange_6 from
+% https://jiffyclub.github.io/palettable/tableau/
+\definecolor{pgreen}     {RGB}{50,162,81}
+\definecolor{porange}    {RGB}{255,127,15}
+\definecolor{pblue}      {RGB}{60,183,204}
+\definecolor{pyellow}    {RGB}{255,217,74}
+\definecolor{pteal}      {RGB}{57,115,124}
+\definecolor{pauburn}    {RGB}{184,90,13}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\ignoreForPairs}[1]{}
+\newcommand{\includeForPairs}[1]{#1}
+\newcommand{\maintainTreeCanvasSize}[1]{\includeForPairs{#1}}
+\newcommand{\maintainPairCanvasSize}[1]{\includeForPairs{#1}}
+\newcommand{\includeNodeLabels}[1]{}
+\newcommand{\includeEventLabels}[1]{#1}
+
+% 1.6 deep
+% 5.6 shallow
+% 3.6 middle
+\pgfmathsetmacro\shallowdepth{4.5}
+\pgfmathsetmacro\middledepth{2.2}
+\pgfmathsetmacro\deepdepth{1.4}
+\pgfmathsetmacro\firstdepth{\middledepth}
+\pgfmathsetmacro\seconddepth{\deepdepth}
+\pgfmathsetmacro\thirddepth{\shallowdepth}
+\pgfmathsetmacro\stemlength{1.0}
+\pgfmathsetmacro\maximumdepth{\deepdepth}
+\newcommand{\firstEventLineColor}{black!00}
+\newcommand{\secondEventLineColor}{black!00}
+\newcommand{\thirdEventLineColor}{black!00}
+\newcommand{\firstEventLabelColor}{black!00}
+\newcommand{\secondEventLabelColor}{black!00}
+\newcommand{\thirdEventLabelColor}{black!00}
+
+\newcommand{\getEventLabel}[1]{%
+    \ifthenelse{\equal{#1}{\shallowdepth}}%
+        {$\tau_{\scriptscriptstyle 1}$}%
+        {\ifthenelse{\equal{#1}{\deepdepth}}%
+            {$\divtime{}_{\scriptscriptstyle 3}$}%
+            {$\divtime{}_{\scriptscriptstyle 2}$}}%
+}
+
+\begin{document}
+
+\pgfmathsetmacro\firstdepth{\shallowdepth}
+\pgfmathsetmacro\seconddepth{\middledepth}
+\pgfmathsetmacro\thirddepth{\middledepth}
+
+\renewcommand{\firstEventLineColor}{black!50}
+\renewcommand{\secondEventLineColor}{black!50}
+\renewcommand{\firstEventLabelColor}{black}
+\renewcommand{\secondEventLabelColor}{black}
+\renewcommand{\includeNodeLabels}[1]{#1}
+
+\thispagestyle{empty}
+\beginpgfgraphicnamed{div-cartoon}
+\input{div-cartoon-template.tex}
+\endpgfgraphicnamed
+
+\end{document}
+
