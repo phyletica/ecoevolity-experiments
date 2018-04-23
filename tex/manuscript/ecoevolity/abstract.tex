@@ -1,0 +1,31 @@
+A major challenge to understanding biological diversification is accounting for
+large-scale processes that cause non-independent speciation of multiple,
+co-distributed lineages.
+Such processes predict temporally clustered divergences across taxa.
+Approximate-likelihood Bayesian computation (ABC) approaches to inferring such
+patterns from comparative genetic data are very sensitive to prior assumptions
+and often biased toward estimating shared divergences.
+We introduce a full-likelihood Bayesian approach, \ecoevolity, which takes full
+advantage of information in genomic data.
+By analytically integrating over gene trees, we are able to directly calculate
+the likelihood of the population history from genomic data, and efficiently
+sample the model-averaged posterior via Markov chain Monte Carlo algorithms.
+Using simulations, we find that the new method is much more accurate and
+precise at estimating the number and timing of divergence events across pairs
+of populations than existing approximate-likelihood methods.
+Our full Bayesian approach also requires several orders of magnitude less
+computational time than existing ABC approaches.
+We find that despite assuming unlinked characters (e.g., unlinked
+single-nucleotide polymorphisms), the new method performs better if this
+assumption is violated in order to retain the constant characters of whole
+linked loci.
+In fact, retaining constant characters allows the new method to robustly
+estimate the correct number of divergence events with high posterior
+probability in the face of character-acquisition biases, which commonly
+plague loci assembled from reduced-representation genomic libraries.
+We apply our method to genomic data from four pairs of insular populations of
+\spp{Gekko} lizards from the Philippines that are \emph{not} expected to have
+co-diverged.
+Despite all four pairs diverging very recently, our method strongly supports
+that they diverged independently, and these results are robust to very
+disparate prior assumptions.
