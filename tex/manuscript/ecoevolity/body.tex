@@ -13,7 +13,8 @@ independent evolutionary lineages provides compelling evidence that a shared,
 landscape-level process was responsible for the lineages diverging.
 For example, the fragmentation of an environment, like an island, forest, or
 watershed, can cause multiple taxa distributed across that environment to
-co-diverge over a short interval relative to evolutionary timescales.
+co-diverge over a short interval relative to evolutionary timescales
+(Figure~\ref{fig:divCartoon}).
 \thought{Better word than ``environment?'' I don't like landscape, because
     it excludes aquatic systems.}
 % , such that a model that treats them as
@@ -26,7 +27,6 @@ divergence times.
 % As a result, we stand to learn a lot about processes of diversification from
 % a robust method for inferring the temporal pattern of divergences across
 % multiple, independent lineages.
-\thought{It would be nice to reference a cartoon example above}.
 
 \begin{linenomath}
 If we have pairs of populations for which we wish to infer and compare their
@@ -35,12 +35,12 @@ How many divergence events, and what assignment of taxa to those events, best
 explain the genetic variation within and between the diverged populations of
 each lineage (Figure~\ref{fig:divCartoon})?
 One challenge of this inference problem is the number of possible models.
-If we have \ncomparisons pairs of populations, we would like to assign them to an
-unknown number of divergence events, \nevents, which can range from one to
-\ncomparisons.
+If we have \ncomparisons{} pairs of populations, we would like to assign them to an
+unknown number of divergence events, \nevents{}, which can range from one to
+\ncomparisons{}.
 For a given number of divergence events, the Stirling number of the second kind
 tells us the number of ways of assigning the taxa to the divergence times
-(i.e., the number of models with \nevents divergence-time parameters):
+(i.e., the number of models with \nevents{} divergence-time parameters):
 \begin{equation}
     S_2(\ncomparisons, \nevents) = 
     \frac{1}{\nevents!} \sum_{i = 0}^{\nevents - 1} (-1)^{i}
@@ -49,7 +49,7 @@ tells us the number of ways of assigning the taxa to the divergence times
 \end{equation}
 When the number of divergence times is unknown, to get the total number of
 possible divergence models, we need to sum over all possible values of
-\nevents, which is Bell's number \citep{Bell1934}:
+\nevents{}, which is Bell's number \citep{Bell1934}:
 \begin{equation}
     B_{\ncomparisons} = \sum_{\nevents = 1}^{\ncomparisons}
     S_2(\ncomparisons, \nevents).
@@ -63,23 +63,28 @@ allows the data to determine which models are most relevant.
 \end{linenomath}
 
 Methods have been developed to perform this model averaging using
-approximate-likelihood Bayesian computation
+approximate-likelihood Bayesian computation (ABC)
 \citep{Hickerson2006,Huang2011,Oaks2014dpp}.
 However, these methods often struggle to detect multiple divergence times
 across pairs of populations \citep{Oaks2012, Oaks2014reply} or have little
 information to update \emph{a priori} expectations \citep{Oaks2014dpp}.
+More fundamentally, the loss of information inherent to ABC approaches can
+prevent them from discriminating among models
+\citep{Robert2011,Marin2014,Green2015}.
+
 One proposed solution is to focus the inference problem on whether or not all
 pairs diverged at the same time (i.e., $\nevents = 1$ versus
 $\nevents > 1$)\citep{Hickerson2013}.
 However, limiting the inference in this way is often not satisfactory, because
-phylogeographers rarely expect that all of the pairs of populations they wish
+biogeographers rarely expect that all of the pairs of populations they wish
 to compare diverged at the same time.
 Limiting ourselves to the hypothesis of a single shared divergence would not
 recognize situations where only a subset of taxa co-diverged, or where multiple
 shared divergences have occurred.
 The latter is particularly relevant when multiple landscape changes are known
 to have occurred.
-More fundamentally, Papadopoulou and Knowles \citeyear{Papadopoulou2016}
+More fundamentally,
+\citet{Papadopoulou2016}
 astutely point out that all of the pairs co-diverging is not the correct null
 hypothesis.
 If we wish to test for shared divergences, it is more appropriate to consider
@@ -113,7 +118,7 @@ For each pair of populations that we wish to compare, we assume that we have
 collected orthologous genetic markers with at most two states.
 We will refer to these as ``biallelic characters,'' but note that this includes
 constant characters.
-We follow Bryant et al.\ \citeyear{Bryant2012} in referring to the two possible
+We follow \citet{Bryant2012} in referring to the two possible
 states as ``red'' and ``green.''
 We assume each character is effectively unlinked, i.e., each marker evolved
 along a gene tree that is independent of the others, conditional on the
@@ -188,6 +193,7 @@ shorthand for the species tree.
 
 \subsubsection{The likelihood}
 
+\begin{linenomath}
 Given \murate, \gfreq, \comparisondivtime and \comparisonpopsizes, the
 probability of the observed data at a marker (\allelecount and \redallelecount),
 is the probability of the site pattern given a gene tree multiplied by the
@@ -209,7 +215,9 @@ likelihood of the species tree directly from the biallelic site patterns under
 a coalescent model.
 \thought{For completeness, should I lay out the math and algorithm for
     calculating the likelihood in the supplemental materials?}
+\end{linenomath}
 
+\begin{linenomath}
 Assuming independence among loci, conditional on the species tree, we can
 calculate the probability of the \nloci loci given the specie trees by simply
 taking the product over them,
@@ -240,10 +248,11 @@ $\sptrees = \sptree[1], \sptree[2], \ldots, \sptree[\ncomparisons]$,
 $\murates = \murate[1], \murate[2], \ldots, \murate[\ncomparisons]$,
 and
 $\gfreqs = \gfreq[1], \gfreq[2], \ldots, \gfreq[\ncomparisons]$.
-
+\end{linenomath}
 
 \subsubsection{Correcting for missing constant characters}
 
+\begin{linenomath}
 If we only sample variable characters, we need to correct the sample space for
 the missing constant characters.
 We can correct the likelihood by simply dividing by the probability of a
@@ -310,9 +319,11 @@ loci for each population (i.e., no missing data), but will deviate if fewer
 gene copies are sampled for at least one locus.
 Thus, identical likelihoods between SNAPP and our method should not be expected
 when analyzing variable-only data.
+\end{linenomath}
 
 \subsection{Bayesian inference}
 
+\begin{linenomath}
 We can obtain a posterior probability distribution by naively plugging the
 likelihood in Equation~\ref{eq:collectionlikelihood} into Bayes' rule,
 \begin{equation}
@@ -379,14 +390,15 @@ What we want to do is relax this assumption and allow pairs to share divergence
 times.
 % We want to estimate how many divergences occurred, and which pairs, if any,
 % shared divergences.
+\end{linenomath}
 
 Let's use \divtimemodel to represent the divergence model, which comprises
-the divergence times, the number of which (\nevents) can range from 1 to
-\ncomparisons, and the mapping of non-overlapping subsets of the population
-pairs to these \nevents divergence times.
+the divergence times, the number of which (\nevents{}) can range from 1 to
+\ncomparisons{}, and the mapping of non-overlapping subsets of the population
+pairs to these \nevents{} divergence times.
 We will separate out \divtimemodel into two components,
 \begin{enumerate}
-    \item the partitioning of the \ncomparisons population pairs to
+    \item the partitioning of the \ncomparisons{} population pairs to
         divergence events, which we will denote as \divtimesets, and
     \item the divergence times themselves,
         $\divtimes = \divtime[1], \ldots, \divtime[\nevents]$.
@@ -403,6 +415,7 @@ The concentration parameter determines the prior probability of \divtimesets,
 the partitioning of the population pairs, and the base distribution determines
 the prior probability of the divergence time of each subset.
 
+\begin{linenomath}
 Under the Dirichlet process prior, the posterior becomes
 \begin{equation}
     \pr(
@@ -478,6 +491,7 @@ to those times (\divtimesets), we get
     }.
     \label{eq:bayesruleexpanded}
 \end{equation}
+\end{linenomath}
 
 \subsubsection{Priors}
 
@@ -486,10 +500,11 @@ to those times (\divtimesets), we get
 % of population pairs to those events as random variables under a Dirichlet
 % process prior \citep{Ferguson1973, Antoniak1974}.
 
+\begin{linenomath}
 \paragraph{Prior on concentration parameter}
 Given a single parameter, \concentration, the Dirichlet process determines the
-prior probability of all the possible ways the \ncomparisons pairs of
-populations can be partitioned to \nevents = 1, 2, \ldots \ncomparisons
+prior probability of all the possible ways the \ncomparisons{} pairs of
+populations can be partitioned to $\nevents = 1, 2, \ldots \ncomparisons$
 divergence events.
 Given \concentration, the prior probability that two pairs of populations, $i$
 and $j$ (assuming $i \neq j$), share the same divergence time is
@@ -506,6 +521,7 @@ which is likely sufficient when the number of pairs is small.
 Alternatively, we allow a hierarchical approach to accommodate uncertainty in
 the concentration parameter by specifying a gamma distribution as a prior on
 \concentration \citep{Escobar1995,Heath2011}.
+\end{linenomath}
 
 \paragraph{Prior on divergence times}
 Given the subsets of pairs assigned to divergence events, we use a gamma
@@ -585,7 +601,7 @@ time-reversible model \citep{Tavare1986}.
 
 We use Markov chain Monte Carlo (MCMC) algorithms to numerically approximate
 the joint posterior in Equation~\ref{eq:bayesruleexpanded}.
-We use the Gibbs sampling algorithm (Algorithm 8) of Neal \citeyear{Neal2000}
+We use the Gibbs sampling algorithm (Algorithm 8) of \citet{Neal2000}
 to update the divergence model (\divtimemodel) during the chain.
 We also use univariate Metropolis-Hastings algorithms
 \citep{Metropolis1953,Hastings1970} to update each parameter of the model
@@ -617,6 +633,7 @@ To simplify notation, throughout this section we will use
 \sepopsize[\rootpopindex] in place of \epopsize[\rootpopindex] to denote the
 effective size of the ancestral population.
 
+\begin{linenomath}
 When coalescence of gene lineages is complete within a sampled pair of
 populations, only two lineages coalesce within the ancestral population.
 In this case, the expected height of the root of a gene tree is
@@ -639,7 +656,9 @@ during our proposal,
 This relationship will allow us to jointly and efficiently explore the space of
 \divtime and \sepopsize[\rootpopindex] when there is little information in the
 data to tease them apart.
+\end{linenomath}
 
+\begin{linenomath}
 For population pair $i$, we first draw a uniform random deviate,
 $\uniformdeviate \sim \textrm{Uniform}(-\tuningparameter, \tuningparameter)$,
 where \tuningparameter is a tuning parameter that can be adjusted to 
@@ -657,8 +676,11 @@ determine the corresponding proposed value for the population divergence time,
 \end{equation}
 The uniform deviate to reverse this move is simply
 $\uniformdeviate\proposed = -\uniformdeviate$.
+\end{linenomath}
 
 
+% {\singlespacing
+\begin{linenomath}
 To get the Hastings ratio for this move, we use the formula of
 \citet{Green1995},
 \begin{equation}
@@ -675,7 +697,7 @@ $\frac{g\proposed(\uniformdeviate\proposed)}{g(\uniformdeviate)} = 1$,
 and the Hastings ratio reduces to just the Jacobian term,
 \begin{equation}
 % \arraycolsep=4pt
-\def\arraystretch{1.5}
+% \def\arraystretch{1.5}
 \begin{split}
     J & = \left|\begin{array}{ccc}
         \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \sepopsize[\rootpopindex]{}_i} &
@@ -751,7 +773,7 @@ Equation~\ref{eq:timerootsizeequality}:
 The Jacobian term then becomes
 \begin{equation}
 % \arraycolsep=4pt
-\def\arraystretch{1.5}
+% \def\arraystretch{1.5}
 \begin{split}
     J & = \left|\begin{array}{ccccccc}
         \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \sepopsize[\rootpopindex]{}_i} &
@@ -859,6 +881,8 @@ The Jacobian term then becomes
     |\det(J)| & = |-e^{\uniformdeviate}| = e^{\uniformdeviate} = \textrm{Hastings ratio}.
 \end{split}
 \end{equation}
+\end{linenomath}
+% }
 
 \paragraph{\timesizeratemixer proposal}
 This proposal is designed to improve mixing of the MCMC chain when there are
@@ -871,6 +895,7 @@ The divergence time was often positively correlated with the effective size of
 the descendant populations, and negatively correlated with the mutation rate
 and effective population size of the ancestral population.
 
+\begin{linenomath}
 For a given divergence time, \divtime[i],
 we first draw a random uniform deviate,
 $\uniformdeviate \sim \textrm{Uniform}(-\tuningparameter, \tuningparameter)$,
@@ -896,7 +921,10 @@ that have been updated, denoted as $n$,
 and how many of these were scaled by
 $e^{\uniformdeviate}$, denoted $m$;
 the remaining $n-m$ parameters were scaled by $e^{-\uniformdeviate}$.
+\end{linenomath}
 
+% {\singlespacing
+\begin{linenomath}
 Given $n$ and $m$, we can again use Green's \citeyear{Green1995} formula
 (Equation~\ref{eq:greenhastings}) to determine the Hastings ratio for this
 proposal.
@@ -915,7 +943,7 @@ $e^{-\uniformdeviate}$, respectively,
 the Jacobian term is
 \begin{equation}
 % \arraycolsep=4pt
-\def\arraystretch{1.5}
+% \def\arraystretch{1.5}
 \begin{split}
     J & = \left|\begin{array}{ccccccccccc}
         \frac{\partial \parameter[1]\proposed}{\partial \parameter[1]} &
@@ -1168,6 +1196,8 @@ the Jacobian term is
     |\det(J)| & = e^{\uniformdeviate{}(2m - n)} = \textrm{Hastings ratio}.
 \end{split}
 \end{equation}
+\end{linenomath}
+% }
 
 \subsection{Software implementation}
 The method outlined above is implemented in the open-source software package,
@@ -1261,12 +1291,12 @@ divergence models approximated by \ecoevolity, we simulated an additional
 20,000 \datasets of 100,000 characters under the setting where
 $\rootrelativepopsize \sim \dgamma{100}{1}$.
 All 20,500 \datasets were analyzed with \ecoevolity and binned based on the
-inferred posterior probability that $\nevents = 1$.
-The mean posterior probability that $\nevents = 1$ for each bin was plotted
+inferred posterior probability that $\nevents{} = 1$.
+The mean posterior probability that $\nevents{} = 1$ for each bin was plotted
 against the proportion of \datasets within the bin for which the true
-divergence model was $\nevents = 1$.
+divergence model was $\nevents{} = 1$.
 If the new method is unbiased, in a frequentist sense, the inferred posterior
-probabilities that $\nevents = 1$ within a bin should approximately equal the
+probabilities that $\nevents{} = 1$ within a bin should approximately equal the
 proportion of the \datasets for which that is true
 \citep{Huelsenbeck2004,Oaks2012,Oaks2014dpp}.
 
@@ -1320,7 +1350,7 @@ probabilities of divergence models, we simulated an additional 10,000 \datasets
 with 1,000, 100-character loci (100,000 total characters each).
 As described above, to assess the frequentist behavior of approximated
 posterior probabilities, we binned the results of the analyses of these 10,500
-\datasets based on the posterior probability that $\nevents = 1$.
+\datasets based on the posterior probability that $\nevents{} = 1$.
 
 \subsubsection{Assessing the effect of missing data}
 Our method should be robust to missing data, because it is simply treated as a
@@ -1472,8 +1502,8 @@ characters, we tried the following priors:
 For all analyses, we ran 10 independent MCMC chains for 150,000 generations,
 sampling every 100th generation.
 Convergence and mixing of the chains was assessed by the potential scale
-reduction factor (the square root of Equation 1.1 in Brooks and Gelman
-\citeyear{Brooks1998}) and effective sample size \citep{Gong2014} of the
+reduction factor (the square root of Equation 1.1 in
+\citet{Brooks1998}) and effective sample size \citep{Gong2014} of the
 likelihood and all parameters, and inspected visually with the program Tracer
 version 1.6
 \citep{Tracer16}.
@@ -1498,7 +1528,7 @@ and ancestral
 (Figure~S\ref{fig:valrootsizes})
 populations.
 Our results also show that the estimated posterior probability of the single
-divergence model ($\nevents = 1$) mirrors the probability that the model
+divergence model ($\nevents{} = 1$) mirrors the probability that the model
 is correct 
 (Figure~\ref{fig:valpostprobs}).
 We see the same behaviors whether or not the constant characters are excluded,
@@ -1624,7 +1654,7 @@ The median posterior probability of the correct number of divergence events is
 over 0.95 for all 500k site \datasets, even when loci were 1000bp long.
 (Figure~\ref{fig:linkagenevents500k}).
 However, our results show that linked characters do introduce a bias in the
-estimated posterior probability of the one divergence model ($\nevents = 1$)
+estimated posterior probability of the one divergence model ($\nevents{} = 1$)
 (Figure~\ref{fig:linkagepostprobs}).
 However, the bias is moderate and makes the method conservative in the
 sense that it tends to underestimate the probability of shared
@@ -1820,7 +1850,6 @@ of the correct number of divergence events was 0.94
 
 \subsection{To exclude linked sites or not to exclude?}
 
-\thought{Compare to and cite Kubatko (SVDQuartets) and Knowles (IM, I think?)}
 The increased precision and robustness associated with retaining constant
 characters creates an interesting question when analyzing DNA sequence data
 from reduced-representation genomic libraries:
@@ -1865,6 +1894,21 @@ or pattern-acquisition biases we simulated
 \ref{fig:filterednevents});
 these values are as low as 0.41 when constant characters are removed
 \ref{fig:filterednevents}).
+
+We caution against generalizing our findings
+of favorable performance with linked loci
+to other methods that assume unlinked characters.
+However, 
+\citet{ChifmanKubatko2014}
+found quartet inference of splits in multi-species coalescent trees
+from SNP data was robust to the violation of unlinked characters.
+Our results show the amount of data that is discarded to avoid linked
+characters can far outway the negative effects of violating the assumption of
+unlinked characters.
+When analyzing linked loci with a method that assumes unlinked characters,
+using simulations to assess the effect of linkage on the method may be worth
+the effort in order to bring more data to bear.
+
 
 \subsection{Philippine \spp{Gekko}}
 We used the new method to compare the divergence times of four pairs
