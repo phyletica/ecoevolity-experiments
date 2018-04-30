@@ -17,8 +17,9 @@ performance of the new method,
 Acknowledgements
 ================
 
-This software benefited from funding provided to Jamie Oaks from the National
-Science Foundation (DBI 1308885).
+This work was made possible by funding provided to [Jamie
+Oaks](http://phyletica.org) from the National Science Foundation (grant numbers
+DBI 1308885 and DEB 1656004).
 
 License
 =======
