@@ -51,23 +51,59 @@ node lower right/.style={font=\small,anchor=north west,text height=0.240cm,text 
 \coordinate (n11) at (5.600,0.000);
 \coordinate (n11p) at (\thirddepth,0.000);
 
+\node (a2) [right=0mm of n11,circle, red,      fill, inner sep = 1.2pt] {};
+\node (a1) [below=0mm of a2, circle, black!50, fill, inner sep = 1.2pt] {};
+\node (a3) [above=0mm of a2, circle, red,      fill, inner sep = 1.2pt] {};
+
+\node [above=-1.5mm of a3] {\tiny ($\allelecount[2], \redallelecount[2]) = (3, 2)$};
+
+\node (a5) [right=0mm of n10,circle, black!50, fill, inner sep = 1.2pt] {};
+\node (a4) [below=0mm of a5, circle, black!50, fill, inner sep = 1.2pt] {};
+\node (a6) [above=0mm of a5, circle, red,      fill, inner sep = 1.2pt] {};
+
+\node [below=-1.5mm of a4] {\tiny ($\allelecount[1], \redallelecount[1]) = (3, 1)$};
+
+\coordinate (abracket1) at (6.5, 0.75);
+\coordinate (abracket2) at (6.6, 0.75);
+\coordinate (abracket3) at (6.6, 0.28);
+\coordinate (abracket4) at (6.5, 0.28);
+\coordinate (anotation) at (6.6, 0.50);
+
 \coordinate (m5) at (7.5,-1.000);
 \coordinate (m4) at (7.5,0.600);
 \coordinate (m3) at (7.5,2.200);
 \coordinate (m2) at (7.5,3.800);
 \coordinate (m1) at (7.5,5.400);
 
-\node [right=0mm of m5] {\includegraphics[height=15mm]{./pairs-3-lines-crop.pdf}};
-\node [right=0mm of m4] {\includegraphics[height=15mm]{./pairs-2-3-lines-crop.pdf}};
-\node [right=0mm of m3] {\includegraphics[height=15mm]{./pairs-2-2-lines-crop.pdf}};
-\node [right=0mm of m2] {{\setlength{\fboxsep}{0.5mm}\setlength{\fboxrule}{1pt}\fcolorbox{pblue}{white}{\includegraphics[height=15mm]{./pairs-2-1-lines-crop.pdf}}}};
-\node [right=2mm of m1] {\includegraphics[height=15mm]{./pairs-1-lines-crop.pdf}};
+\coordinate (m2bul) at (7.5, 4.6);
+\coordinate (m2bur) at (9.3, 4.6);
+\coordinate (m2bbl) at (7.5, 3.0);
+\coordinate (m2bbr) at (9.3, 3.0);
 
-\node [right=19mm of m5] {\model[5]};
-\node [right=19mm of m4] {\model[4]};
-\node [right=19mm of m3] {\model[3]};
-\node [right=19mm of m2] {\model[2]};
-\node [right=19mm of m1] {\model[1]};
+\coordinate (kbracket1) at (9.4, 4.6);
+\coordinate (kbracket2) at (9.5, 4.6);
+\coordinate (kbracket3) at (9.5, -0.15);
+\coordinate (kbracket4) at (9.4, -0.15);
+
+\node [right=0mm of m5] {\includegraphics[height=14mm]{./pairs-3-lines-crop.pdf}};
+\node [right=0mm of m4] {\includegraphics[height=14mm]{./pairs-2-3-lines-crop.pdf}};
+\node [right=0mm of m3] {\includegraphics[height=14mm]{./pairs-2-2-lines-crop.pdf}};
+% \node [right=0mm of m2] {{\setlength{\fboxsep}{0.5mm}\setlength{\fboxrule}{1pt}\fcolorbox{pblue}{white}{\includegraphics[height=15mm]{./pairs-2-1-lines-crop.pdf}}}};
+\node [right=0mm of m2] {\includegraphics[height=14mm]{./pairs-2-1-lines-crop.pdf}};
+\node [right=0mm of m1] {\includegraphics[height=14mm]{./pairs-1-lines-crop.pdf}};
+
+\draw [pblue, very thick, line cap=rect] (m2bul) -- (m2bur) -- (m2bbr) -- (m2bbl) -- (m2bul);
+
+\node [right=20mm of m5] {$\nevents = 3$};
+% \node [right=19mm of m4] {\model[4]};
+\node [right=20mm of m3] {$\nevents = 2$};
+% \node [right=19mm of m2] {\model[2]};
+\node [right=20mm of m1] {$\nevents = 1$};
+
+\draw [very thick, line cap=rect] (kbracket1) -- (kbracket2) -- (kbracket3) -- (kbracket4);
+
+\draw [thick, line cap=rect] (abracket1) -- (abracket2) -- (abracket3) -- (abracket4);
+\node [right=0mm of anotation] {$\leafallelecounts, \leafredallelecounts$};
 
 
 \coordinate (rootisland) at (\maximumdepth, -1.5);
@@ -149,8 +185,8 @@ node lower right/.style={font=\small,anchor=north west,text height=0.240cm,text 
 \node [right=0mm of n4] {\includegraphics[width=14mm]{../phylopics/gekko-vittatus-6-auburn-shadow.png}};
 \node [right=0mm of n7] {\includegraphics[width=14mm]{../phylopics/gecko-pixabay-cc0-5-teal-shadow.png}};
 \node [right=0mm of n8] {\includegraphics[width=14mm]{../phylopics/gecko-pixabay-cc0-6-auburn-shadow.png}};
-\node [right=0mm of n10] {\includegraphics[width=14mm]{../phylopics/gekko-gecko-5-teal-shadow.png}};
-\node [right=0mm of n11] {\includegraphics[width=14mm]{../phylopics/gekko-gecko-6-auburn-shadow.png}};
+\node [right=0.5mm of n10] {\includegraphics[width=14mm]{../phylopics/gekko-gecko-5-teal-shadow.png}};
+\node [right=0.5mm of n11] {\includegraphics[width=14mm]{../phylopics/gekko-gecko-6-auburn-shadow.png}};
 
 %% root labels
 \node [left=0mm of n2m] {\includegraphics[width=14mm]{../phylopics/gekko-vittatus-5-teal-shadow.png}};

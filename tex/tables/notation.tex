@@ -1,0 +1,45 @@
+\begin{table}[htbp]
+    \sffamily
+    \small
+    % \addtolength{\tabcolsep}{-0.1cm}
+\caption{
+    Summary of the notation.
+}
+    \centering
+    \begin{tabular}{ l >{\raggedright\hangindent=0.5cm}m{14cm} }
+    % \begin{tabular}{ l l }
+        \toprule
+        \textbf{Symbol} & \textbf{Description} \tn
+        \midrule
+        \ncomparisons{} & The number of population pairs being compared.
+        \tn
+        \nevents{} & The number of divergence events.
+        \tn
+        \allelecount, \redallelecount & The number of copies of a locus sampled
+            from a population, and the number of those copies that are the ``red''
+            allele.
+            \tn
+        \leafallelecounts, \leafredallelecounts & The allele counts from both
+            populations of a pair (i.e., $\leafallelecounts, \leafredallelecounts =
+            (\allelecount[1], \redallelecount[1]), 
+            (\allelecount[2], \redallelecount[2])$).
+            \tn
+        \comparisondata[i] & The allele counts across all the loci from a population pair $i$.
+        \tn
+        \genetree & A gene tree with branch lengths.
+        \tn
+        \murate & The rate of mutation.
+        \tn
+        \rgmurate & Relative rate of mutating from the ``red'' to ``green'' state.
+        \tn
+        \grmurate & Relative rate of mutating from the ``green'' to ``red'' state.
+        \tn
+        \gfreq & The stationary frequency of the ``green'' state.
+        \tn
+        \comparisondivtime[i] & The time in the past when two populations of pair $i$ diverged.
+        \tn
+        \bottomrule
+    \end{tabular}
+    \label{table:notation}
+\end{table}
+
