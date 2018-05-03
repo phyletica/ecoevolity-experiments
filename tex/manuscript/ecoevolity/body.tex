@@ -6,21 +6,21 @@
 \section{Introduction}
 
 To understand the distribution of Earth's biodiversity, we must consider the
-degree to which the landscape, and changes to it, explains diversity within and
-among species, and across communities.
-A major component of this is inferring how landscape-level processes cause
+degree to which environmental changes explain diversity within and among
+species.
+A major component of this is understanding how community-scale processes cause
 co-diversification across evolutionary lineages.
 Such processes are expected to generate patterns of divergence times that are
 difficult to explain by lineage-specific processes of diversification.
 Specifically, finding that divergences are temporally clustered across
-independent evolutionary lineages provides compelling evidence that a shared,
-landscape-level process was responsible for the lineages diverging.
+multiple evolutionary lineages provides compelling evidence that a shared
+process was responsible for the lineages diverging.
 For example, the fragmentation of an environment, like an island, forest, or
 watershed, can cause multiple taxa distributed across that environment to
-co-diverge over a short interval relative to evolutionary timescales
+co-diverge over a short period relative to evolutionary timescales
 (Figure~\ref{fig:divCartoon}).
-\thought{Better word than ``environment?'' I don't like landscape, because
-    it excludes aquatic systems.}
+% \thought{Better word than ``environment?'' I don't like landscape, because
+%     it excludes aquatic systems.}
 % , such that a model that treats them as
 % simultaneous will be a better explanation of the genetic variation than a model
 % that treats the divergence of each lineage as independent \figureNeeded.
@@ -32,12 +32,12 @@ whether any subsets of the taxa shared the same divergence times.
 % multiple, independent lineages.
 
 \begin{linenomath}
-If a research is interested in comparing the divergence times among a number of
-pairs of populations,
+If researchers are interested in comparing the divergence times among a number
+of pairs of populations,
 we can approach this as a problem of model choice:
 How many divergence events, and what assignment of taxa to those events, best
 explain the genetic variation within and between the diverged populations of
-each lineage (Figure~\ref{fig:divCartoon})?
+each pair (Figure~\ref{fig:divCartoon})?
 One challenge of this inference problem is the number of possible models.
 If we have \ncomparisons{} pairs of populations, we would like to assign them to an
 unknown number of divergence events, \nevents{}, which can range from one to
@@ -78,7 +78,7 @@ prevent them from discriminating among models
 
 One proposed solution is to focus the inference problem on whether or not all
 pairs diverged at the same time (i.e., $\nevents = 1$ versus
-$\nevents > 1$)\citep{Hickerson2013}.
+$\nevents > 1$) \citep{Hickerson2013}.
 However, limiting the inference in this way is often not satisfactory, because
 biogeographers rarely expect that all of the pairs of populations they wish
 to compare diverged at the same time.
@@ -126,7 +126,8 @@ compare these divergence times across the pairs.
 For each pair of populations that we wish to compare, we assume that we have
 collected orthologous genetic markers with at most two states.
 We will refer to these as ``biallelic characters,'' but note that this includes
-constant characters.
+constant characters (i.e., characters for which all the samples
+from the two populations share the same state).
 We follow \citet{Bryant2012} in referring to the two possible
 states as ``red'' and ``green.''
 We assume each character is effectively unlinked, i.e., each marker evolved
@@ -149,8 +150,14 @@ $\leafallelecounts, \leafredallelecounts = (\allelecount[1], \redallelecount[1])
 (\allelecount[2], \redallelecount[2])$.
 We will use \comparisondata[i] to denote these counts across all the loci from
 population pair $i$.
-% and \alldata to represent the data across all the pairs of
-% populations of which we wish to compare the divergence times.
+In other words, \comparisondata[i] is all the genetic data collected from
+population pair $i$.
+Finally, we use \alldata to represent the data across all the pairs of
+populations of which we wish to compare the divergence times.
+Note, because the pairs are unconnected
+(Figures~\labelcref{fig:divCartoon,fig:dag}),
+different characters can be collected for each pair (i.e., characters do not
+need to be orthologous across the pairs).
 
 
 \subsection{The model}
@@ -172,15 +179,15 @@ $\rgmurate / (\rgmurate + \grmurate)$, respectively.
 Thus, if given the stationary frequency of the green allele, \gfreq, we can
 obtain the relative rates of mutation between the two states.
 We will denote the overall rate of mutation as \murate.
-If $\murate = 1$, the branch lengths of the gene tree are in units of expected
-mutations per site.
+If a mutation rate per site per unit time is given, then branch lengths are in
+absolute time.
+Alternatively, if $\murate = 1$, the branch lengths of the gene tree are in
+units of expected mutations per site.
 In such a case, for a given pair of populations, the \murate is 
 redundant, because it can be incorporated into the branch lengths of the gene
 tree.
 However, we introduce the notation here, because it will be useful later when
 we want to allow rate variation among pairs of populations.
-If a mutation rate per site per unit time is given, then branch lengths are in
-absolute time.
 % For now, we will assume $\murate = 1$ so that the gene tree branch lengths, and
 % time in general, is in units of the expected mutations per site.
 
@@ -189,9 +196,10 @@ absolute time.
 We assume that each marker sampled from a pair of populations evolved within a
 simple ``species'' tree with one ancestral root population that diverged into
 two descendant (terminal) branches at time \comparisondivtime
-(Figure~\ref{fig:divCartoon}).
-Again, if the $\murate$ is given, \comparisondivtime is absolute time; however,
-if $\murate$ is set to one, time is in units of expected mutations per site.
+(Figures~\labelcref{fig:divCartoon,fig:dag}).
+Again, if the $\murate$ is given, \comparisondivtime is in units of absolute
+time; however, if $\murate$ is set to one, time is in units of expected
+mutations per site.
 We will use
 \comparisonpopsizes{}
 to denote all three
@@ -199,21 +207,22 @@ effective sizes of a population pair
 (\epopsize[\rootpopindex],
 \epopsize[\descendantpopindex{1}],
 and \epopsize[\descendantpopindex{2}]).
-.
 We will also use
 \sptree{}
-as shorthand for the species tree, which comprises the populations sizes and
+as shorthand for the species tree, which comprises the population sizes and
 divergence time of a pair
 (\comparisonpopsizes{} and \comparisondivtime{}).
 
 \subsubsection{The likelihood}
 
 \begin{linenomath}
-Given \murate, \gfreq, \comparisondivtime and \comparisonpopsizes, the
-probability of the observed data at a marker (\allelecount and \redallelecount),
-is the probability of the site pattern given a gene tree multiplied by the
-probability of the gene given the species tree, summed over all possible gene
-tree topologies and integrated over all possible gene tree branch lengths,
+% Given \murate, \gfreq, \comparisondivtime and \comparisonpopsizes,
+Given \murate, \gfreq, and \sptree{},
+the probability of the observed data at a locus (\allelecount and
+\redallelecount), is the probability of the site pattern given the gene tree
+multiplied by the probability of the gene given the species tree, summed over
+all possible gene tree topologies and integrated over all possible gene tree
+branch lengths,
 \begin{equation}
     \pr(\leafallelecounts, \leafredallelecounts \given \sptree, \murate, \gfreq)
     =
@@ -226,7 +235,7 @@ tree topologies and integrated over all possible gene tree branch lengths,
 \citep{Felsenstein1988,Nielsen2001,Rannala2003}.
 We take advantage of the mathematical work of \citep{Bryant2012} to calculate
 the integral over gene trees analytically, allowing us to compute the
-likelihood of the species tree directly from the biallelic site patterns under
+likelihood of the species tree directly from a biallelic site pattern under
 a coalescent model.
 \thought{For completeness, should I lay out the math and algorithm for
     calculating the likelihood in the supplemental materials?}
@@ -265,11 +274,11 @@ and
 $\gfreqs = \gfreq[1], \gfreq[2], \ldots, \gfreq[\ncomparisons]$.
 \end{linenomath}
 
-\subsubsection{Correcting for missing constant characters}
+\subsubsection{Correcting for excluded constant characters}
 
 \begin{linenomath}
-If we only sample variable characters, we need to correct the sample space for
-the missing constant characters.
+If we exclude constant characters and only analyze variable characters, we need
+to correct the sample space for the excluded constant characters.
 We can correct the likelihood by simply dividing by the probability of a
 variable character, which is equal to one minus the probability of a constant
 character,
@@ -330,8 +339,8 @@ sampled from each population, then the correction in SNAPP is
     \label{eq:snappvariablecomparisonlikelihood}
 \end{equation}
 These are equivalent if the same number of samples are collected across all
-loci for each population (i.e., no missing data), but will deviate if fewer
-gene copies are sampled for at least one locus.
+variable loci for each population (i.e., no missing locus copies), but will
+deviate if fewer copies are sampled for at least one locus.
 Thus, identical likelihoods between SNAPP and our method should not be expected
 when analyzing variable-only data.
 \end{linenomath}
@@ -407,9 +416,9 @@ times.
 % shared divergences.
 \end{linenomath}
 
-Let's use \divtimemodel to represent the divergence model, which comprises
-the divergence times, the number of which (\nevents{}) can range from 1 to
-\ncomparisons{}, and the mapping of non-overlapping subsets of the population
+Let's use \divtimemodel to represent the divergence model, which comprises the
+divergence times---the number of which (\nevents{}) can range from 1 to
+\ncomparisons{}---and the mapping of non-overlapping subsets of the population
 pairs to these \nevents{} divergence times.
 We will separate out \divtimemodel into two components,
 \begin{enumerate}
@@ -516,7 +525,7 @@ to those times (\divtimesets), we get
 % process prior \citep{Ferguson1973, Antoniak1974}.
 
 \begin{linenomath}
-\paragraph{Prior on concentration parameter}
+\paragraph{Prior on the concentration parameter}
 Given a single parameter, \concentration, the Dirichlet process determines the
 prior probability of all the possible ways the \ncomparisons{} pairs of
 populations can be partitioned to $\nevents = 1, 2, \ldots \ncomparisons$
@@ -546,7 +555,7 @@ This is the base distribution (\basedistribution) of the Dirichlet process.
 
 \paragraph{Prior on effective population sizes}
 For the two descendant populations of each pair, we use a gamma distribution as
-the prior on the effective population size.
+the prior on the effective population sizes.
 For the root population, we use a gamma distribution on the effective
 population size \emph{relative} to the mean size of the two descendant
 populations, which we denote as \rootrelativepopsize.
@@ -573,7 +582,7 @@ In the model presented above, for each population pair, the divergence time
 (\divtime) and mutation rate (\murate) are inextricably linked.
 For a single pair of populations, if little is known about the mutation rate,
 this problem is easily solved by setting it to one ($\murate[1] = 1$) such
-that time is in units of expected mutations per site and the effective
+that time is in units of expected substitutions per site and the effective
 population sizes are scaled by \murate.
 However, what about the second pair of populations for which we wish to compare
 the divergence time to the first?
@@ -703,13 +712,13 @@ To get the Hastings ratio for this move, we use the formula of
     \frac{g\proposed(\uniformdeviate\proposed)}{g(\uniformdeviate)} |\det(J)|,
     \label{eq:greenhastings}
 \end{equation}
-which is the ratio of the probability of the drawing the random deviate that
+which is the ratio of the probability of drawing the random deviate that
 would reverse the proposed move to the probability of drawing the random
 deviate of the proposed move, multiplied by the absolute value of the
 determinant of a matrix of Jacobian terms.
 Because the forward and reverse random deviates are uniform,
 $\frac{g\proposed(\uniformdeviate\proposed)}{g(\uniformdeviate)} = 1$,
-and the Hastings ratio reduces to just the Jacobian term,
+the Hastings ratio reduces to just the Jacobian term,
 \begin{equation}
 % \arraycolsep=4pt
 % \def\arraystretch{1.5}
@@ -906,7 +915,7 @@ mutation rate parameters.
 It does so by jointly scaling these parameters according to the direction
 (positive or negative) of the posterior correlations we often observed when
 analyzing simulated data.
-The divergence time was often positively correlated with the effective size of
+The divergence time was often positively correlated with the effective sizes of
 the descendant populations, and negatively correlated with the mutation rate
 and effective population size of the ancestral population.
 
@@ -1289,6 +1298,8 @@ This includes constant characters; the mean number of variable SNPs were
 approximately 5,500 and 27,500, respectively.
 We then analyzed all 5,000 simulated \datasets in \ecoevolity both with and
 without constant characters included.
+For all analyses, the prior for each parameter matched the distribution
+the true value was drawn from when the data were simulated.
 For analyses where 
 $\epopsize[\rootpopindex] = 
 \epopsize[\descendantpopindex{1}] =
