@@ -19,7 +19,9 @@
 \usepackage[T1]{fontenc}
 \usepackage[titles]{tocloft}
 \usepackage{xspace}
-\usepackage[usenames]{color}
+% xcolor allows rowcolors for tables
+\usepackage[table,x11names,dvipsnames,table]{xcolor}
+% \usepackage[usenames]{color}
 \usepackage{ifthen}
 \usepackage{cancel}
 \usepackage{array}
@@ -38,6 +40,7 @@
 \definecolor{pteal}      {RGB}{57,115,124}
 \definecolor{pauburn}    {RGB}{184,90,13}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\definecolor{mygray}{gray}{0.9}
 
 \usepackage{hyperref}
 \hypersetup{pdfborder={0 0 0},

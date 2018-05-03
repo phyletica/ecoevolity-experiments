@@ -1,19 +1,39 @@
 \begin{table}[htbp]
     \sffamily
     \small
-    % \addtolength{\tabcolsep}{-0.1cm}
+    \rowcolors{2}{}{mygray}
+    \addtolength{\tabcolsep}{-0.1cm}
 \caption{
-    Summary of the notation.
+    A key to some of the notation used in the text.
 }
     \centering
     \begin{tabular}{ l >{\raggedright\hangindent=0.5cm}m{14cm} }
-    % \begin{tabular}{ l l }
         \toprule
         \textbf{Symbol} & \textbf{Description} \tn
         \midrule
         \ncomparisons{} & The number of population pairs being compared.
         \tn
-        \nevents{} & The number of divergence events.
+        \nevents{} & The number of divergence times (or ``events'') across the
+            population pairs being compared.
+        \tn
+        \comparisondivtime[i] & The time in the past when the two populations
+            of pair $i$ diverged.
+        \tn
+        \divtime & A divergence time (or ``event'') that can be shared by
+            multiple population pairs.
+        \tn
+        \divtimemodel & The divergence model, which comprises the divergence
+            times and the mapping of the population pairs to those times.
+        \tn
+        \divtimes & All of the unique divergence times in the model
+            ($\divtimes = \divtime[1], \ldots, \divtime[\nevents]$).
+        \tn
+        \divtimesets & The mapping of population pairs to divergence events,
+            but not the times of the events.
+        \tn
+        \basedistribution & The base distribution of the Dirichlet process.
+        \tn
+        \concentration & The concentration parameter of the Dirichlet process.
         \tn
         \allelecount, \redallelecount & The number of copies of a locus sampled
             from a population, and the number of those copies that are the ``red''
@@ -24,7 +44,14 @@
             (\allelecount[1], \redallelecount[1]), 
             (\allelecount[2], \redallelecount[2])$).
             \tn
-        \comparisondata[i] & The allele counts across all the loci from a population pair $i$.
+        \comparisondata[i] & The allele counts across all the loci from
+            population pair $i$. I.e., all of the data being analyzed for
+            population pair $i$.
+            \tn
+        \nloci & The number of loci collected for a pair of populations.
+        \tn
+        \alldata & All of the data being analyzed. I.e., the allele counts
+            across all loci collected from all pairs of populations.
         \tn
         \genetree & A gene tree with branch lengths.
         \tn
@@ -36,8 +63,19 @@
         \tn
         \gfreq & The stationary frequency of the ``green'' state.
         \tn
-        \comparisondivtime[i] & The time in the past when two populations of pair $i$ diverged.
+        \epopsize[\rootpopindex] & The effective size of the ancestral population.
         \tn
+        \epopsize[\descendantpopindex{1}], \epopsize[\descendantpopindex{2}] &
+            The effective sizes of the two descendant populations of a pair.
+        \tn
+        \comparisonpopsizes & Shorthand notation for all three effective
+            population sizes for a pair (ancestral and the two descendant
+            populations).
+        \tn
+        \sptree & The species tree for a pair of populations. This comprises the
+            three effective population sizes (ancestral an the two descendant)
+            and the time of divergence.
+            \tn
         \bottomrule
     \end{tabular}
     \label{table:notation}
