@@ -23,7 +23,7 @@ Below, we detail the Hastings ratio for two of our multivariate moves.
 \paragraph{\timerootsizemixer proposal}
 One case of poor mixing can occur for pairs that diverge long enough ago such
 that only a single coalescence occurs within the root for most loci.
-In this scenario there is very little information in the allele count patterns
+In this scenario there is very little information in the character patterns
 about the size of the ancestral population, and so the divergence time and root
 population size become highly correlated (i.e., an older divergence time and
 smaller root size explain the data equally well as a younger divergence time
@@ -41,7 +41,7 @@ In this case, the expected height of the root of a gene tree is
 $\divtime\murate + 2\sepopsize[\rootpopindex]\murate$,
 in units of time determined by $\murate$ (e.g., expected substitutions per site
 if $\murate = 1$).
-The purpose of our move is to keep the expected root height of a gene tree
+The purpose of our move is to keep the expected root height of the gene trees
 of the proposed state equal to the current state,
 \begin{equation}
     \divtime\proposed\murate + 2\sepopsize[\rootpopindex]{}\proposed\murate =
@@ -95,7 +95,7 @@ deviate of the proposed move, multiplied by the absolute value of the
 determinant of a matrix of Jacobian terms.
 Because the forward and reverse random deviates are uniform,
 $\frac{g\proposed(\uniformdeviate\proposed)}{g(\uniformdeviate)} = 1$,
-the Hastings ratio reduces to just the Jacobian term,
+and the Hastings ratio reduces to just the Jacobian term,
 \begin{equation}
 % \arraycolsep=4pt
 % \def\arraystretch{1.5}

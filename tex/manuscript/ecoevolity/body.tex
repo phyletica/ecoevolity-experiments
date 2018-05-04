@@ -51,9 +51,10 @@ tells us the number of ways of assigning the taxa to the divergence times
     \binom{\nevents}{i} (\nevents - i)^{\ncomparisons}.
     \label{eq:stirling2}
 \end{equation}
-When the number of divergence times is unknown, to get the total number of
-possible divergence models, we need to sum over all possible values of
-\nevents{}, which is Bell's number \citep{Bell1934}:
+When the number of divergence times is unknown, we need to sum over all
+possible values of \nevents{} to get the total number of possible divergence
+models
+\citep[the Bell number;][]{Bell1934}):
 \begin{equation}
     B_{\ncomparisons} = \sum_{\nevents = 1}^{\ncomparisons}
     S_2(\ncomparisons, \nevents).
@@ -106,7 +107,7 @@ events.
 Our method leverages recent analytical work \citep{Bryant2012} to efficiently
 and directly compute the full-likelihood of divergence models from genomic
 data.
-By efficiently using all the information in the data, the new method is
+By efficiently using all of the information in the data, the new method is
 faster,
 more accurate,
 and more precise
@@ -142,12 +143,15 @@ allele and the remaining $\allelecount - \redallelecount$ are
 copies of the green allele;
 \redallelecount can range from zero to \allelecount.
 Thus, for each population of a pair, and for each locus, we have a count of the
-total sampled copies of the locus and how many of those are the red allele.
+total sampled gene copies and how many of those are the red allele.
 
 We will use \leafallelecounts and \leafredallelecounts to denote allele counts
-from both populations of a pair; i.e., 
+for a locus from both populations of a pair; i.e., 
 $\leafallelecounts, \leafredallelecounts = (\allelecount[1], \redallelecount[1]), 
-(\allelecount[2], \redallelecount[2])$.
+(\allelecount[2], \redallelecount[2])$
+(Figure~\ref{fig:divCartoon}).
+When we will also use ``character pattern'' to refer to $\leafallelecounts,
+\leafredallelecounts$.
 We will use \comparisondata[i] to denote these counts across all the loci from
 population pair $i$.
 In other words, \comparisondata[i] is all the genetic data collected from
@@ -182,14 +186,14 @@ We will denote the overall rate of mutation as \murate.
 If a mutation rate per site per unit time is given, then branch lengths are in
 absolute time.
 Alternatively, if $\murate = 1$, the branch lengths of the gene tree are in
-units of expected mutations per site.
+units of expected substitutions per site.
 In such a case, for a given pair of populations, the \murate is 
 redundant, because it can be incorporated into the branch lengths of the gene
 tree.
 However, we introduce the notation here, because it will be useful later when
 we want to allow rate variation among pairs of populations.
 % For now, we will assume $\murate = 1$ so that the gene tree branch lengths, and
-% time in general, is in units of the expected mutations per site.
+% time in general, is in units of the expected substitutions per site.
 
 \subsubsection{The evolution of gene trees}
 
@@ -199,7 +203,7 @@ two descendant (terminal) branches at time \comparisondivtime
 (Figures~\labelcref{fig:divCartoon,fig:dag}).
 Again, if the $\murate$ is given, \comparisondivtime is in units of absolute
 time; however, if $\murate$ is set to one, time is in units of expected
-mutations per site.
+substitutions per site.
 We will use
 \comparisonpopsizes{}
 to denote all three
@@ -218,11 +222,11 @@ divergence time of a pair
 \begin{linenomath}
 % Given \murate, \gfreq, \comparisondivtime and \comparisonpopsizes,
 Given \murate, \gfreq, and \sptree{},
-the probability of the observed data at a locus (\allelecount and
-\redallelecount), is the probability of the site pattern given the gene tree
-multiplied by the probability of the gene given the species tree, summed over
-all possible gene tree topologies and integrated over all possible gene tree
-branch lengths,
+the probability of the observed data at a locus (\leafallelecounts and
+\leafredallelecounts), is the probability of the character pattern given the
+gene tree multiplied by the probability of the gene tree given the species
+tree, summed over all possible gene tree topologies and integrated over all
+possible gene tree branch lengths,
 \begin{equation}
     \pr(\leafallelecounts, \leafredallelecounts \given \sptree, \murate, \gfreq)
     =
@@ -235,15 +239,15 @@ branch lengths,
 \citep{Felsenstein1988,Nielsen2001,Rannala2003}.
 We take advantage of the mathematical work of \citep{Bryant2012} to calculate
 the integral over gene trees analytically, allowing us to compute the
-likelihood of the species tree directly from a biallelic site pattern under
-a coalescent model.
+likelihood of the species tree directly from a biallelic character pattern
+under a coalescent model.
 \thought{For completeness, should I lay out the math and algorithm for
     calculating the likelihood in the supplemental materials?}
 \end{linenomath}
 
 \begin{linenomath}
-Assuming independence among loci, conditional on the species tree, we can
-calculate the probability of the \nloci{} loci given the species trees by
+Assuming independence among loci (conditional on the species tree), we can
+calculate the probability of \nloci{} loci given the species tree by
 simply taking the product over them,
 \begin{equation}
     \pr(\comparisondata \given \sptree, \murate, \gfreq)
@@ -252,8 +256,8 @@ simply taking the product over them,
     \pr(\leafallelecounts[i], \leafredallelecounts[i] \given \sptree, \murate, \gfreq).
     \label{eq:comparisonlikelihood}
 \end{equation}
-Finally, the likelihood across all of our pairs is simply the product of the
-likelihood of each pair,
+Finally, the likelihood across all of our \ncomparisons{} pairs is simply the
+product of the likelihood of each pair,
 \begin{equation}
     \pr(
     \alldata
@@ -339,7 +343,7 @@ sampled from each population, then the correction in SNAPP is
     \label{eq:snappvariablecomparisonlikelihood}
 \end{equation}
 These are equivalent if the same number of samples are collected across all
-variable loci for each population (i.e., no missing locus copies), but will
+variable loci for each population (i.e., no missing gene copies), but will
 deviate if fewer copies are sampled for at least one locus.
 Thus, identical likelihoods between SNAPP and our method should not be expected
 when analyzing variable-only data.
@@ -435,9 +439,11 @@ Specifically, we use the Dirichlet process as a prior on divergence models,
 $\divtimemodel \sim \dirp(\basedistribution, \concentration)$, where
 \basedistribution is the base distribution of the process and \concentration is
 concentration parameter that controls how clustered the process is.
-The concentration parameter determines the prior probability of \divtimesets,
-the partitioning of the population pairs, and the base distribution determines
-the prior probability of the divergence time of each subset.
+The concentration parameter determines the prior probability of
+\divtimesets
+(the partitioning of the population pairs)
+and the base distribution determines the prior probability of the divergence
+time of each subset.
 
 \begin{linenomath}
 Under the Dirichlet process prior, the posterior becomes
@@ -447,7 +453,7 @@ Under the Dirichlet process prior, the posterior becomes
     \divtimemodel,
     \collectionpopsizes,
     \murates,
-    \gfreq
+    \gfreqs
     \given
     \alldata,
     \basedistribution
@@ -472,10 +478,14 @@ Under the Dirichlet process prior, the posterior becomes
         \alldata,
         \basedistribution
         )
-    }.
+    },
     \label{eq:bayesrule}
 \end{equation}
-By expanding out the divergence model (\divtimemodel) into the unique
+where
+\collectionpopsizes
+is the collection of the effective population sizes (\comparisonpopsizes{})
+across pairs.
+By expanding the divergence model (\divtimemodel) into the unique
 divergence times (\divtimes) and the partitioning of the pairs of populations
 to those times (\divtimesets), we get
 \begin{equation}
@@ -485,7 +495,7 @@ to those times (\divtimesets), we get
     \divtimesets,
     \collectionpopsizes,
     \murates,
-    \gfreq
+    \gfreqs
     \given
     \alldata,
     \basedistribution
@@ -547,13 +557,13 @@ the concentration parameter by specifying a gamma distribution as a prior on
 \concentration \citep{Escobar1995,Heath2011}.
 \end{linenomath}
 
-\paragraph{Prior on divergence times}
+\paragraph{Prior on the divergence times}
 Given the subsets of pairs assigned to divergence events, we use a gamma
 distribution for the prior on the divergence time of each event,
-$\divtime[i] \given \divtimesets \sim \distgamma(\cdot, \cdot)$.
+$\divtime \given \divtimesets \sim \distgamma(\cdot, \cdot)$.
 This is the base distribution (\basedistribution) of the Dirichlet process.
 
-\paragraph{Prior on effective population sizes}
+\paragraph{Prior on the effective population sizes}
 For the two descendant populations of each pair, we use a gamma distribution as
 the prior on the effective population sizes.
 For the root population, we use a gamma distribution on the effective
@@ -563,10 +573,10 @@ For example, a value of one would mean the root population size is equal to
 $(\epopsize[\descendantpopindex{1}] + \epopsize[\descendantpopindex{2}]) / 2$.
 The goal of this approach is to allow more informative priors on the root
 population size; we often have stronger prior expectations for the relative
-effective size of the ancestral population than the absolute size.
+size of the ancestral population than the absolute size.
 This is important, because the effective size of the ancestral population is a
-difficult nuisance parameter to estimate and is correlated with the divergence
-time.
+difficult nuisance parameter to estimate and can be strongly correlated with
+the divergence time.
 For example, if the divergence time is so old such that all the gene copies
 of a locus coalesce within the descendant populations, the locus
 provides very little information about the size of the ancestral
@@ -586,30 +596,32 @@ that time is in units of expected substitutions per site and the effective
 population sizes are scaled by \murate.
 However, what about the second pair of populations for which we wish to compare
 the divergence time to the first?
-Because the species trees in our model are disconnected, we cannot learn about
+Because the species trees in our model are disconnected
+(Figures~\labelcref{fig:divCartoon,fig:dag}),
+we cannot learn about
 the relative rates of mutation across the population pairs from the data.
 As a result, we need strong prior information about the relative rates of
 mutation across population pairs for this model to work.
 
-If the second pair of populations is closely related to our first, and shares a
-similar life history, we could assume they share the same mutation rate, and
-set the mutation rate of the second pair to one as well ($\murate[2] = 1$).
+If the second pair of populations is closely related to the first, and shares a
+similar life history, we could assume they share the same mutation rate and
+set the mutation rate of the second pair to one as well ($\murate[1] = \murate[2] = 1$).
 Alternatively, we could relax that assumption and put a prior on \murate[2].
 However, this should be a strongly informative prior.
-Placing a very weakly informative prior on \murate[2] would mean that we can no
+Placing a weakly informative prior on \murate[2] would mean that we can no
 longer estimate its divergence time relative to the first pair.
 So, while it is possible to incorporate uncertainty in relative mutation rates,
 it is important to keep in mind that the data cannot inform these parameters,
 and thus the uncertainty will be directly reflected in the uncertainty of
 divergence times.
 
-\paragraph{Prior on equilibrium state frequency}
+\paragraph{Prior on the equilibrium-state frequency}
 Our method allows for a beta prior to be placed on the frequency of the green
 allele for each pair of populations,
 $\gfreq[i] \sim \textrm{Beta}(\cdot, \cdot)$.
 However, if using SNP data, we advise fixing the frequency of the red and green
 states to be equal (i.e., $\gfreq = 0.5$).
-The reason for this is that there is no natural way of recoding four-state
+The reason for this is that there is no natural way of re-coding four-state
 nucleotides to two states, and so the relative transition rates, \rgmurate and
 \grmurate, are not biologically meaningful.
 There will always be arbitrariness associated with how one decides to perform
@@ -659,7 +671,7 @@ Our first step to validate the new method was to verify that it behaves as
 expected when the model is correct (i.e., data are simulated and analyzed under
 the same model).
 We used the \simcoevolity tool from the \ecoevolity package, which simulates
-data under the same model used for inference that is described above.
+data under the model described above.
 All data were simulated under the following settings:
 \begin{enumerate}
     \item $\ncomparisons = 3$
@@ -694,7 +706,7 @@ in the root population size affects inference.
 
 Under each of the five scenarios we simulated 500 \datasets of 100,000
 characters and 500 \datasets of 500,000 characters.
-This includes constant characters; the mean number of variable SNPs were
+This includes constant characters; the mean number of variable SNPs was
 approximately 5,500 and 27,500, respectively.
 We then analyzed all 5,000 simulated \datasets in \ecoevolity both with and
 without constant characters included.
@@ -709,48 +721,51 @@ three independent MCMC chains for 37,500 generations, sampling every
 25th generation.
 For all other analyses, we ran the three chains for 75,000 generations,
 sampling every 50th generation.
-As a result we collected 4503 samples for each analysis (1501 samples from each
-chain, including the initial state).
+As a result, we collected 4503 samples for each analysis (1501 samples from
+each chain, including the initial state).
 
 In order to assess the frequentist behavior of the posterior probabilities of
-divergence models approximated by \ecoevolity, we simulated an additional
+divergence models inferred by \ecoevolity, we simulated an additional
 20,000 \datasets of 100,000 characters under the setting where
 $\rootrelativepopsize \sim \dgamma{100}{1}$.
 All 20,500 \datasets were analyzed with \ecoevolity and binned based on the
 inferred posterior probability that $\nevents{} = 1$.
 The mean posterior probability that $\nevents{} = 1$ for each bin was plotted
 against the proportion of \datasets within the bin for which the true
-divergence model was $\nevents{} = 1$.
+divergence model was $\nevents{} = 1$;
+the latter approximates the true probability that $\nevents{} = 1$.
 If the new method is unbiased, in a frequentist sense, the inferred posterior
 probabilities that $\nevents{} = 1$ within a bin should approximately equal the
 proportion of the \datasets for which that is true
 \citep{Huelsenbeck2004,Oaks2012,Oaks2014dpp}.
 
-\subsubsection{Assessing the effect of linked sites}
+\subsubsection{Assessing the effect of linked characters}
 The characters of most \datasets being collected by high-throughput technologies
 do not all evolve along independent gene trees.
 Most consist of many putatively unlinked loci that each comprise sequences of
 linked nucleotides.
 For example, ``RADseq'' and ``sequence capture'' techniques generate thousands
 of loci that are approximately 50--300 nucleotides in length.
-This creates a question when using methods that assume each character is
-independent:
+This creates a question when using methods like \ecoevolity that assume each
+character is independent:
 Is it better to violate the assumption of unlinked characters and use all of
 the data, or throw away much of the data to avoid linked characters?
 
 To better adhere to the unlinked-character assumption, we could retain only a
 single site per locus.
 However, this results in a very large loss of data.
-Furthermore, to try and maximize the informativeness of the retained sites,
-most researchers retain only one \emph{variable} character per locus.
+Furthermore, to try and maximize the informativeness of the retained
+characters, most researchers retain only one \emph{variable} character per
+locus.
 While this can be corrected for (see
 Equation~\ref{eq:variablecomparisonlikelihood}), it still results in the loss
-of a very informative component of the data: The proportion of variable sites.
+of a very informative component of the data: The proportion of variable
+characters.
 Before throwing away so much information, we should determine whether
 it is in our best interest.
-In other words, does keeping the data and violating the assumption unlinked
-characters result in better or worse inferences than throwing out much of our
-data?
+In other words, does keeping all of the data and violating the assumption of
+unlinked characters result in better or worse inferences than throwing out much
+of our data?
 
 To address this question, 
 we simulated \datasets composed of loci of linked sites that were 100, 500, and
@@ -774,15 +789,17 @@ above where the relative size of the root population was distributed as
 Furthermore, to assess the affect of linked characters on the posterior
 probabilities of divergence models, we simulated an additional 10,000 \datasets
 with 1,000, 100-character loci (100,000 total characters each).
-As described above, to assess the frequentist behavior of approximated
+As described above, to assess the frequentist behavior of the inferred
 posterior probabilities, we binned the results of the analyses of these 10,500
-\datasets based on the posterior probability that $\nevents{} = 1$.
+\datasets based on the posterior probability that $\nevents{} = 1$ and plotted
+the mean of each bin against the approximated true probability that $\nevents{}
+= 1$.
 
 \subsubsection{Assessing the effect of missing data}
-Our method should be robust to missing data, because it is simply treated as a
+The method should be robust to missing data, because it is simply treated as a
 smaller sample of gene copies from a particular population for a particular
 locus.
-This is because each character is assumed to have evolved along a coalescent
+Because each character is assumed to have evolved along a coalescent
 gene tree, the identity of each gene copy within a population does not matter.
 Thus, some loci having fewer sampled gene copies from some populations should
 result in more variance in parameter estimates, but is not expected to create
@@ -793,15 +810,15 @@ Specifically, we simulated \datasets for which the probability of sampling each
 gene copy was 90\%, 75\%, or 50\%, which resulted in \datasets with
 approximately 10\%, 25\%, or 50\% missing data.
 For each sampling probability, we simulated 100 \datasets with 500,000
-characters; the settings were the same as described above where
-$\rootrelativepopsize \sim \dgamma{100}{1}$.
+characters; the settings were the same as described for the validation analyses
+above where $\rootrelativepopsize \sim \dgamma{100}{1}$.
 
 \subsubsection{Assessing the effect of biases in character-pattern acquisition}
 When analyzing the \spp{Gekko} data (see below), we observed large
 discrepancies in the estimated divergence times depending on whether or not the
-constant sites were removed from the analysis.
+constant characters were removed from the analysis.
 This was not observed in the analyses of simulated data, because the likelihood
-is appropriately corrected for the missing constant sites.
+is appropriately corrected for the excluded constant characters.
 This suggests that there are additional character-pattern acquisition biases in
 the empirical data, for which are our method cannot correct.
 Such acquisition biases have been documented during the denovo assembly of
@@ -809,19 +826,19 @@ RADseq loci \citep{Harvey2015,Linck2017}.
 
 The loss of rare alleles during the acquisition and assembly of the data could
 explain the much larger divergence times estimated from the empirical data when
-constant sites are removed.
-After the constant sites, the rare alleles are ``next in line'' to inform the
-model that the population divergence was recent.
+constant characters are removed.
+After the constant characters, the rare alleles are ``next in line'' to inform
+the model that the population divergence was recent.
 If these patterns are being lost during data acquisition and assembly, and not
 accounted for in the likelihood calculation, this should create an upward bias
 in the divergence time estimates.
 
 To explore whether data acquisition bias can explain the discrepancy we
 observed for the \spp{Gekko} data, we simulated \datasets where the probability
-of sampling singleton site patterns (i.e., one gene copy is different from all
-the others) was 80\%, 60\%, and 40\%.
-For each, we simulated 100 \datasets for which the settings were
-the same as described above where
+of sampling singleton character patterns (i.e., one gene copy is different from
+all the others) was 80\%, 60\%, and 40\%.
+For each, we simulated and analyzed 100 \datasets; the settings were
+the same as described for the validation analyses above where
 $\rootrelativepopsize \sim \dgamma{100}{1}$.
 
 
@@ -872,8 +889,8 @@ Each pair of populations inhabit two different oceanic islands in the
 Philippines that were never connected during lower sea levels of glacial
 periods.
 Because these islands were never connected, the divergence between the
-populations of each pair is likely due to dispersal, the timing of which should
-be idiosyncratic to each pair.
+populations of each pair is likely due to over-water dispersal, the timing of
+which should be idiosyncratic to each pair.
 
 We analyzed the data with and without the constant characters.
 Also, there were a small number of sites that had more than two nucleotides
@@ -903,7 +920,7 @@ include:
 \end{itemize}
 
 The ABC methods of inferring shared divergence events are very sensitive to the
-prior divergence times
+prior on divergence times
 \citep{Oaks2012,Hickerson2013,Oaks2014reply,Oaks2014dpp}.
 To assess whether results of our new method are also sensitivity to the
 prior on divergence times, we analyzed the \datasets that included constant
@@ -916,7 +933,7 @@ characters under the following priors:
     \item $\divtime \sim \dexponential{0.2}$
 \end{enumerate}
 For the two versions of the \spp{Gekko} data that lacked the constant
-characters, we tried the following priors:
+characters, we used the following priors:
 \begin{enumerate}
     \item $\divtime \sim \dexponential{0.01}$
     \item $\divtime \sim \dexponential{0.05}$
@@ -930,8 +947,8 @@ sampling every 100th generation.
 Convergence and mixing of the chains was assessed by the potential scale
 reduction factor (the square root of Equation 1.1 in
 \citet{Brooks1998}) and effective sample size \citep{Gong2014} of the
-likelihood and all parameters, and inspected visually with the program Tracer
-version 1.6
+likelihood and all parameters.
+We also inspected the chains visually with the program Tracer version 1.6
 \citep{Tracer16}.
 
 
@@ -958,13 +975,13 @@ divergence model ($\nevents{} = 1$) mirrors the probability that the model
 is correct 
 (Figure~\ref{fig:valpostprobs}).
 We see the same behaviors whether or not the constant characters are excluded,
-demonstrating that our likelihood correction for those missing constant
+demonstrating that our likelihood correction for excluded constant
 characters is working correctly
 (Equation~\ref{eq:variablecomparisonlikelihood}).
 
 As expected, the precision of divergence time and population size estimates is
-greater when the constant sites are included and when there is greater prior
-information about the ancestral population size
+greater when the constant characters are included and when there is greater
+prior information about the ancestral population size
 (Figures \ref{fig:valdivtimes}, S\ref{fig:valleafsizes}, \&
 S\ref{fig:valrootsizes}).
 The increase in precision associated with the fivefold increase in the number
@@ -994,18 +1011,18 @@ probability of the correct number of divergence event is high (over 0.89
 for all simulation conditions; 
 Figure~\ref{fig:valnevents}).
 
-For the \datasets simulated with 100,000 and 500,000 characters,
-the number of variable sites ranged from
+For the \datasets simulated with 100,000 and 500,000 characters, the number of
+variable characters ranged from
 515--21,676 
 and
 4,670--105,373,
 respectively, with an average of approximately
 5,500
 and 
-27,500 variable sites, respectively
+27,500 variable characters, respectively
 (Figures S\ref{fig:valnumberofvariablesites100k} \&
 S\ref{fig:valnumberofvariablesites500k}).
-As expected, the variance in the number variable sites increases with the
+As expected, the variance in the number variable characters increases with the
 variance in the prior distribution of the relative effective size of the root
 population
 (Figures S\ref{fig:valnumberofvariablesites100k} \&
@@ -1028,15 +1045,15 @@ parameter values were contained within the 95\% confidence intervals (Figures
 and the weak relationship between the ESS and estimation error
 (Figure~S\ref{fig:valessvserror}),
 we do not expect MCMC mixing had a large effect on our simulation results under
-the extreme levels of uncertainty in the root population size that we
+the most extreme levels of uncertainty in the root population size that we
 simulated.
 
 
 
-\subsubsection{Assessing the effect of linked sites}
+\subsubsection{Assessing the effect of linked characters}
 
 The accuracy of divergence time estimates did not appear to be affected by the
-model violation of linked sites
+model violation of linked characters
 (Figures \ref{fig:linkagedivtimes500k}
 \&
 S\ref{fig:linkagedivtimes100k}).
@@ -1051,7 +1068,7 @@ S\ref{fig:linkagedivtimes100k}).
 This makes sense given that there is less coalescent variation in the data than
 the model expects if all the characters had evolved along independent gene
 trees.
-Importantly, this effect of underestimating posterior uncertainty is very small
+Importantly, this effect of underestimating posterior uncertainty is small
 for \datasets with 100bp loci, suggesting this violation of the model has little
 impact for high-throughput \datasets with short loci, like those collected via
 RADseq.
@@ -1076,33 +1093,33 @@ posterior probability, when the constant characters are retained
 \&
 S\ref{fig:linkagenevents100k}).
 The median posterior probability of the correct number of divergence events is
-over 0.95 for all 500k site \datasets, even when loci were 1000bp long
+over 0.95 for all 500k-character \datasets, even when loci were 1000bp long
 (Figure~\ref{fig:linkagenevents500k}).
 However, our results show that linked characters do introduce bias in the
 estimated posterior probability of the one divergence model ($\nevents{} = 1$)
 (Figure~\ref{fig:linkagepostprobs}).
 However, the bias is moderate and makes the method conservative in the
 sense that it tends to underestimate the probability of shared
-divergence across \datasets (Figure~\ref{fig:linkagepostprobs}).
+divergence (Figure~\ref{fig:linkagepostprobs}).
 
 For simulated \datasets with loci of length 100, 500, and 1000 base pairs, there
 were an average of 5.4, 27.1, and 54.1 variable characters per locus,
 respectively.
-As expected, the number of variable characters per 100k and 500k \dataset
-was very similar to the unlinked simulated \datasets, with an average of
+As expected, the number of variable characters per 100k and 500k \dataset was
+very similar to the simulated unlinked-character \datasets, with an average of
 about
 5,500 variable characters per 100k \dataset
 (Figure~S\ref{fig:linkagenumberofvariablesites100k})
 and
 27,100 variable characters per 500k \dataset
 (Figure~S\ref{fig:linkagenumberofvariablesites500k}).
-When at most one variable character per locus is sampled per locus, the
+When at most one variable character is sampled per locus, the
 number of remaining characters is usually close or equal to the
 number of loci;
 1000, 200, and 100 characters for the 100k \datasets
 with 100, 500, and 1000 bp loci, respectively, and
 5000, 1000, and 500 characters for 500k \datasets
-with 100, 500, and 1000 bp loci, respectively.
+with 100, 500, and 1000 bp loci, respectively
 (Figures
 S\ref{fig:linkagenumberofvariablesites100k}
 \&
@@ -1125,7 +1142,7 @@ S\ref{fig:missingrootsizes}), or the number of divergence events
 
 \subsubsection{Assessing the effect of biases in character-pattern acquisition}
 
-Biased character acquisition against singleton allele patterns does create
+Biased character acquisition against singleton character patterns does create
 bias in estimates of divergence times
 (Figure~\ref{fig:filtereddivtimes}) and
 population sizes
@@ -1134,7 +1151,7 @@ S\ref{fig:filteredleafsizes}
 \&
 S\ref{fig:filteredrootsizes}), and the bias increases as the probability of
 missing a character with a singleton pattern increases.
-Notably, this bias is smaller when the constant patterns are retained in
+Notably, this bias is smaller when the constant characters are retained in
 the \dataset
 (Figure
 \ref{fig:filtereddivtimes},
@@ -1173,7 +1190,7 @@ The new method also does a better job of estimating the number of divergence
 events (Figure~\ref{fig:bakeoffnevents}), with a median posterior probability
 of the correct number of events of 0.942, compared to 0.789 for the ABC method.
 Importantly, the new method underestimates the number of events much less
-frequently,
+frequently (Figure~\ref{fig:bakeoffnevents}),
 which should lead to fewer erroneous interpretations of shared processes of
 divergence.
 
@@ -1185,8 +1202,8 @@ To compare the overall amount of computation required by the two approaches
 we look at the average time it takes to analyze a simulated \dataset
 on a single processor 
 (2.6GHz Intel Xeon CPU E5-2660 v3).
-This was 34.6 days for the approximate-likelihood method (2,991,304 seconds)
-and only 33.4 minutes (2004.5 seconds) for the full-likelihood.
+This was 34.6 days for \dppmsbayes (2,991,304 seconds)
+and only 33.4 minutes (2004.5 seconds) for \ecoevolity.
 The majority of the runtime for the ABC method is spent simulating samples
 from the prior distribution.
 While this step can be parallelized, the likelihood computations of \ecoevolity
@@ -1233,7 +1250,7 @@ clearly nonsensical.
 Also, the posterior probabilities of the number of divergences is also
 much more sensitive to the \divtime and \concentration priors,
 with some combinations yielding results for which three divergence events
-are preferred (although, Bayes factors always prefer four divergences)
+are preferred, although Bayes factors always preferred four divergences
 (Figure~S\ref{fig:gekkovaronlynevents}).
 These findings are similar when the polyallelic SNPs are removed
 (Figures
@@ -1249,7 +1266,7 @@ S\ref{fig:filteredleafsizes}
 S\ref{fig:filteredrootsizes}).
 In these simulation-based analyses, we also saw dramatic overestimation of
 these parameters when constant characters were excluded.
-Clearly, variable site patterns are being lost during the acquisition and
+It appears that variable character patterns are being lost during the acquisition and
 assembly of the RADseq data, and the model is sensitive to these missing
 variable sites, especially when only variable characters are analyzed.
 
@@ -1258,7 +1275,7 @@ variable sites, especially when only variable characters are analyzed.
 
 Previous approaches to estimating shared divergence times based on summary
 statistics were very sensitive to prior assumptions about divergence times and
-often over-clustered divergences with strong support
+often over-cluster divergences with strong support
 \citep{Oaks2012,Hickerson2013,Oaks2014reply,Oaks2014dpp}.
 Our goal was to increase the robustness of these inferences by leveraging all
 of the information in the data within a full-likelihood, Bayesian framework
@@ -1278,13 +1295,13 @@ of the correct number of divergence events was 0.94
 (Figure~\ref{fig:bakeoffnevents}).
 
 
-\subsection{To exclude linked sites, or not?}
+\subsection{To exclude linked characters, or not?}
 
 The increased precision and robustness associated with retaining constant
 characters creates an interesting question when analyzing DNA sequence data
 from reduced-representation genomic libraries:
-Is it better to analyze all the data and violate the assumption that the sites
-are unlinked, or suffer a large loss of data to avoid violating that
+Is it better to analyze all the data and violate the assumption that the
+characters are unlinked, or suffer a large loss of data to avoid violating that
 assumption?
 Several of our results suggest retaining all the data is preferable.
 First of all, the method is much better at estimating the divergence times,
@@ -1297,19 +1314,21 @@ and
 Figures
 S\labelcref{fig:linkagedivtimes100k,fig:linkageleafsizes500k,fig:linkageleafsizes100k,fig:linkagerootsizes500k,fig:linkagerootsizes100k,fig:linkagenevents100k}).
 Second, retaining all the data makes the method more robust to data acquisition
-biases, which are common in alignments from reduced-representation genomic
-libraries
+biases
 (Figures
 \labelcref{fig:filtereddivtimes,fig:filterednevents}
 and
 Figures
-S\labelcref{fig:filteredleafsizes,fig:filteredrootsizes}).
+S\labelcref{fig:filteredleafsizes,fig:filteredrootsizes}),
+which are common in alignments from reduced-representation genomic
+libraries
+\citep{Harvey2015,Linck2017}.
 Third, the results from the \emph{Gekko} RADseq data are
 reasonable and robust to prior assumptions when all data are analyzed,
 but nonsensical and sensitive to prior assumptions when only variable
 characters are analyzed.
-This appears to be due to the filtering of the character patterns that occurred
-when assembling these data.
+Our simulations suggest this is due to the filtering of the character patterns
+that occurred when assembling these data.
 
 Perhaps most striking is how much better the method estimates the number
 of divergence events when all the data are used.
@@ -1321,7 +1340,8 @@ or pattern-acquisition biases we simulated
 \ref{fig:valnevents},
 \ref{fig:linkagenevents500k},
 \&
-\ref{fig:filterednevents});
+\ref{fig:filterednevents}).
+For comparison,
 these values are as low as 0.41 when constant characters are removed
 \ref{fig:filterednevents}).
 
@@ -1331,9 +1351,9 @@ to other methods that assume unlinked characters.
 However, 
 \citet{ChifmanKubatko2014}
 found quartet inference of splits in multi-species coalescent trees
-from SNP data was robust to the violation of unlinked characters.
+from SNP data was also robust to the violation of unlinked characters.
 Our results show the amount of data that is discarded to avoid linked
-characters can far outway the negative effects of violating the assumption of
+characters can far outweigh the effects of violating the assumption of
 unlinked characters.
 When analyzing linked loci with a method that assumes unlinked characters,
 using simulations to assess the effect of linkage on the method may be worth
@@ -1345,8 +1365,8 @@ We purposefully selected a challenging empirical test case for the new method.
 Each of the four pairs of populations of \spp{Gekko} occur on two different
 oceanic islands that were never connected.
 Thus, we do not expect shared divergence times across the pairs.
-However, based on previous findings \citep{Siler2012, Siler2014kikuchii}, we
-knew all these pairs likely diverged very recently.
+However, based on previous findings \citep{Siler2012, Siler2014kikuchii}, all
+these pairs likely diverged very recently.
 This is a challenging region of parameter space for this type of method: Very
 similar and recent divergence times that are nonetheless independent.
 % We used the new method to compare the divergence times of four pairs
@@ -1354,8 +1374,9 @@ similar and recent divergence times that are nonetheless independent.
 % Each pair of populations inhabit two different oceanic islands that were never
 % connected, and thus never experienced the fragmentation associated with
 % Pleistocene sea-level fluctuations.
-Our results strongly support that all four pairs of populations diverged
-independently, despite all four pairs diverging very recently.
+Our results strongly support independent divergences, despite all four pairs
+diverging very recently.
+(Figures
 \ref{fig:gekkonevents}
 \& 
 \ref{fig:gekkodivtimes}).
@@ -1365,8 +1386,8 @@ timescales.
 
 \subsection{Caveats}
 This method is subject to the caveats associated with all model-based
-statistical methods.
-However, there are at least two caveats that are worth emphasizing with
+statistical methods,
+however, there are two caveats that are worth emphasizing with
 specific reference to the types of models we explored here.
 First, it is important to keep in mind that when modeling the divergence of two
 populations, the time of the divergence and the mutation rate are inextricably
@@ -1382,19 +1403,17 @@ to be able to estimate the divergence times.
 Second, the new method does not allow migration after populations diverge.
 This is a weakness compared to ABC approaches to this problem
 \citep{Huang2011,Oaks2014dpp}.
-However, given the biases and sensitivity to priors exhibited by the ABC
-methods, even when migration is ignored
+However, given the bias and sensitivity to priors exhibited by the ABC
+methods even when migration is ignored
 \citep{Oaks2012,Oaks2014reply,Oaks2014dpp},
 modeling migration with these methods is not advisable without thorough
 simulation-based analyses to assess their statistical behavior.
 
 \section{Conclusions}
 We introduced a new Bayesian model-choice method for estimating shared
-divergence times across taxa, which are predicted by landscape-level processes
-of diversification.
+divergence times across taxa.
 By using the full likelihood and genome-scale data, the new method is much more
 accurate, precise, and robust than existing methods based on approximate
 likelihoods.
 This new tool will allow biologists to leverage comparative genomic data to
 test hypotheses about the effects of environmental change on diversification.
-
