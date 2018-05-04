@@ -1,0 +1,631 @@
+\subsubsection{Approximating the posterior with MCMC}
+
+We use Markov chain Monte Carlo (MCMC) algorithms to numerically approximate
+the joint posterior in Equation~\ref{eq:bayesruleexpanded}.
+We use the Gibbs sampling algorithm (Algorithm 8) of \citet{Neal2000}
+to update the divergence model (\divtimemodel) during the chain.
+We also use univariate Metropolis-Hastings algorithms
+\citep{Metropolis1953,Hastings1970} to update each parameter of the model
+during the MCMC.
+To improve mixing of the chain when there are strong correlations between
+divergence times, effective population sizes, and mutation rates we use
+multivariate Metropolis-Hastings algorithms.
+The probability of accepting a Metropolis-Hastings proposal is determined
+by the product of three terms, the first two of which are the
+ratios of the likelihood and prior probability densities of the proposed
+state to the current state of the model.
+The third term, the Hastings ratio (HR), accounts for any difference in the
+probability of the proposed move versus the probability of the move that
+would exactly reverse the proposed state back to the current state of the
+model.
+Below, we detail the Hastings ratio for two of our multivariate moves.
+
+\paragraph{\timerootsizemixer proposal}
+One case of poor mixing can occur for pairs that diverge long enough ago such
+that only a single coalescence occurs within the root for most loci.
+In this scenario there is very little information in the allele count patterns
+about the size of the ancestral population, and so the divergence time and root
+population size become highly correlated (i.e., an older divergence time and
+smaller root size explain the data equally well as a younger divergence time
+and larger root size).
+We used expectations under the coalescent to design a proposal to better sample
+this correlated region of parameter space.
+To simplify notation, throughout this section we will use
+\sepopsize[\rootpopindex] in place of \epopsize[\rootpopindex] to denote the
+effective size of the ancestral population.
+
+\begin{linenomath}
+When coalescence of gene lineages is complete within a sampled pair of
+populations, only two lineages coalesce within the ancestral population.
+In this case, the expected height of the root of a gene tree is
+$\divtime\murate + 2\sepopsize[\rootpopindex]\murate$,
+in units of time determined by $\murate$ (e.g., expected substitutions per site
+if $\murate = 1$).
+The purpose of our move is to keep the expected root height of a gene tree
+of the proposed state equal to the current state,
+\begin{equation}
+    \divtime\proposed\murate + 2\sepopsize[\rootpopindex]{}\proposed\murate =
+    \divtime\murate + 2\sepopsize[\rootpopindex]\murate.
+\end{equation}
+The mutation rate cancels, giving us the following relationship to uphold
+during our proposal,
+\begin{equation}
+    \divtime\proposed + 2\sepopsize[\rootpopindex]{}\proposed =
+    \divtime + 2\sepopsize[\rootpopindex].
+    \label{eq:timerootsizeequality}
+\end{equation}
+This relationship will allow us to jointly and efficiently explore the space of
+\divtime and \sepopsize[\rootpopindex] when there is little information in the
+data to tease them apart.
+\end{linenomath}
+
+\begin{linenomath}
+For population pair $i$, we first draw a uniform random deviate,
+$\uniformdeviate \sim \textrm{Uniform}(-\tuningparameter, \tuningparameter)$,
+where \tuningparameter is a tuning parameter that can be adjusted to 
+improve the acceptance rate of the proposal.
+Next, we propose a new value for the effective population size of the
+root population
+\[
+    \sepopsize[\rootpopindex]{}_i\proposed = \sepopsize[\rootpopindex]{}_ie^{\uniformdeviate}.
+\]
+Now, we use the relationship in Equation~\ref{eq:timerootsizeequality} to
+determine the corresponding proposed value for the population divergence time,
+\begin{equation}
+    \divtime\proposed =
+    \divtime + 2\sepopsize[\rootpopindex]{}_i - 2\sepopsize[\rootpopindex]{}_i\proposed.
+\end{equation}
+The uniform deviate to reverse this move is simply
+$\uniformdeviate\proposed = -\uniformdeviate$.
+\end{linenomath}
+
+
+% {\singlespacing
+\begin{linenomath}
+To get the Hastings ratio for this move, we use the formula of
+\citet{Green1995},
+\begin{equation}
+    \textrm{Hastings ratio} =
+    \frac{g\proposed(\uniformdeviate\proposed)}{g(\uniformdeviate)} |\det(J)|,
+    \label{eq:greenhastings}
+\end{equation}
+which is the ratio of the probability of drawing the random deviate that
+would reverse the proposed move to the probability of drawing the random
+deviate of the proposed move, multiplied by the absolute value of the
+determinant of a matrix of Jacobian terms.
+Because the forward and reverse random deviates are uniform,
+$\frac{g\proposed(\uniformdeviate\proposed)}{g(\uniformdeviate)} = 1$,
+the Hastings ratio reduces to just the Jacobian term,
+\begin{equation}
+% \arraycolsep=4pt
+% \def\arraystretch{1.5}
+\begin{split}
+    J & = \left|\begin{array}{ccc}
+        \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \sepopsize[\rootpopindex]{}_i} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \divtime} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \uniformdeviate} \\
+        \frac{\partial \divtime\proposed}{\partial \sepopsize[\rootpopindex]{}_i} &
+        \frac{\partial \divtime\proposed}{\partial \divtime} &
+        \frac{\partial \divtime\proposed}{\partial \uniformdeviate} \\
+        \frac{\partial \uniformdeviate\proposed}{\partial \sepopsize[\rootpopindex]{}_i} &
+        \frac{\partial \uniformdeviate\proposed}{\partial \divtime} &
+        \frac{\partial \uniformdeviate\proposed}{\partial \uniformdeviate}
+    \end{array}\right| \\
+    & = \left|\begin{array}{ccc}
+        e^{\uniformdeviate} &
+        0 &
+        \sepopsize[\rootpopindex]e^{\uniformdeviate} \\
+        2(1 - e^{\uniformdeviate}) &
+        1 &
+        -2\sepopsize[\rootpopindex]e^{\uniformdeviate} \\
+        0 &
+        0 &
+        -1
+    \end{array}\right| \\
+    \det(J) & = e^{\uniformdeviate} \left|\begin{array}{cc}
+        1 &
+        -2\sepopsize[\rootpopindex]e^{\uniformdeviate} \\
+        0 &
+        -1 
+    \end{array}\right| - 0 \left|\begin{array}{cc}
+        2(1 - e^{\uniformdeviate}) &
+        -2\sepopsize[\rootpopindex]e^{\uniformdeviate} \\
+        0 &
+        -1
+    \end{array}\right| + \sepopsize[\rootpopindex]e^{\uniformdeviate} \left|\begin{array}{cc}
+        2(1 - e^{\uniformdeviate}) &
+        1 \\
+        0 &
+        0 \\
+    \end{array}\right| \\
+    & = -e^{\uniformdeviate} \\
+    |\det(J)| & = |-e^{\uniformdeviate}| = e^{\uniformdeviate} = \textrm{Hastings ratio}.
+\end{split}
+\end{equation}
+Notice that the change to \divtime also changes the divergence times
+of all the pairs that currently share this divergence time with pair $i$.
+So, the efficiency of this move can be hindered when there is a lot of sharing
+of divergence times.
+However, we can easily extend this move to change the sizes of the ancestral
+population of pairs $j, k, \ldots n$ that share their divergence time with
+pair $i$.
+To do this, we, again, adhere to the relationship in
+Equation~\ref{eq:timerootsizeequality}:
+\begin{equation}
+\begin{split}
+    2\sepopsize[\rootpopindex]{}_j\proposed
+    & =
+    2\sepopsize[\rootpopindex]{}_j + \divtime - \divtime\proposed \\
+    \sepopsize[\rootpopindex]{}_j\proposed
+    & =
+    \sepopsize[\rootpopindex]{}_j + \frac{1}{2}(\divtime - \divtime\proposed) \\
+    & =
+    \sepopsize[\rootpopindex]{}_j + \frac{1}{2}(\divtime - (\divtime + 2\sepopsize[\rootpopindex]{}_i - 2\sepopsize[\rootpopindex]{}_i\proposed)) \\
+    & =
+    \sepopsize[\rootpopindex]{}_j + \frac{1}{2}(\divtime - \divtime - 2\sepopsize[\rootpopindex]{}_i + 2\sepopsize[\rootpopindex]{}_i\proposed) \\
+    & =
+    \sepopsize[\rootpopindex]{}_j - (\sepopsize[\rootpopindex]{}_i - \sepopsize[\rootpopindex]{}_i\proposed) \\
+    & =
+    \sepopsize[\rootpopindex]{}_j - (\sepopsize[\rootpopindex]{}_i - \sepopsize[\rootpopindex]{}_i e^{\uniformdeviate}) \\
+    & =
+    \sepopsize[\rootpopindex]{}_j - \sepopsize[\rootpopindex]{}_i(1 - e^{\uniformdeviate}).
+\end{split}
+\end{equation}
+The Jacobian term then becomes
+\begin{equation}
+% \arraycolsep=4pt
+% \def\arraystretch{1.5}
+\begin{split}
+    J & = \left|\begin{array}{cccccccc}
+        \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \sepopsize[\rootpopindex]{}_i} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \divtime} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \sepopsize[\rootpopindex]{}_j} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \sepopsize[\rootpopindex]{}_k} &
+        \ldots &
+        \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \sepopsize[\rootpopindex]{}_{n-1}} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \sepopsize[\rootpopindex]{}_n} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \uniformdeviate} \\
+        \frac{\partial \divtime\proposed}{\partial \sepopsize[\rootpopindex]{}_i} &
+        \frac{\partial \divtime\proposed}{\partial \divtime} &
+        \frac{\partial \divtime\proposed}{\partial \sepopsize[\rootpopindex]{}_j} &
+        \frac{\partial \divtime\proposed}{\partial \sepopsize[\rootpopindex]{}_k} &
+        \ldots &
+        \frac{\partial \divtime\proposed}{\partial \sepopsize[\rootpopindex]{}_{n-1}} &
+        \frac{\partial \divtime\proposed}{\partial \sepopsize[\rootpopindex]{}_n} &
+        \frac{\partial \divtime\proposed}{\partial \uniformdeviate} \\
+        \frac{\partial \sepopsize[\rootpopindex]{}_j\proposed}{\partial \sepopsize[\rootpopindex]{}_i} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_j\proposed}{\partial \divtime} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_j\proposed}{\partial \sepopsize[\rootpopindex]{}_j} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_j\proposed}{\partial \sepopsize[\rootpopindex]{}_k} &
+        \ldots &
+        \frac{\partial \sepopsize[\rootpopindex]{}_j\proposed}{\partial \sepopsize[\rootpopindex]{}_{n-1}} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_j\proposed}{\partial \sepopsize[\rootpopindex]{}_n} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_j\proposed}{\partial \uniformdeviate} \\
+        \frac{\partial \sepopsize[\rootpopindex]{}_k\proposed}{\partial \sepopsize[\rootpopindex]{}_i} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_k\proposed}{\partial \divtime} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_k\proposed}{\partial \sepopsize[\rootpopindex]{}_j} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_k\proposed}{\partial \sepopsize[\rootpopindex]{}_k} &
+        \ldots &
+        \frac{\partial \sepopsize[\rootpopindex]{}_k\proposed}{\partial \sepopsize[\rootpopindex]{}_{n-1}} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_k\proposed}{\partial \sepopsize[\rootpopindex]{}_n} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_k\proposed}{\partial \uniformdeviate} \\
+        \vdots &
+        \vdots &
+        \vdots &
+        \vdots &
+        \ddots &
+        \vdots &
+        \vdots &
+        \vdots \\
+        \frac{\partial \sepopsize[\rootpopindex]{}_{n-1}\proposed}{\partial \sepopsize[\rootpopindex]{}_i} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_{n-1}\proposed}{\partial \divtime} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_{n-1}\proposed}{\partial \sepopsize[\rootpopindex]{}_j} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_{n-1}\proposed}{\partial \sepopsize[\rootpopindex]{}_k} &
+        \ldots &
+        \frac{\partial \sepopsize[\rootpopindex]{}_{n-1}\proposed}{\partial \sepopsize[\rootpopindex]{}_{n-1}} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_{n-1}\proposed}{\partial \sepopsize[\rootpopindex]{}_n} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_{n-1}\proposed}{\partial \uniformdeviate} \\
+        \frac{\partial \sepopsize[\rootpopindex]{}_n\proposed}{\partial \sepopsize[\rootpopindex]{}_i} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_n\proposed}{\partial \divtime} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_n\proposed}{\partial \sepopsize[\rootpopindex]{}_j} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_n\proposed}{\partial \sepopsize[\rootpopindex]{}_k} &
+        \ldots &
+        \frac{\partial \sepopsize[\rootpopindex]{}_n\proposed}{\partial \sepopsize[\rootpopindex]{}_{n-1}} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_n\proposed}{\partial \sepopsize[\rootpopindex]{}_n} &
+        \frac{\partial \sepopsize[\rootpopindex]{}_n\proposed}{\partial \uniformdeviate} \\
+        \frac{\partial \uniformdeviate\proposed}{\partial \sepopsize[\rootpopindex]{}_i} &
+        \frac{\partial \uniformdeviate\proposed}{\partial \divtime} &
+        \frac{\partial \uniformdeviate\proposed}{\partial \sepopsize[\rootpopindex]{}_j} &
+        \frac{\partial \uniformdeviate\proposed}{\partial \sepopsize[\rootpopindex]{}_k} &
+        \ldots &
+        \frac{\partial \uniformdeviate\proposed}{\partial \sepopsize[\rootpopindex]{}_{n-1}} &
+        \frac{\partial \uniformdeviate\proposed}{\partial \sepopsize[\rootpopindex]{}_n} &
+        \frac{\partial \uniformdeviate\proposed}{\partial \uniformdeviate}
+    \end{array}\right| \\
+    & = \left|\begin{array}{cccccccc}
+        e^{\uniformdeviate} &
+        0 &
+        0 &
+        0 &
+        \ldots &
+        0 &
+        0 &
+        \sepopsize[\rootpopindex]{}_i e^{\uniformdeviate} \\
+        2(1 - e^{\uniformdeviate}) &
+        1 &
+        0 &
+        0 &
+        \ldots &
+        0 &
+        0 &
+        -2\sepopsize[\rootpopindex]{}_i e^{\uniformdeviate} \\
+        e^{\uniformdeviate} - 1 &
+        0 &
+        1 &
+        0 &
+        \ldots &
+        0 &
+        0 &
+        \sepopsize[\rootpopindex]{}_i e^{\uniformdeviate} \\
+        e^{\uniformdeviate} - 1 &
+        0 &
+        0 &
+        1 &
+        \ddots &
+        0 &
+        0 &
+        \sepopsize[\rootpopindex]{}_i e^{\uniformdeviate} \\
+        \vdots &
+        \vdots &
+        \vdots &
+        \ddots &
+        \ddots &
+        \ddots &
+        \vdots &
+        \vdots \\
+        e^{\uniformdeviate} - 1 &
+        0 &
+        0 &
+        0 &
+        \ddots &
+        1 &
+        0 &
+        \sepopsize[\rootpopindex]{}_i e^{\uniformdeviate} \\
+        e^{\uniformdeviate} - 1 &
+        0 &
+        0 &
+        0 &
+        \ldots &
+        0 &
+        1 &
+        \sepopsize[\rootpopindex]{}_i e^{\uniformdeviate} \\
+        0 &
+        0 &
+        0 &
+        0 &
+        \ldots &
+        0 &
+        0 &
+        -1
+    \end{array}\right| \\
+    \det(J) & = -e^{\uniformdeviate} \\
+    |\det(J)| & = |-e^{\uniformdeviate}| = e^{\uniformdeviate} = \textrm{Hastings ratio}.
+\end{split}
+\end{equation}
+\end{linenomath}
+% }
+
+\paragraph{\timesizeratemixer proposal}
+This proposal is designed to improve mixing of the MCMC chain when there are
+strong posterior correlations among divergence time, population size, and
+mutation rate parameters.
+It does so by jointly scaling these parameters according to the direction
+(positive or negative) of the posterior correlations we often observed when
+analyzing simulated data.
+The divergence time was often positively correlated with the effective sizes of
+the descendant populations, and negatively correlated with the mutation rate
+and effective population size of the ancestral population.
+
+\begin{linenomath}
+For a given divergence time, \divtime[i],
+we first draw a random uniform deviate,
+$\uniformdeviate \sim \textrm{Uniform}(-\tuningparameter, \tuningparameter)$,
+where \tuningparameter is, again, a tuning parameter to adjust the proposal's
+acceptance rate.
+We use this random deviate to propose a new value for the divergence time,
+\[
+    \divtime[i]\proposed = \divtime[i] e^{\uniformdeviate}.
+\]
+Next, we visit each population pair that is associated with this
+divergence time, and propose the following updates to the
+pair's parameters, if they are being estimated (i.e., not fixed):
+\begin{equation}
+    \begin{split}
+        \epopsize[\rootpopindex]{}\proposed & = \epopsize[\rootpopindex]{} e^{-\uniformdeviate} \\
+        \epopsize[\descendantpopindex{1}]{}\proposed & = \epopsize[\descendantpopindex{1}]{} e^{\uniformdeviate} \\
+        \epopsize[\descendantpopindex{2}]{}\proposed & = \epopsize[\descendantpopindex{1}]{} e^{\uniformdeviate} \\
+        \murate\proposed & = \murate e^{-\uniformdeviate}.
+    \end{split}
+\end{equation}
+When doing so, we keep track of the total number of parameters
+that have been updated, denoted as $n$,
+and how many of these were scaled by
+$e^{\uniformdeviate}$, denoted $m$;
+the remaining $n-m$ parameters were scaled by $e^{-\uniformdeviate}$.
+\end{linenomath}
+
+% {\singlespacing
+\begin{linenomath}
+Given $n$ and $m$, we can again use Green's \citeyear{Green1995} formula
+(Equation~\ref{eq:greenhastings}) to determine the Hastings ratio for this
+proposal.
+Once again, 
+$\frac{g\proposed(\uniformdeviate\proposed)}{g(\uniformdeviate)} = 1$,
+because the random deviates are uniform.
+Using
+$\parameter[1], \ldots, \parameter[m]$
+and
+$\parameter[m+1], \ldots, \parameter[n]$
+to denote the parameters that
+have been scaled by
+$e^{\uniformdeviate}$
+and
+$e^{-\uniformdeviate}$, respectively,
+the Jacobian term is
+\begin{equation}
+% \arraycolsep=4pt
+% \def\arraystretch{1.5}
+\begin{split}
+    J & = \left|\begin{array}{ccccccccccc}
+        \frac{\partial \parameter[1]\proposed}{\partial \parameter[1]} &
+        \frac{\partial \parameter[1]\proposed}{\partial \parameter[2]} &
+        \ldots &
+        \frac{\partial \parameter[1]\proposed}{\partial \parameter[m-1]} &
+        \frac{\partial \parameter[1]\proposed}{\partial \parameter[m]} &
+        \frac{\partial \parameter[1]\proposed}{\partial \parameter[m+1]} &
+        \frac{\partial \parameter[1]\proposed}{\partial \parameter[m+2]} &
+        \ldots &
+        \frac{\partial \parameter[1]\proposed}{\partial \parameter[n-1]} &
+        \frac{\partial \parameter[1]\proposed}{\partial \parameter[n]} &
+        \frac{\partial \parameter[1]\proposed}{\partial \uniformdeviate} \\
+        \frac{\partial \parameter[2]\proposed}{\partial \parameter[1]} &
+        \frac{\partial \parameter[2]\proposed}{\partial \parameter[2]} &
+        \ldots &
+        \frac{\partial \parameter[2]\proposed}{\partial \parameter[m-1]} &
+        \frac{\partial \parameter[2]\proposed}{\partial \parameter[m]} &
+        \frac{\partial \parameter[2]\proposed}{\partial \parameter[m+1]} &
+        \frac{\partial \parameter[2]\proposed}{\partial \parameter[m+2]} &
+        \ldots &
+        \frac{\partial \parameter[2]\proposed}{\partial \parameter[n-1]} &
+        \frac{\partial \parameter[2]\proposed}{\partial \parameter[n]} &
+        \frac{\partial \parameter[2]\proposed}{\partial \uniformdeviate} \\
+        \vdots &
+        \vdots &
+        \ddots &
+        \vdots &
+        \vdots &
+        \vdots &
+        \vdots &
+        \ddots &
+        \vdots &
+        \vdots &
+        \vdots \\
+        \frac{\partial \parameter[m-1]\proposed}{\partial \parameter[1]} &
+        \frac{\partial \parameter[m-1]\proposed}{\partial \parameter[2]} &
+        \ldots &
+        \frac{\partial \parameter[m-1]\proposed}{\partial \parameter[m-1]} &
+        \frac{\partial \parameter[m-1]\proposed}{\partial \parameter[m]} &
+        \frac{\partial \parameter[m-1]\proposed}{\partial \parameter[m+1]} &
+        \frac{\partial \parameter[m-1]\proposed}{\partial \parameter[m+2]} &
+        \ldots &
+        \frac{\partial \parameter[m-1]\proposed}{\partial \parameter[n-1]} &
+        \frac{\partial \parameter[m-1]\proposed}{\partial \parameter[n]} &
+        \frac{\partial \parameter[m-1]\proposed}{\partial \uniformdeviate} \\
+        \frac{\partial \parameter[m]\proposed}{\partial \parameter[1]} &
+        \frac{\partial \parameter[m]\proposed}{\partial \parameter[2]} &
+        \ldots &
+        \frac{\partial \parameter[m]\proposed}{\partial \parameter[m-1]} &
+        \frac{\partial \parameter[m]\proposed}{\partial \parameter[m]} &
+        \frac{\partial \parameter[m]\proposed}{\partial \parameter[m+1]} &
+        \frac{\partial \parameter[m]\proposed}{\partial \parameter[m+2]} &
+        \ldots &
+        \frac{\partial \parameter[m]\proposed}{\partial \parameter[n-1]} &
+        \frac{\partial \parameter[m]\proposed}{\partial \parameter[n]} &
+        \frac{\partial \parameter[m]\proposed}{\partial \uniformdeviate} \\
+        \frac{\partial \parameter[m+1]\proposed}{\partial \parameter[1]} &
+        \frac{\partial \parameter[m+1]\proposed}{\partial \parameter[2]} &
+        \ldots &
+        \frac{\partial \parameter[m+1]\proposed}{\partial \parameter[m-1]} &
+        \frac{\partial \parameter[m+1]\proposed}{\partial \parameter[m]} &
+        \frac{\partial \parameter[m+1]\proposed}{\partial \parameter[m+1]} &
+        \frac{\partial \parameter[m+1]\proposed}{\partial \parameter[m+2]} &
+        \ldots &
+        \frac{\partial \parameter[m+1]\proposed}{\partial \parameter[n-1]} &
+        \frac{\partial \parameter[m+1]\proposed}{\partial \parameter[n]} &
+        \frac{\partial \parameter[m+1]\proposed}{\partial \uniformdeviate} \\
+        \frac{\partial \parameter[m+2]\proposed}{\partial \parameter[1]} &
+        \frac{\partial \parameter[m+2]\proposed}{\partial \parameter[2]} &
+        \ldots &
+        \frac{\partial \parameter[m+2]\proposed}{\partial \parameter[m-1]} &
+        \frac{\partial \parameter[m+2]\proposed}{\partial \parameter[m]} &
+        \frac{\partial \parameter[m+2]\proposed}{\partial \parameter[m+1]} &
+        \frac{\partial \parameter[m+2]\proposed}{\partial \parameter[m+2]} &
+        \ldots &
+        \frac{\partial \parameter[m+2]\proposed}{\partial \parameter[n-1]} &
+        \frac{\partial \parameter[m+2]\proposed}{\partial \parameter[n]} &
+        \frac{\partial \parameter[m+2]\proposed}{\partial \uniformdeviate} \\
+        \vdots &
+        \vdots &
+        \ddots &
+        \vdots &
+        \vdots &
+        \vdots &
+        \vdots &
+        \ddots &
+        \vdots &
+        \vdots &
+        \vdots \\
+        \frac{\partial \parameter[n-1]\proposed}{\partial \parameter[1]} &
+        \frac{\partial \parameter[n-1]\proposed}{\partial \parameter[2]} &
+        \ldots &
+        \frac{\partial \parameter[n-1]\proposed}{\partial \parameter[m-1]} &
+        \frac{\partial \parameter[n-1]\proposed}{\partial \parameter[m]} &
+        \frac{\partial \parameter[n-1]\proposed}{\partial \parameter[m+1]} &
+        \frac{\partial \parameter[n-1]\proposed}{\partial \parameter[m+2]} &
+        \ldots &
+        \frac{\partial \parameter[n-1]\proposed}{\partial \parameter[n-1]} &
+        \frac{\partial \parameter[n-1]\proposed}{\partial \parameter[n]} &
+        \frac{\partial \parameter[n-1]\proposed}{\partial \uniformdeviate} \\
+        \frac{\partial \parameter[n]\proposed}{\partial \parameter[1]} &
+        \frac{\partial \parameter[n]\proposed}{\partial \parameter[2]} &
+        \ldots &
+        \frac{\partial \parameter[n]\proposed}{\partial \parameter[m-1]} &
+        \frac{\partial \parameter[n]\proposed}{\partial \parameter[m]} &
+        \frac{\partial \parameter[n]\proposed}{\partial \parameter[m+1]} &
+        \frac{\partial \parameter[n]\proposed}{\partial \parameter[m+2]} &
+        \ldots &
+        \frac{\partial \parameter[n]\proposed}{\partial \parameter[n-1]} &
+        \frac{\partial \parameter[n]\proposed}{\partial \parameter[n]} &
+        \frac{\partial \parameter[n]\proposed}{\partial \uniformdeviate} \\
+        \frac{\partial \parameter[\uniformdeviate]\proposed}{\partial \parameter[1]} &
+        \frac{\partial \parameter[\uniformdeviate]\proposed}{\partial \parameter[2]} &
+        \ldots &
+        \frac{\partial \parameter[\uniformdeviate]\proposed}{\partial \parameter[m-1]} &
+        \frac{\partial \parameter[\uniformdeviate]\proposed}{\partial \parameter[m]} &
+        \frac{\partial \parameter[\uniformdeviate]\proposed}{\partial \parameter[m+1]} &
+        \frac{\partial \parameter[\uniformdeviate]\proposed}{\partial \parameter[m+2]} &
+        \ldots &
+        \frac{\partial \parameter[\uniformdeviate]\proposed}{\partial \parameter[n-1]} &
+        \frac{\partial \parameter[\uniformdeviate]\proposed}{\partial \parameter[n]} &
+        \frac{\partial \parameter[\uniformdeviate]\proposed}{\partial \uniformdeviate} \\
+    \end{array}\right| \\
+    & = \left|\begin{array}{ccccccccccc}
+        e^{\uniformdeviate} &
+        0 &
+        \ldots &
+        0 &
+        0 &
+        0 &
+        0 &
+        \ldots &
+        0 &
+        0 &
+        \parameter[1]\proposed e^{\uniformdeviate} \\
+        0 &
+        \ddots &
+        \ddots &
+        0 &
+        0 &
+        0 &
+        0 &
+        \ldots &
+        0 &
+        0 &
+        \parameter[1]\proposed e^{\uniformdeviate} \\
+        \vdots &
+        \ddots &
+        \ddots &
+        \ddots &
+        \vdots &
+        \vdots &
+        \vdots &
+        \ddots &
+        \vdots &
+        \vdots &
+        \vdots \\
+        0 &
+        0 &
+        \ddots &
+        \ddots &
+        0 &
+        0 &
+        0 &
+        \ldots &
+        0 &
+        0 &
+        \parameter[m]\proposed e^{\uniformdeviate} \\
+        0 &
+        0 &
+        \ldots &
+        0 &
+        e^{\uniformdeviate} &
+        0 &
+        0 &
+        \ldots &
+        0 &
+        0 &
+        \parameter[m]\proposed e^{\uniformdeviate} \\
+        0 &
+        0 &
+        \ldots &
+        0 &
+        0 &
+        e^{-\uniformdeviate} &
+        0 &
+        \ldots &
+        0 &
+        0 &
+        \parameter[m]\proposed e^{-\uniformdeviate} \\
+        0 &
+        0 &
+        \ldots &
+        0 &
+        0 &
+        0 &
+        \ddots &
+        \ddots &
+        0 &
+        0 &
+        \parameter[m]\proposed e^{-\uniformdeviate} \\
+        \vdots &
+        \vdots &
+        \ddots &
+        \vdots &
+        \vdots &
+        \vdots &
+        \ddots &
+        \ddots &
+        \ddots &
+        \vdots &
+        \vdots \\
+        0 &
+        0 &
+        \ldots &
+        0 &
+        0 &
+        0 &
+        0 &
+        \ddots &
+        \ddots &
+        0 &
+        \parameter[n]\proposed e^{-\uniformdeviate} \\
+        0 &
+        0 &
+        \ldots &
+        0 &
+        0 &
+        0 &
+        0 &
+        \ldots &
+        0 &
+        e^{-\uniformdeviate} &
+        \parameter[n]\proposed e^{-\uniformdeviate} \\
+        0 &
+        0 &
+        \ldots &
+        0 &
+        0 &
+        0 &
+        0 &
+        \ldots &
+        0 &
+        0 &
+        -1 \\
+    \end{array}\right| \\
+    \det(J) & = -e^{\uniformdeviate{}m}e^{-\uniformdeviate{}(n - m)} \\
+    & = -e^{2\uniformdeviate{}m - \uniformdeviate{}n} \\
+    |\det(J)| & = e^{\uniformdeviate{}(2m - n)} = \textrm{Hastings ratio}.
+\end{split}
+\end{equation}
+\end{linenomath}
+% }
