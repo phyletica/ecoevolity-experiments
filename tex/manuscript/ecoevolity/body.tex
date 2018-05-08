@@ -884,7 +884,8 @@ Previous methods for estimating shared divergence times often over-cluster taxa
 expectations \citep{Oaks2014dpp}.
 Thus, a good empirical test of the new method would be pairs of populations
 that we expect diverged independently of one another.
-We collected RADseq data from four pairs of populations of \spp{Gekko} lizards.
+We analyzed RADseq data from four pairs of populations of \spp{Gekko} lizards;
+the collection of these data are detailed in \citep{Oaks2018paic}.
 Each pair of populations inhabit two different oceanic islands in the
 Philippines that were never connected during lower sea levels of glacial
 periods.
@@ -1273,17 +1274,34 @@ variable sites, especially when only variable characters are analyzed.
 
 \section{Discussion}
 
-Previous approaches to estimating shared divergence times based on summary
-statistics were very sensitive to prior assumptions about divergence times and
-often over-cluster divergences with strong support
+Previous approaches to estimating shared divergence times based on
+approximate-likelihood Bayesian computation (ABC) are very sensitive to prior
+assumptions about divergence times and often over-cluster divergences with
+strong support
 \citep{Oaks2012,Hickerson2013,Oaks2014reply,Oaks2014dpp}.
-Our goal was to increase the robustness of these inferences by leveraging all
-of the information in the data within a full-likelihood, Bayesian framework
-designed for genome-scale data.
-Using all the information in the data makes the new approach much
-more efficient.
-Increasing the number of characters from 100,000 to 500,000 resulted
-in only modest improvement in precision
+Here, we introduced a new approach that increases the power and robustness of
+these inferences by leveraging all of the information in genomic data within a
+full-likelihood, Bayesian framework.
+The full-likelihood approach is much better at estimating
+divergence times
+(Figure~\ref{fig:bakeoffdivtimes})
+and nuisance parameters
+(Figure S\ref{fig:bakeoffleafsizes} \& S\ref{fig:bakeoffrootsizes})
+than ABC.
+It is also better able to estimate the correct number of divergence events with
+more confidence, and is much less biased toward underestimating the number of
+divergence events
+(Figure~\ref{fig:bakeoffnevents}).
+This is especially important, because most biogeographers that use these
+methods are interested in testing for shared events.
+The increased power of the method to detect variation in divergence times and
+avoid spurious estimates of shared divergences will lead to fewer erroneous
+interpretations of shared processes of divergence.
+
+The efficiency associated with using all of the information in the data makes
+the method very promising for empirical applications.
+For example, increasing the number of characters from 100,000 to 500,000
+resulted in only modest improvement in precision
 (Figures
 \ref{fig:valdivtimes}, S\ref{fig:valleafsizes}, \& S\ref{fig:valrootsizes}).
 This suggests that the benefit of collecting more characters begins to plateau
@@ -1293,6 +1311,11 @@ simulated 100k \datasets had only 5,500 SNPs on average).
 Even with only 200 short (200 bp) loci, the median posterior probability
 of the correct number of divergence events was 0.94
 (Figure~\ref{fig:bakeoffnevents}).
+Also, directly calculating the likelihood of the population history from
+genomic data avoids the computation necessary for approximating the likelihood
+via simulations.
+As a result, the new method, \ecoevolity, could provide better approximations
+of the posterior over 1000 times faster than the ABC method, \dppmsbayes.
 
 
 \subsection{To exclude linked characters, or not?}
@@ -1313,7 +1336,7 @@ when only one variable character per locus is analyzed
 and
 Figures
 S\labelcref{fig:linkagedivtimes100k,fig:linkageleafsizes500k,fig:linkageleafsizes100k,fig:linkagerootsizes500k,fig:linkagerootsizes100k,fig:linkagenevents100k}).
-Second, retaining all the data makes the method more robust to data acquisition
+Second, retaining all the data makes the method more robust to data-acquisition
 biases
 (Figures
 \labelcref{fig:filtereddivtimes,fig:filterednevents}
