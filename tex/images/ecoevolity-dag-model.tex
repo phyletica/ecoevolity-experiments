@@ -166,7 +166,8 @@
     \draw[dedge] (times) -- (sptree4);
     \draw[dedge] (times) -- (sptreen);
 
-    \draw[dedge] (sptree1) to [bend left] node[right] {$\int_{\genetree}$} (pattern1);
+    % \draw[dedge] (sptree1) to [bend left] node[right] {$\int_{\genetree}$} (pattern1);
+    \draw[dedge] (sptree1) -- (pattern1);
     \draw[dedge] (gfreq1) -- (pattern1);
     \draw[dedge] (murate1) -- (pattern1);
 
@@ -193,7 +194,8 @@
     \draw[dedge] (bgfreq1) -- (gfreq1);
 
 
-    \draw[dedge] (sptreen) to [bend right] node[left] {$\int_{\genetree}$} (patternn);
+    % \draw[dedge] (sptreen) to [bend right] node[left] {$\int_{\genetree}$} (patternn);
+    \draw[dedge] (sptreen) -- (patternn);
     \draw[dedge] (gfreqn) -- (patternn);
     \draw[dedge] (muraten) -- (patternn);
 
