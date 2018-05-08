@@ -237,12 +237,16 @@ possible gene tree branch lengths,
     \label{eq:markerlikelihood}
 \end{equation}
 \citep{Felsenstein1988,Nielsen2001,Rannala2003}.
-We take advantage of the mathematical work of \citep{Bryant2012} to calculate
-the integral over gene trees analytically, allowing us to compute the
-likelihood of the species tree directly from a biallelic character pattern
-under a coalescent model.
-\thought{For completeness, should I lay out the math and algorithm for
-    calculating the likelihood in the supplemental materials?}
+% We take advantage of the mathematical work of \citep{Bryant2012} to
+% analytically integrate over all possible gene trees and character
+% mutational histories along those gene trees.
+We take advantage of the mathematical work of \citep{Bryant2012} to
+analytically integrate over all possible gene trees and all possible character
+substitution histories along those gene trees.
+This allows us to compute the likelihood of the species tree directly from a
+biallelic character pattern under a coalescent model.
+% \thought{For completeness, should I lay out the math and algorithm for
+%     calculating the likelihood in the supplemental materials?}
 \end{linenomath}
 
 \begin{linenomath}
@@ -650,10 +654,30 @@ SNAPP \citep{Bryant2012},
 and all of our MCMC proposals sample from the expected prior distribution
 when data are ignored.
 
+The \ecoevolity package includes four programs:
+\begin{enumerate}
+    \item \ecoevolity for performing Bayesian inference under the
+        model described above.
+    \item \sumcoevolity for summarizing posterior samples collected by
+        \ecoevolity and performing simulations to calculate Bayes factors for
+        all possible numbers of divergence events.
+    \item \simcoevolity for simulating biallelic characters under the model
+        described above.
+    \item \dpprobs for Monte Carlo approximations of probabilities under the
+        Dirichlet process; this can be useful for choosing a prior on the
+        concentration parameter.
+\end{enumerate}
+We have also developed a Python package, \pycoevolity, to help with
+preprocessing data and summarizing posterior samples collected by \ecoevolity.
+This includes assessing MCMC chain stationarity and convergence and plotting
+posterior distributions.
+The source code for \pycoevolity is available at
+\url{https://github.com/phyletica/pycoevolity}.
+
 All of our analyses were performed with
 Version 0.1 
 (commit 1d688a3)
-of \ecoevolity.
+of the \ecoevolity software package.
 The \timerootsizemixer algorithm implemented in this version of the software
 only updates one ancestral population size per proposal.
 In Version 0.2 (commit 884780e), the default behavior is for the
