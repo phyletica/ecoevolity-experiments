@@ -150,7 +150,7 @@ for a locus from both populations of a pair; i.e.,
 $\leafallelecounts, \leafredallelecounts = (\allelecount[1], \redallelecount[1]), 
 (\allelecount[2], \redallelecount[2])$
 (Figure~\ref{fig:divCartoon}).
-When we will also use ``character pattern'' to refer to $\leafallelecounts,
+We will also use ``character pattern'' to refer to $\leafallelecounts,
 \leafredallelecounts$.
 We will use \comparisondata[i] to denote these counts across all the loci from
 population pair $i$.
@@ -200,7 +200,7 @@ we want to allow rate variation among pairs of populations.
 We assume that each marker sampled from a pair of populations evolved within a
 simple ``species'' tree with one ancestral root population that diverged into
 two descendant (terminal) branches at time \comparisondivtime
-(Figures~\labelcref{fig:divCartoon,fig:dag}).
+(Figure~\ref{fig:divCartoon}).
 Again, if the $\murate$ is given, \comparisondivtime is in units of absolute
 time; however, if $\murate$ is set to one, time is in units of expected
 substitutions per site.
@@ -244,7 +244,12 @@ We take advantage of the mathematical work of \citep{Bryant2012} to
 analytically integrate over all possible gene trees and all possible character
 substitution histories along those gene trees.
 This allows us to compute the likelihood of the species tree directly from a
-biallelic character pattern under a coalescent model.
+biallelic character pattern under a coalescent model,
+i.e.,
+$\pr(\leafallelecounts, \leafredallelecounts \given \sptree, \murate, \gfreq)$.
+We refer readers to
+\citet{Bryant2012}
+for the details of this likelihood and the algorithms to compute it.
 % \thought{For completeness, should I lay out the math and algorithm for
 %     calculating the likelihood in the supplemental materials?}
 \end{linenomath}
@@ -433,7 +438,8 @@ We will separate out \divtimemodel into two components,
     \item the partitioning of the \ncomparisons{} population pairs to
         divergence events, which we will denote as \divtimesets, and
     \item the divergence times themselves,
-        $\divtimes = \divtime[1], \ldots, \divtime[\nevents]$.
+        $\divtimes = \divtime[1], \ldots, \divtime[\nevents]$,
+        the number of which (\nevents{}) is determined by \divtimesets.
 \end{enumerate}
 We relax the assumption of independent divergence times by treating the number
 of divergence events and the assignment of population pairs to those events as
@@ -488,10 +494,14 @@ Under the Dirichlet process prior, the posterior becomes
 where
 \collectionpopsizes
 is the collection of the effective population sizes (\comparisonpopsizes{})
-across pairs.
-By expanding the divergence model (\divtimemodel) into the unique
-divergence times (\divtimes) and the partitioning of the pairs of populations
-to those times (\divtimesets), we get
+across all of the pairs.
+By expanding the divergence model
+(\divtimemodel)
+into the partitioning of the population pairs to divergence events
+(\divtimesets)
+and the times of those events 
+(\divtimes),
+we get
 \begin{equation}
     \pr(
     \concentration,
@@ -562,8 +572,8 @@ the concentration parameter by specifying a gamma distribution as a prior on
 \end{linenomath}
 
 \paragraph{Prior on the divergence times}
-Given the subsets of pairs assigned to divergence events, we use a gamma
-distribution for the prior on the divergence time of each event,
+Given the partitioning of the pairs to divergence events, we use a gamma
+distribution for the prior on the time of each event,
 $\divtime \given \divtimesets \sim \distgamma(\cdot, \cdot)$.
 This is the base distribution (\basedistribution) of the Dirichlet process.
 
@@ -613,11 +623,12 @@ set the mutation rate of the second pair to one as well ($\murate[1] = \murate[2
 Alternatively, we could relax that assumption and put a prior on \murate[2].
 However, this should be a strongly informative prior.
 Placing a weakly informative prior on \murate[2] would mean that we can no
-longer estimate its divergence time relative to the first pair.
+longer estimate its divergence time relative to the first pair,
+which is our primary goal.
 So, while it is possible to incorporate uncertainty in relative mutation rates,
 it is important to keep in mind that the data cannot inform these parameters,
-and thus the uncertainty will be directly reflected in the uncertainty of
-divergence times.
+and thus the prior uncertainty in rates will be directly reflected in the
+posterior of divergence times.
 
 \paragraph{Prior on the equilibrium-state frequency}
 Our method allows for a beta prior to be placed on the frequency of the green
@@ -833,7 +844,7 @@ sampling each gene copy.
 Specifically, we simulated \datasets for which the probability of sampling each
 gene copy was 90\%, 75\%, or 50\%, which resulted in \datasets with
 approximately 10\%, 25\%, or 50\% missing data.
-For each sampling probability, we simulated 100 \datasets with 500,000
+For each sampling probability, we simulated 100 \datasets with 500,000 unlinked
 characters; the settings were the same as described for the validation analyses
 above where $\rootrelativepopsize \sim \dgamma{100}{1}$.
 
@@ -845,7 +856,7 @@ This was not observed in the analyses of simulated data, because the likelihood
 is appropriately corrected for the excluded constant characters.
 This suggests that there are additional character-pattern acquisition biases in
 the empirical data, for which are our method cannot correct.
-Such acquisition biases have been documented during the denovo assembly of
+Such acquisition biases have been documented during the de novo assembly of
 RADseq loci \citep{Harvey2015,Linck2017}.
 
 The loss of rare alleles during the acquisition and assembly of the data could
@@ -861,8 +872,9 @@ To explore whether data acquisition bias can explain the discrepancy we
 observed for the \spp{Gekko} data, we simulated \datasets where the probability
 of sampling singleton character patterns (i.e., one gene copy is different from
 all the others) was 80\%, 60\%, and 40\%.
-For each, we simulated and analyzed 100 \datasets; the settings were
-the same as described for the validation analyses above where
+For each, we simulated and analyzed 100 \datasets with 500,000 unlinked
+characters; the settings were the same as described for the validation analyses
+above where
 $\rootrelativepopsize \sim \dgamma{100}{1}$.
 
 
@@ -871,10 +883,11 @@ We wanted to compare the performance of the new method to the existing
 approximate-likelihood Bayesian computation (ABC) method \dppmsbayes 
 \citep{Oaks2014dpp}.
 In order to do this, we had to simulate relatively small \datasets that the ABC
-methods could handle in a reasonable amount of time.
+method could handle in a reasonable amount of time.
 Accordingly, we simulated \datasets with 200 loci, each with 200 linked
 characters (40,000 total characters).
-For analyses of both \ecoevolity and \dppmsbayes, the settings were
+For simulations and analyses of both \ecoevolity and \dppmsbayes, the settings
+were
 \begin{enumerate}
     \item $\ncomparisons = 3$
     \item $\concentration = 1.414216$, which corresponds with a prior mean of
@@ -904,8 +917,7 @@ sample.
 
 \subsection{Empirical application}
 Previous methods for estimating shared divergence times often over-cluster taxa
-\citep{Oaks2012,Oaks2014reply} or have little information to update prior
-expectations \citep{Oaks2014dpp}.
+\citep{Oaks2012,Oaks2014reply}.
 Thus, a good empirical test of the new method would be pairs of populations
 that we expect diverged independently of one another.
 We analyzed RADseq data from four pairs of populations of \spp{Gekko} lizards;
@@ -919,8 +931,9 @@ which should be idiosyncratic to each pair.
 
 We analyzed the data with and without the constant characters.
 Also, there were a small number of sites that had more than two nucleotides
-represented, which cannot be handled directly by our model of biallelic
-characters.
+represented
+(Table~\ref{table:gekkocomparisons}),
+which cannot be handled directly by our model of biallelic characters.
 We explored two ways of handling these sites:
 (1) excluding them, and
 (2) coding the first nucleotide in the alignment as 0 (``green''), and all
@@ -932,8 +945,8 @@ To be conservative in assessing the ability of the new method to distinguish
 divergence times among the pairs, we set $\concentration = 0.44$, which places
 50\% of the prior probability on one divergence event (i.e., all four pairs
 sharing the same divergence).
-Furthermore, to assess the sensitivity of the results to the \concentration, we
-also tried $\concentration = 3.77$, which corresponds with a prior mean number
+Furthermore, to assess the sensitivity of the results to \concentration, we
+also used $\concentration = 3.77$, which corresponds with a prior mean number
 of divergence events of three.
 Other settings that were shared by all analyses of the \spp{Gekko} RADseq data
 include:
@@ -947,7 +960,7 @@ include:
 The ABC methods of inferring shared divergence events are very sensitive to the
 prior on divergence times
 \citep{Oaks2012,Hickerson2013,Oaks2014reply,Oaks2014dpp}.
-To assess whether results of our new method are also sensitivity to the
+To assess whether results of our new method are also sensitive to the
 prior on divergence times, we analyzed the \datasets that included constant
 characters under the following priors:
 \begin{enumerate}
@@ -972,7 +985,7 @@ sampling every 100th generation.
 Convergence and mixing of the chains was assessed by the potential scale
 reduction factor (the square root of Equation 1.1 in
 \citet{Brooks1998}) and effective sample size \citep{Gong2014} of the
-likelihood and all parameters.
+log-likelihood and all parameters.
 We also inspected the chains visually with the program Tracer version 1.6
 \citep{Tracer16}.
 
@@ -1032,7 +1045,7 @@ As with the parameter estimates, the performance increase associated with the
 increase from 100k to 500k sampled characters is moderate; retaining the
 constant characters has a much larger effect (Figure~\ref{fig:valnevents}).
 When constant characters are used, the median posterior
-probability of the correct number of divergence event is high (over 0.89
+probability of the correct number of divergence events is high (over 0.89
 for all simulation conditions; 
 Figure~\ref{fig:valnevents}).
 
@@ -1223,6 +1236,8 @@ It is difficult to compare the computational effort between the two approaches,
 given that \ecoevolity is collecting autocorrelated samples from
 the full posterior, whereas \dppmsbayes is collecting independent samples
 from a different distribution we hope is similar to the posterior.
+Nonetheless, the comparison is aided by the fact that the heavy computation of
+both methods is coded in \clang/\cpp.
 To compare the overall amount of computation required by the two approaches
 we look at the average time it takes to analyze a simulated \dataset
 on a single processor 
@@ -1272,7 +1287,7 @@ While the true values of these parameters are obviously unknown, given the
 variability of these data (Table~\ref{table:gekkocomparisons}), and other data
 from these species \citep{Siler2012, Siler2014kikuchii}, these values are
 clearly nonsensical.
-Also, the posterior probabilities of the number of divergences is also
+The posterior probabilities of the number of divergences are also
 much more sensitive to the \divtime and \concentration priors,
 with some combinations yielding results for which three divergence events
 are preferred, although Bayes factors always preferred four divergences
@@ -1291,9 +1306,10 @@ S\ref{fig:filteredleafsizes}
 S\ref{fig:filteredrootsizes}).
 In these simulation-based analyses, we also saw dramatic overestimation of
 these parameters when constant characters were excluded.
-It appears that variable character patterns are being lost during the acquisition and
-assembly of the RADseq data, and the model is sensitive to these missing
-variable sites, especially when only variable characters are analyzed.
+It appears that some variable character patterns are being lost during the
+acquisition and assembly of the RADseq data, and the model is sensitive to
+these missing variable sites, especially when only variable characters are
+analyzed.
 
 
 \section{Discussion}
@@ -1325,12 +1341,12 @@ interpretations of shared processes of divergence.
 The efficiency associated with using all of the information in the data makes
 the method very promising for empirical applications.
 For example, increasing the number of characters from 100,000 to 500,000
-resulted in only modest improvement in precision
+resulted in only modest improvements in precision
 (Figures
 \ref{fig:valdivtimes}, S\ref{fig:valleafsizes}, \& S\ref{fig:valrootsizes}).
 This suggests that the benefit of collecting more characters begins to plateau
 when \datasets are small relative to the number of characters commonly
-collected via modern high-throughput sequencing technologies (i.e., the
+collected via modern high-throughput sequencing technologies (e.g., the
 simulated 100k \datasets had only 5,500 SNPs on average).
 Even with only 200 short (200 bp) loci, the median posterior probability
 of the correct number of divergence events was 0.94
@@ -1338,8 +1354,8 @@ of the correct number of divergence events was 0.94
 Also, directly calculating the likelihood of the population history from
 genomic data avoids the computation necessary for approximating the likelihood
 via simulations.
-As a result, the new method, \ecoevolity, could provide better approximations
-of the posterior over 1000 times faster than the ABC method, \dppmsbayes.
+As a result, the new method, \ecoevolity, provides better approximations of the
+posterior over 1000 times faster than the ABC method, \dppmsbayes.
 
 
 \subsection{To exclude linked characters, or not?}
@@ -1390,7 +1406,7 @@ or pattern-acquisition biases we simulated
 \ref{fig:filterednevents}).
 For comparison,
 these values are as low as 0.41 when constant characters are removed
-\ref{fig:filterednevents}).
+(Figure \ref{fig:filterednevents}).
 
 We caution against generalizing our findings
 of favorable performance with linked loci
@@ -1450,7 +1466,7 @@ to be able to estimate the divergence times.
 Second, the new method does not allow migration after populations diverge.
 This is a weakness compared to ABC approaches to this problem
 \citep{Huang2011,Oaks2014dpp}.
-However, given the bias and sensitivity to priors exhibited by the ABC
+However, given the biases and sensitivity to priors exhibited by the ABC
 methods even when migration is ignored
 \citep{Oaks2012,Oaks2014reply,Oaks2014dpp},
 modeling migration with these methods is not advisable without thorough

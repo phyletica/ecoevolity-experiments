@@ -1,3 +1,45 @@
+\siFigure{../../../simulations/validation/plots/leaf-pop-size-scatter.pdf}{
+    The accuracy and precision of estimates of the descendant population sizes
+    (scaled by the mutation rate), when data are simulated and analyzed under
+    the same model (i.e., no model misspecification).
+    The columns show the
+    results from different distributions on the relative effective size of the
+    ancestral population, decreasing in variance from left to right.
+    For the first two and last two rows, the simulated character matrix for
+    each population had 500,000 and 100,000 characters, respectively.
+    The first and third rows show the results of analyses using all characters,
+    whereas the second and fourth rows show the results when only variable
+    characters are used.
+    Each plotted circle and associated error bars represent the posterior mean
+    and 95\% credibility interval for the time that a pair of populations
+    diverged.
+    Each plot consists of 1500 estimates---500 simulated \datasets, each with
+    three pairs of populations.
+    \accuracyscatterplotannotations{\epopsize{}}
+    \weusedmatplotlib
+}{fig:valleafsizes}
+
+\siFigure{../../../simulations/validation/plots/root-pop-size-scatter.pdf}{
+    The accuracy and precision of estimates of the ancestral population size
+    (scaled by the mutation rate), when data are simulated and analyzed under
+    the same model (i.e., no model misspecification).
+    The columns show the
+    results from different distributions on the relative effective size of the
+    ancestral population, decreasing in variance from left to right.
+    For the first two and last two rows, the simulated character matrix for
+    each population had 500,000 and 100,000 characters, respectively.
+    The first and third rows show the results of analyses using all characters,
+    whereas the second and fourth rows show the results when only variable
+    characters are used.
+    Each plotted circle and associated error bars represent the posterior mean
+    and 95\% credibility interval for the time that a pair of populations
+    diverged.
+    Each plot consists of 1500 estimates---500 simulated \datasets, each with
+    three pairs of populations.
+    \accuracyscatterplotannotations{\epopsize{}}
+    \weusedmatplotlib
+}{fig:valrootsizes}
+
 \siFigure{../../../simulations/validation/plots/number-of-variable-sites-100k-histograms.pdf}{
     The number of variable characters in the simulated \datasets with 100,000
     unlinked and unfiltered characters per pair of populations.
@@ -64,72 +106,6 @@
     \validationfiguregriddescription
     \weusedmatplotlib
 }{fig:valessvserror}
-
-
-\siFigure{../../../simulations/validation/plots/leaf-pop-size-scatter.pdf}{
-    The accuracy and precision of estimates of the descendant population sizes
-    (scaled by the mutation rate), when data are simulated and analyzed under
-    the same model (i.e., no model misspecification).
-    The columns show the
-    results from different distributions on the relative effective size of the
-    ancestral population, decreasing in variance from left to right.
-    For the first two and last two rows, the simulated character matrix for
-    each population had 500,000 and 100,000 characters, respectively.
-    The first and third rows show the results of analyses using all characters,
-    whereas the second and fourth rows show the results when only variable
-    characters are used.
-    Each plotted circle and associated error bars represent the posterior mean
-    and 95\% credibility interval for the time that a pair of populations
-    diverged.
-    Each plot consists of 1500 estimates---500 simulated \datasets, each with
-    three pairs of populations.
-    \accuracyscatterplotannotations{\epopsize{}}
-    \weusedmatplotlib
-}{fig:valleafsizes}
-
-\siFigure{../../../simulations/validation/plots/root-pop-size-scatter.pdf}{
-    The accuracy and precision of estimates of the ancestral population size
-    (scaled by the mutation rate), when data are simulated and analyzed under
-    the same model (i.e., no model misspecification).
-    The columns show the
-    results from different distributions on the relative effective size of the
-    ancestral population, decreasing in variance from left to right.
-    For the first two and last two rows, the simulated character matrix for
-    each population had 500,000 and 100,000 characters, respectively.
-    The first and third rows show the results of analyses using all characters,
-    whereas the second and fourth rows show the results when only variable
-    characters are used.
-    Each plotted circle and associated error bars represent the posterior mean
-    and 95\% credibility interval for the time that a pair of populations
-    diverged.
-    Each plot consists of 1500 estimates---500 simulated \datasets, each with
-    three pairs of populations.
-    \accuracyscatterplotannotations{\epopsize{}}
-    \weusedmatplotlib
-}{fig:valrootsizes}
-
-
-\siFigure{../../../simulations/validation/plots/linkage-100k-number-of-variable-sites-histograms.pdf}{
-    The number of variable characters in the simulated \datasets with 100,000
-    characters per pair of populations that were linked in loci of length (left
-    column) 100, (middle column) 500, and (right column) 1000 sites.
-    The first row shows all the variable sites, whereas the second row shows
-    when at most one variable site per locus is randomly choosen.
-    The mean and range across the 500 \datasets is indicated
-    in the upper right corner of each plot.
-    \weusedmatplotlib
-}{fig:linkagenumberofvariablesites100k}
-
-\siFigure{../../../simulations/validation/plots/linkage-500k-number-of-variable-sites-histograms.pdf}{
-    The number of variable characters in the simulated \datasets with 500,000
-    characters per pair of populations that were linked in loci of length (left
-    column) 100, (middle column) 500, and (right column) 1000 sites.
-    The first row shows all the variable sites, whereas the second row shows
-    when at most one variable site per locus is randomly choosen.
-    The mean and range across the 500 \datasets is indicated
-    in the upper right corner of each plot.
-    \weusedmatplotlib
-}{fig:linkagenumberofvariablesites500k}
 
 \siFigure{../../../simulations/validation/plots/linkage-100k-div-time-scatter.pdf}{
     Assessing the affect of linked sites on the
@@ -209,6 +185,29 @@
     \neventplotannotations
     \weusedmatplotlib
 }{fig:linkagenevents100k}
+
+
+\siFigure{../../../simulations/validation/plots/linkage-100k-number-of-variable-sites-histograms.pdf}{
+    The number of variable characters in the simulated \datasets with 100,000
+    characters per pair of populations that were linked in loci of length (left
+    column) 100, (middle column) 500, and (right column) 1000 sites.
+    The first row shows all the variable sites, whereas the second row shows
+    when at most one variable site per locus is randomly choosen.
+    The mean and range across the 500 \datasets is indicated
+    in the upper right corner of each plot.
+    \weusedmatplotlib
+}{fig:linkagenumberofvariablesites100k}
+
+\siFigure{../../../simulations/validation/plots/linkage-500k-number-of-variable-sites-histograms.pdf}{
+    The number of variable characters in the simulated \datasets with 500,000
+    characters per pair of populations that were linked in loci of length (left
+    column) 100, (middle column) 500, and (right column) 1000 sites.
+    The first row shows all the variable sites, whereas the second row shows
+    when at most one variable site per locus is randomly choosen.
+    The mean and range across the 500 \datasets is indicated
+    in the upper right corner of each plot.
+    \weusedmatplotlib
+}{fig:linkagenumberofvariablesites500k}
 
 
 \siFigure{../../../simulations/validation/plots/missing-data-leaf-pop-size-scatter.pdf}{
