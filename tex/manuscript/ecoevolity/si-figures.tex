@@ -1,7 +1,7 @@
 \siFigure{../../../simulations/validation/plots/leaf-pop-size-scatter.pdf}{
-    The accuracy and precision of estimates of the descendant population sizes
-    (scaled by the mutation rate), when data are simulated and analyzed under
-    the same model (i.e., no model misspecification).
+    The accuracy and precision of estimates of the descendant (leaf) population
+    sizes (scaled by the mutation rate), when data are simulated and analyzed
+    under the same model (i.e., no model misspecification).
     The columns show the
     results from different distributions on the relative effective size of the
     ancestral population, decreasing in variance from left to right.
@@ -11,18 +11,17 @@
     whereas the second and fourth rows show the results when only variable
     characters are used.
     Each plotted circle and associated error bars represent the posterior mean
-    and 95\% credibility interval for the time that a pair of populations
-    diverged.
-    Each plot consists of 1500 estimates---500 simulated \datasets, each with
+    and 95\% credibility interval.
+    Each plot consists of 3000 estimates---500 simulated \datasets, each with
     three pairs of populations.
-    \accuracyscatterplotannotations{\epopsize{}}
+    \accuracyscatterplotannotations{\epopsize{}\murate{}}
     \weusedmatplotlib
 }{fig:valleafsizes}
 
 \siFigure{../../../simulations/validation/plots/root-pop-size-scatter.pdf}{
-    The accuracy and precision of estimates of the ancestral population size
-    (scaled by the mutation rate), when data are simulated and analyzed under
-    the same model (i.e., no model misspecification).
+    The accuracy and precision of estimates of the ancestral (root) population
+    size (scaled by the mutation rate), when data are simulated and analyzed
+    under the same model (i.e., no model misspecification).
     The columns show the
     results from different distributions on the relative effective size of the
     ancestral population, decreasing in variance from left to right.
@@ -32,11 +31,10 @@
     whereas the second and fourth rows show the results when only variable
     characters are used.
     Each plotted circle and associated error bars represent the posterior mean
-    and 95\% credibility interval for the time that a pair of populations
-    diverged.
+    and 95\% credibility interval.
     Each plot consists of 1500 estimates---500 simulated \datasets, each with
     three pairs of populations.
-    \accuracyscatterplotannotations{\epopsize{}}
+    \accuracyscatterplotannotations{\epopsize{}\murate{}}
     \weusedmatplotlib
 }{fig:valrootsizes}
 
@@ -81,7 +79,7 @@
 }{fig:valpsrfdivtimes}
 
 \siFigure{../../../simulations/validation/plots/ess-ln-likelihood-histograms.pdf}{
-    Histogram of the estimated effective samples sizes \citep{Gong2014} for the
+    Histogram of the estimated effective sample sizes \citep{Gong2014} for the
     log likelihood across the three MCMC chains run for each simulated
     \dataset.
     \validationfiguregriddescription
@@ -91,7 +89,7 @@
 }{fig:valesslikelihood}
 
 \siFigure{../../../simulations/validation/plots/ess-div-time-histograms.pdf}{
-    Histogram of the estimated effective samples sizes \citep{Gong2014} for the
+    Histogram of the estimated effective sample sizes \citep{Gong2014} for the
     divergence times across the three MCMC chains run for each simulated
     \dataset.
     \validationfiguregriddescription
@@ -101,7 +99,7 @@
 }{fig:valessdivtimes}
 
 \siFigure{../../../simulations/validation/plots/div-time-ess-vs-error-scatter.pdf}{
-    Plots of the estimated effective samples sizes \citep{Gong2014} for the
+    Plots of the estimated effective sample sizes \citep{Gong2014} for the
     divergence times against absolute error of the divergence-time estimates.
     \validationfiguregriddescription
     \weusedmatplotlib
@@ -123,53 +121,57 @@
 
 \siFigure{../../../simulations/validation/plots/linkage-100k-leaf-pop-size-scatter.pdf}{
     Assessing the affect of linked sites on the accuracy and precision of
-    estimates of descendant population sizes (scaled by the mutation rate).
+    estimates of descendant (leaf) population sizes (scaled by the mutation
+    rate).
     The columns, from left to right, show the results when loci are simulated
     with 100, 500, and 1000 linked sites.
     For each simulated \dataset, each of three population pairs has
     100,000 sites total.
     The rows show the results when (top) all sites, (middle) all variable
     sites, and (bottom) at most one variable site per locus are analyzed.
-    \accuracyscatterplotannotations{\epopsize{}}
+    \accuracyscatterplotannotations{\epopsize{}\murate{}}
     \weusedmatplotlib
 }{fig:linkageleafsizes100k}
 
 \siFigure{../../../simulations/validation/plots/linkage-500k-leaf-pop-size-scatter.pdf}{
     Assessing the affect of linked sites on the accuracy and precision of
-    estimates of descendant population sizes (scaled by the mutation rate).
+    estimates of descendant (leaf) population sizes (scaled by the mutation
+    rate).
     The columns, from left to right, show the results when loci are simulated
     with 100, 500, and 1000 linked sites.
     For each simulated \dataset, each of three population pairs has
     500,000 sites total.
     The rows show the results when (top) all sites, (middle) all variable
     sites, and (bottom) at most one variable site per locus are analyzed.
-    \accuracyscatterplotannotations{\epopsize{}}
+    \accuracyscatterplotannotations{\epopsize{}\murate{}}
     \weusedmatplotlib
 }{fig:linkageleafsizes500k}
 
 \siFigure{../../../simulations/validation/plots/linkage-100k-root-pop-size-scatter.pdf}{
     Assessing the affect of linked sites on the accuracy and precision of
-    estimates of ancestral population size (scaled by the mutation rate).
+    estimates of ancestral (root) population size (scaled by the mutation
+    rate).
     The columns, from left to right, show the results when loci are simulated
     with 100, 500, and 1000 linked sites.
     For each simulated \dataset, each of three population pairs has
     100,000 sites total.
     The rows show the results when (top) all sites, (middle) all variable
     sites, and (bottom) at most one variable site per locus are analyzed.
-    \accuracyscatterplotannotations{\epopsize{}}
+    \accuracyscatterplotannotations{\epopsize{}\murate{}}
     \weusedmatplotlib
 }{fig:linkagerootsizes100k}
 
 \siFigure{../../../simulations/validation/plots/linkage-500k-root-pop-size-scatter.pdf}{
     Assessing the affect of linked sites on the accuracy and precision of
-    estimates of ancestral population size (scaled by the mutation rate).
+    estimates of ancestral (root) population size (scaled by the mutation
+    rate).
     The columns, from left to right, show the results when loci are simulated
     with 100, 500, and 1000 linked sites.
     For each simulated \dataset, each of three population pairs has
     500,000 sites total.
     The rows show the results when (top) all sites, (middle) all variable
     sites, and (bottom) at most one variable site per locus are analyzed.
-    \accuracyscatterplotannotations{\epopsize{}}
+    \accuracyscatterplotannotations{\epopsize{}\murate{}}
     \weusedmatplotlib
 }{fig:linkagerootsizes500k}
 
@@ -212,26 +214,27 @@
 
 \siFigure{../../../simulations/validation/plots/missing-data-leaf-pop-size-scatter.pdf}{
     Assessing the affect of missing data on the the accuracy and precision of
-    estimates of descendant population sizes (scaled by the mutation rate).
+    estimates of descendant (leaf) population sizes (scaled by the mutation
+    rate).
     The columns, from left to right, show the results when each simulated
     500,000-character matrix has approximately 0\%, 10\%, 25\%, and 50\%
     missing cells.
     The rows show the results when (top) all sites and (bottom) only variable
     sites are analyzed.
-    \accuracyscatterplotannotations{\epopsize{}}
+    \accuracyscatterplotannotations{\epopsize{}\murate{}}
     All simulated \datasets had three pairs of populations.
     \weusedmatplotlib
 }{fig:missingleafsizes}
 
 \siFigure{../../../simulations/validation/plots/missing-data-root-pop-size-scatter.pdf}{
     Assessing the affect of missing data on the the accuracy and precision of
-    estimating ancestral population size (scaled by the mutation rate).
+    estimating ancestral (root) population size (scaled by the mutation rate).
     The columns, from left to right, show the results when each simulated
     500,000-character matrix has approximately 0\%, 10\%, 25\%, and 50\%
     missing cells.
     The rows show the results when (top) all sites and (bottom) only variable
     sites are analyzed.
-    \accuracyscatterplotannotations{\epopsize{}}
+    \accuracyscatterplotannotations{\epopsize{}\murate{}}
     All simulated \datasets had three pairs of populations.
     \weusedmatplotlib
 }{fig:missingrootsizes}
@@ -239,68 +242,66 @@
 
 \siFigure{../../../simulations/validation/plots/filtered-data-leaf-pop-size-scatter.pdf}{
     Assessing the affect of an acquisition bias against rare allele patterns on
-    the accuracy and precision of estimating descendant population sizes
+    the accuracy and precision of estimating descendant (leaf) population sizes
     (scaled by the mutation rate).
     The columns, from left to right, show the results when each simulated
     500,000-character \dataset has a probability of 100\%, 80\%, 60\%, and 40\%
     of sampling each simulated singleton pattern.
-    I.e., each character matrix analyzed in the far right column is missing
+    E.g., each character matrix analyzed in the far right column is missing
     approximately 60\% of characters where all but one gene copy has the same
     allele.
     The rows show the results when (top) all sites and (bottom) only variable
     sites are analyzed.
-    \accuracyscatterplotannotations{\epopsize{}}
+    \accuracyscatterplotannotations{\epopsize{}\murate{}}
     All simulated \datasets had three pairs of populations.
     \weusedmatplotlib
 }{fig:filteredleafsizes}
 
 \siFigure{../../../simulations/validation/plots/filtered-data-root-pop-size-scatter.pdf}{
     Assessing the affect of an acquisition bias against rare allele patterns on
-    the accuracy and precision of estimating ancestral population size
+    the accuracy and precision of estimating ancestral (root) population size
     (scaled by the mutation rate).
     The columns, from left to right, show the results when each simulated
     500,000-character \dataset has a probability of 100\%, 80\%, 60\%, and 40\%
     of sampling each simulated singleton pattern.
-    I.e., each character matrix analyzed in the far right column is missing
+    E.g., each character matrix analyzed in the far right column is missing
     approximately 60\% of characters where all but one gene copy has the same
     allele.
     The rows show the results when (top) all sites and (bottom) only variable
     sites are analyzed.
-    \accuracyscatterplotannotations{\epopsize{}}
+    \accuracyscatterplotannotations{\epopsize{}\murate{}}
     All simulated \datasets had three pairs of populations.
     \weusedmatplotlib
 }{fig:filteredrootsizes}
 
 
 \siFigure{../../../bake-off/plots/leaf-population-size-scatter.pdf}{
-    Comparing the accuracy and precision of estimates of the descendant
+    Comparing the accuracy and precision of estimates of the descendant (leaf)
     population sizes between (left) the new full-likelihood Bayesian method,
     \ecoevolity, and (right) the approximate-likelihood Bayesian method,
     \dppmsbayes.
     Each plotted circle and associated error bars represent the posterior mean
-    and 95\% credibility interval for the time that a pair of populations
-    diverged.
-    Each plot consists of 1500 estimates---500 simulated \datasets, each with
+    and 95\% credibility interval.
+    Each plot consists of 3000 estimates---500 simulated \datasets, each with
     three pairs of populations.
     The simulated character matrix for each population pair consisted of 200 loci,
     each with 200 linked sites (40,000 characters total).
-    \accuracyscatterplotannotations{\comparisondivtime{}}
+    \accuracyscatterplotannotations{\epopsize{}\murate{}}
     \weusedmatplotlib
 }{fig:bakeoffleafsizes}
 
 \siFigure{../../../bake-off/plots/root-population-size-scatter.pdf}{
-    Comparing the accuracy and precision of estimates of the ancestral 
+    Comparing the accuracy and precision of estimates of the ancestral (root)
     population size between (left) the new full-likelihood Bayesian method,
     \ecoevolity, and (right) the approximate-likelihood Bayesian method,
     \dppmsbayes.
     Each plotted circle and associated error bars represent the posterior mean
-    and 95\% credibility interval for the time that a pair of populations
-    diverged.
+    and 95\% credibility interval.
     Each plot consists of 1500 estimates---500 simulated \datasets, each with
     three pairs of populations.
     The simulated character matrix for each population pair consisted of 200 loci,
     each with 200 linked sites (40,000 characters total).
-    \accuracyscatterplotannotations{\comparisondivtime{}}
+    \accuracyscatterplotannotations{\epopsize{}\murate{}}
     \weusedmatplotlib
 }{fig:bakeoffrootsizes}
 
@@ -308,7 +309,7 @@
 \siFigure{../../../gekko-results/sumevents-nopoly.pdf}{
     The prior (light bars) and approximated posterior (dark bars) probabilities
     of the number of divergence events across \spp{Gekko} pairs of populations,
-    under eight different combinations of priors on the divergence times (rows)
+    under eight different combinations of prior on the divergence times (rows)
     and the concentration parameter of the Dirichlet process (columns).
     For these analyses, constant characters were included, but all characters
     with more than two alleles were removed.
@@ -322,7 +323,7 @@
 \siFigure{../../../gekko-results/sumsizes.pdf}{
     The approximate marginal posterior densities of population sizes for each
     \spp{Gekko} pair of populations,
-    under eight different combinations of priors on the divergence times (rows)
+    under eight different combinations of prior on the divergence times (rows)
     and the concentration parameter of the Dirichlet process (columns).
     For these analyses, constant characters were included, but all characters
     with more than two alleles were recoded as biallelic.
@@ -332,7 +333,7 @@
 \siFigure{../../../gekko-results/sumtimes-nopoly.pdf}{
     The approximate marginal posterior densities of divergence times for each
     \spp{Gekko} pair of populations,
-    under eight different combinations of priors on the divergence times (rows)
+    under eight different combinations of prior on the divergence times (rows)
     and the concentration parameter of the Dirichlet process (columns).
     For these analyses, constant characters were included, but all characters
     with more than two alleles were removed.
@@ -342,7 +343,7 @@
 \siFigure{../../../gekko-results/sumsizes-nopoly.pdf}{
     The approximate marginal posterior densities of population sizes for each
     \spp{Gekko} pair of populations,
-    under eight different combinations of priors on the divergence times (rows)
+    under eight different combinations of prior on the divergence times (rows)
     and the concentration parameter of the Dirichlet process (columns).
     For these analyses, constant characters were included, but all characters
     with more than two alleles were removed.
@@ -352,7 +353,7 @@
 \siFigure{../../../gekko-results/sumtimes-varonly.pdf}{
     The approximate marginal posterior densities of divergence times for each
     \spp{Gekko} pair of populations,
-    under eight different combinations of priors on the divergence times (rows)
+    under eight different combinations of prior on the divergence times (rows)
     and the concentration parameter of the Dirichlet process (columns).
     For these analyses, constant characters were excluded, and all characters
     with more than two alleles were recoded as biallelic.
@@ -362,7 +363,7 @@
 \siFigure{../../../gekko-results/sumsizes-varonly.pdf}{
     The approximate marginal posterior densities of population sizes for each
     \spp{Gekko} pair of populations,
-    under eight different combinations of priors on the divergence times (rows)
+    under eight different combinations of prior on the divergence times (rows)
     and the concentration parameter of the Dirichlet process (columns).
     For these analyses, constant characters were excluded, and all characters
     with more than two alleles were recoded as biallelic.
@@ -372,7 +373,7 @@
 \siFigure{../../../gekko-results/sumevents-varonly.pdf}{
     The prior (light bars) and approximated posterior (dark bars) probabilities
     of the number of divergence events across \spp{Gekko} pairs of populations,
-    under eight different combinations of priors on the divergence times (rows)
+    under eight different combinations of prior on the divergence times (rows)
     and the concentration parameter of the Dirichlet process (columns).
     For these analyses, constant characters were excluded, and all characters
     with more than two alleles were recoded as biallelic.
@@ -386,7 +387,7 @@
 \siFigure{../../../gekko-results/sumtimes-nopoly-varonly.pdf}{
     The approximate marginal posterior densities of divergence times for each
     \spp{Gekko} pair of populations,
-    under eight different combinations of priors on the divergence times (rows)
+    under eight different combinations of prior on the divergence times (rows)
     and the concentration parameter of the Dirichlet process (columns).
     For these analyses, constant characters and all characters
     with more than two alleles were removed.
@@ -396,7 +397,7 @@
 \siFigure{../../../gekko-results/sumsizes-nopoly-varonly.pdf}{
     The approximate marginal posterior densities of population sizes for each
     \spp{Gekko} pair of populations,
-    under eight different combinations of priors on the divergence times (rows)
+    under eight different combinations of prior on the divergence times (rows)
     and the concentration parameter of the Dirichlet process (columns).
     For these analyses, constant characters and all characters
     with more than two alleles were removed.
@@ -406,7 +407,7 @@
 \siFigure{../../../gekko-results/sumevents-nopoly-varonly.pdf}{
     The prior (light bars) and approximated posterior (dark bars) probabilities
     of the number of divergence events across \spp{Gekko} pairs of populations,
-    under eight different combinations of priors on the divergence times (rows)
+    under eight different combinations of prior on the divergence times (rows)
     and the concentration parameter of the Dirichlet process (columns).
     For these analyses, constant characters and all characters
     with more than two alleles were removed.
