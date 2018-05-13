@@ -13,7 +13,7 @@
 \newcounter{cparametercounter}
 \newcommand{\constantparameter}[1][]{%
     \stepcounter{cparametercounter}%
-    \ensuremath{p^{#1}_{\arabic{cparametercounter}}}\xspace}
+    \ensuremath{\mathbf{p}^{#1}_{\arabic{cparametercounter}}}\xspace}
 
 \begin{document}
 
@@ -48,15 +48,18 @@
             ]
 
     \node[stochastic] (conc) {\concentration};
-    \node (abconcspace) [above of = conc] {};
+    % \node (abconcspace) [above of = conc] {};
     % \node[constant] (aconc) [left=3mm of abconcspace] {$a_{\concentration}$};
     % \node[constant] (bconc) [right=3mm of abconcspace] {$b_{\concentration}$};
     % \node[constant] (atime) [left of = conc] {$a_{\divtime}$};
     % \node[constant] (btime) [right of = conc] {$b_{\divtime}$};
-    \node[constant] (aconc) [left=3mm of abconcspace] {\constantparameter};
-    \node[constant] (bconc) [right=3mm of abconcspace] {\constantparameter};
-    \node[constant] (atime) [left of = conc] {\constantparameter};
-    \node[constant] (btime) [right of = conc] {\constantparameter};
+    % \node[constant] (aconc) [left=3mm of abconcspace] {\constantparameter};
+    % \node[constant] (bconc) [right=3mm of abconcspace] {\constantparameter};
+    \node[constant] (pconc) [above of = conc] {\constantparameter};
+    % \node[constant] (atime) [left of = conc] {\constantparameter};
+    % \node[constant] (btime) [right of = conc] {\constantparameter};
+    % \node[constant] (ptime) [left of = conc] {\constantparameter};
+    \node[constant] (ptime) [left of = conc] {\basedistribution};
     \node[longstochastic] (times) [below of = conc] {$\comparisondivtime[1], \ldots, \comparisondivtime[\ncomparisons]$};
 
     \node (sptree3above) [below of = times] {};
@@ -77,11 +80,12 @@
     \node[stochastic] (leaf1popsize1) [above of = rootpopsize1] {\epopsize[\descendantpopindex{1}]};
     \node[stochastic] (leaf2popsize1) [right of = leaf1popsize1] {\epopsize[\descendantpopindex{2}]};
     \node[stochastic] (relrootsize1) [left of = leaf1popsize1] {\rootrelativepopsize};
-    \node (relrootsize1above) [above of = relrootsize1] {};
+    % \node (relrootsize1above) [above of = relrootsize1] {};
     % \node[constant] (arelsize1) [left=1mm of relrootsize1above] {$a^1_{\rootrelativepopsize}$};
     % \node[constant] (brelsize1) [right=1mm of relrootsize1above] {$b^1_{\rootrelativepopsize}$};
-    \node[constant] (arelsize1) [left=1mm of relrootsize1above] {\constantparameter};
-    \node[constant] (brelsize1) [right=1mm of relrootsize1above] {\constantparameter};
+    % \node[constant] (arelsize1) [left=1mm of relrootsize1above] {\constantparameter};
+    % \node[constant] (brelsize1) [right=1mm of relrootsize1above] {\constantparameter};
+    \node[constant] (prelsize1) [above of = relrootsize1] {\constantparameter};
 
     \node (sptreenaboveabove) [above of = sptreenabove] {};
     \node[deterministic] (rootpopsizen) [right of = sptreenaboveabove] {\epopsize[\rootpopindex]};
@@ -91,18 +95,23 @@
     \node (relrootsizenabove) [above of = relrootsizen] {};
     % \node[constant] (arelsizen) [left=1mm of relrootsizenabove] {$a^{\ncomparisons}_{\rootrelativepopsize}$};
     % \node[constant] (brelsizen) [right=1mm of relrootsizenabove] {$b^{\ncomparisons}_{\rootrelativepopsize}$};
-    \node[constant] (arelsizen) [left=1mm of relrootsizenabove] {\constantparameter};
-    \node[constant] (brelsizen) [right=1mm of relrootsizenabove] {\constantparameter};
+    % \node[constant] (arelsizen) [left=1mm of relrootsizenabove] {\constantparameter};
+    % \node[constant] (brelsizen) [right=1mm of relrootsizenabove] {\constantparameter};
+    \node[constant] (prelsizen) [above of = relrootsizen] {\constantparameter};
 
     % \node[constant] (apopsize1) [above of = leaf1popsize1] {$a^1_{\epopsize[\descendantpopindex{}]}$};
     % \node[constant] (bpopsize1) [above of = leaf2popsize1] {$b^1_{\epopsize[\descendantpopindex{}]}$};
-    \node[constant] (apopsize1) [above of = leaf1popsize1] {\constantparameter};
-    \node[constant] (bpopsize1) [above of = leaf2popsize1] {\constantparameter};
+    % \node[constant] (apopsize1) [above of = leaf1popsize1] {\constantparameter};
+    % \node[constant] (bpopsize1) [above of = leaf2popsize1] {\constantparameter};
+    \node (popsizespace1) [above of = leaf1popsize1] {};
+    \node[constant] (ppopsize1) [right=5mm of popsizespace1] {\constantparameter};
 
     % \node[constant] (bpopsizen) [above of = leaf1popsizen] {$b^{\ncomparisons}_{\epopsize[\descendantpopindex{}]}$};
     % \node[constant] (apopsizen) [above of = leaf2popsizen] {$a^{\ncomparisons}_{\epopsize[\descendantpopindex{}]}$};
-    \node[constant] (apopsizen) [above of = leaf2popsizen] {\constantparameter};
-    \node[constant] (bpopsizen) [above of = leaf1popsizen] {\constantparameter};
+    % \node[constant] (apopsizen) [above of = leaf2popsizen] {\constantparameter};
+    % \node[constant] (bpopsizen) [above of = leaf1popsizen] {\constantparameter};
+    \node (popsizespacen) [above of = leaf1popsizen] {};
+    \node[constant] (ppopsizen) [left=5mm of popsizespacen] {\constantparameter};
 
     \node (gfreq1above) [left of = sptree1above] {};
     \node (murate1above) [left of = gfreq1above] {};
@@ -120,31 +129,35 @@
 
     \node[clamped] (patternn) [below of = gfreqn] {$\leafallelecounts, \leafredallelecounts$};
 
-    \node (gfreq1above) [above=8mm of gfreq1] {};
+    % \node (gfreq1above) [above=8mm of gfreq1] {};
     % \node[constant] (agfreq1) [left=0mm of gfreq1above] {$a^1_{\gfreq}$};
     % \node[constant] (bgfreq1) [right=0mm of gfreq1above] {$b^1_{\gfreq}$};
-    \node[constant] (agfreq1) [left=0mm of gfreq1above] {\constantparameter};
-    \node[constant] (bgfreq1) [right=0mm of gfreq1above] {\constantparameter};
+    % \node[constant] (agfreq1) [left=0mm of gfreq1above] {\constantparameter};
+    % \node[constant] (bgfreq1) [right=0mm of gfreq1above] {\constantparameter};
+    \node[constant] (pgfreq1) [above=8mm of gfreq1] {\constantparameter};
 
-    \node (gfreqnabove) [above=8mm of gfreqn] {};
+    % \node (gfreqnabove) [above=8mm of gfreqn] {};
     % \node[constant] (agfreqn) [left=0mm of gfreqnabove] {$a^{\ncomparisons}_{\gfreq}$};
     % \node[constant] (bgfreqn) [right=0mm of gfreqnabove] {$b^{\ncomparisons}_{\gfreq}$};
-    \node[constant] (agfreqn) [left=0mm of gfreqnabove] {\constantparameter};
-    \node[constant] (bgfreqn) [right=0mm of gfreqnabove] {\constantparameter};
+    % \node[constant] (agfreqn) [left=0mm of gfreqnabove] {\constantparameter};
+    % \node[constant] (bgfreqn) [right=0mm of gfreqnabove] {\constantparameter};
+    \node[constant] (pgfreqn) [above=8mm of gfreqn] {\constantparameter};
 
     % \node[constant] (bmurate1) [left=3mm of agfreq1] {$b^1_{\murate}$};
     % \node[constant] (amurate1) [left=2mm of bmurate1] {$a^1_{\murate}$};
-    \node[constant] (bmurate1) [left=3mm of agfreq1] {\constantparameter};
-    \node[constant] (amurate1) [left=2mm of bmurate1] {\constantparameter};
+    % \node[constant] (bmurate1) [left=3mm of agfreq1] {\constantparameter};
+    % \node[constant] (amurate1) [left=2mm of bmurate1] {\constantparameter};
+    \node[constant] (pmurate1) [above=8mm of murate1] {\constantparameter};
 
     % \node[constant] (amuraten) [right=3mm of bgfreqn] {$a^{\ncomparisons}_{\murate}$};
     % \node[constant] (bmuraten) [right=2mm of amuraten] {$b^{\ncomparisons}_{\murate}$};
-    \node[constant] (amuraten) [right=3mm of bgfreqn] {\constantparameter};
-    \node[constant] (bmuraten) [right=2mm of amuraten] {\constantparameter};
+    % \node[constant] (amuraten) [right=3mm of bgfreqn] {\constantparameter};
+    % \node[constant] (bmuraten) [right=2mm of amuraten] {\constantparameter};
+    \node[constant] (pmuraten) [above=8mm of muraten] {\constantparameter};
 
 
     % Key
-    \node[constant] (keyconstant) [above=0.8cm of apopsize1] {};
+    \node[constant] (keyconstant) [above=0.8cm of popsizespace1] {};
     \node[dot] (keyconstanttext) [right=2mm of keyconstant] {\sffamily Constant node};
     \node[stochastic] (keystochastic) [right=4mm of keyconstanttext] {}; 
     \node[dot] (keystochastictext) [right=2mm of keystochastic] {\sffamily Stochastic node};
@@ -154,11 +167,11 @@
     \node[dot] (keyclampedtext) [right=2mm of keyclamped] {\sffamily Data node};
 
 
-    \draw[dedge] (aconc) -- (conc);
-    \draw[dedge] (bconc) -- (conc);
+    \draw[dedge] (pconc) -- (conc);
+    % \draw[dedge] (bconc) -- (conc);
     \draw[dedge] (conc) -- (times);
-    \draw[dedge] (atime) -- (times);
-    \draw[dedge] (btime) -- (times);
+    \draw[dedge] (ptime) -- (times);
+    % \draw[dedge] (btime) -- (times);
 
     \draw[dedge] (times) -- (sptree1);
     \draw[dedge] (times) -- (sptree2);
@@ -171,13 +184,13 @@
     \draw[dedge] (gfreq1) -- (pattern1);
     \draw[dedge] (murate1) -- (pattern1);
 
-    \draw[dedge] (arelsize1) -- (relrootsize1);
-    \draw[dedge] (brelsize1) -- (relrootsize1);
+    \draw[dedge] (prelsize1) -- (relrootsize1);
+    % \draw[dedge] (brelsize1) -- (relrootsize1);
 
-    \draw[dedge] (apopsize1) -- (leaf1popsize1);
-    \draw[dedge] (apopsize1) -- (leaf2popsize1);
-    \draw[dedge] (bpopsize1) -- (leaf1popsize1);
-    \draw[dedge] (bpopsize1) -- (leaf2popsize1);
+    \draw[dedge] (ppopsize1) -- (leaf1popsize1);
+    \draw[dedge] (ppopsize1) -- (leaf2popsize1);
+    % \draw[dedge] (bpopsize1) -- (leaf1popsize1);
+    % \draw[dedge] (bpopsize1) -- (leaf2popsize1);
 
     \draw[dedge] (relrootsize1) -- (rootpopsize1);
     \draw[dedge] (leaf1popsize1) -- (rootpopsize1);
@@ -187,11 +200,11 @@
     \draw[dedge] (leaf1popsize1) to [bend left, looseness=0.3] (sptree1);
     \draw[dedge] (leaf2popsize1) to [bend left, looseness=0.3] (sptree1);
 
-    \draw[dedge] (amurate1) -- (murate1);
-    \draw[dedge] (bmurate1) -- (murate1);
+    \draw[dedge] (pmurate1) -- (murate1);
+    % \draw[dedge] (bmurate1) -- (murate1);
 
-    \draw[dedge] (agfreq1) -- (gfreq1);
-    \draw[dedge] (bgfreq1) -- (gfreq1);
+    \draw[dedge] (pgfreq1) -- (gfreq1);
+    % \draw[dedge] (bgfreq1) -- (gfreq1);
 
 
     % \draw[dedge] (sptreen) to [bend right] node[left] {$\int_{\genetree}$} (patternn);
@@ -199,13 +212,13 @@
     \draw[dedge] (gfreqn) -- (patternn);
     \draw[dedge] (muraten) -- (patternn);
 
-    \draw[dedge] (arelsizen) -- (relrootsizen);
-    \draw[dedge] (brelsizen) -- (relrootsizen);
+    \draw[dedge] (prelsizen) -- (relrootsizen);
+    % \draw[dedge] (brelsizen) -- (relrootsizen);
 
-    \draw[dedge] (apopsizen) -- (leaf1popsizen);
-    \draw[dedge] (apopsizen) -- (leaf2popsizen);
-    \draw[dedge] (bpopsizen) -- (leaf1popsizen);
-    \draw[dedge] (bpopsizen) -- (leaf2popsizen);
+    \draw[dedge] (ppopsizen) -- (leaf1popsizen);
+    \draw[dedge] (ppopsizen) -- (leaf2popsizen);
+    % \draw[dedge] (bpopsizen) -- (leaf1popsizen);
+    % \draw[dedge] (bpopsizen) -- (leaf2popsizen);
 
     \draw[dedge] (relrootsizen) -- (rootpopsizen);
     \draw[dedge] (leaf1popsizen) -- (rootpopsizen);
@@ -215,11 +228,11 @@
     \draw[dedge] (leaf1popsizen) to [bend right, looseness=0.3] (sptreen);
     \draw[dedge] (leaf2popsizen) to [bend right, looseness=0.3] (sptreen);
 
-    \draw[dedge] (amuraten) -- (muraten);
-    \draw[dedge] (bmuraten) -- (muraten);
+    \draw[dedge] (pmuraten) -- (muraten);
+    % \draw[dedge] (bmuraten) -- (muraten);
 
-    \draw[dedge] (agfreqn) -- (gfreqn);
-    \draw[dedge] (bgfreqn) -- (gfreqn);
+    \draw[dedge] (pgfreqn) -- (gfreqn);
+    % \draw[dedge] (bgfreqn) -- (gfreqn);
 
 \end{tikzpicture}
 \end{document}
