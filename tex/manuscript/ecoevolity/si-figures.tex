@@ -217,11 +217,9 @@
     Assessing the affect of missing data on the the accuracy and precision of
     estimates of descendant (leaf) population sizes (scaled by the mutation
     rate).
-    The columns, from left to right, show the results when each simulated
-    500,000-character matrix has approximately 0\%, 10\%, 25\%, and 50\%
-    missing cells.
-    The rows show the results when (top) all sites and (bottom) only variable
-    sites are analyzed.
+    \missingdatafigurecolumndescription
+    \comparisoncolumndescription{S}{fig:valleafsizes}
+    \missingdatafigurerowdescription
     \accuracyscatterplotannotations{\epopsize{}\murate{}}
     All simulated \datasets had three pairs of populations.
     \weusedmatplotlib
@@ -230,11 +228,9 @@
 \siFigure{../../../simulations/validation/plots/missing-data-root-pop-size-scatter.pdf}{
     Assessing the affect of missing data on the the accuracy and precision of
     estimating ancestral (root) population size (scaled by the mutation rate).
-    The columns, from left to right, show the results when each simulated
-    500,000-character matrix has approximately 0\%, 10\%, 25\%, and 50\%
-    missing cells.
-    The rows show the results when (top) all sites and (bottom) only variable
-    sites are analyzed.
+    \missingdatafigurecolumndescription
+    \comparisoncolumndescription{S}{fig:valrootsizes}
+    \missingdatafigurerowdescription
     \accuracyscatterplotannotations{\epopsize{}\murate{}}
     All simulated \datasets had three pairs of populations.
     \weusedmatplotlib
@@ -245,14 +241,9 @@
     Assessing the affect of an acquisition bias against rare allele patterns on
     the accuracy and precision of estimating descendant (leaf) population sizes
     (scaled by the mutation rate).
-    The columns, from left to right, show the results when each simulated
-    500,000-character \dataset has a probability of 100\%, 80\%, 60\%, and 40\%
-    of sampling each simulated singleton pattern.
-    E.g., each character matrix analyzed in the far right column is missing
-    approximately 60\% of characters where all but one gene copy has the same
-    allele.
-    The rows show the results when (top) all sites and (bottom) only variable
-    sites are analyzed.
+    \filtereddatafigurecolumndescription
+    \comparisoncolumndescription{S}{fig:valleafsizes}
+    \filtereddatafigurerowdescription
     \accuracyscatterplotannotations{\epopsize{}\murate{}}
     All simulated \datasets had three pairs of populations.
     \weusedmatplotlib
@@ -262,14 +253,9 @@
     Assessing the affect of an acquisition bias against rare allele patterns on
     the accuracy and precision of estimating ancestral (root) population size
     (scaled by the mutation rate).
-    The columns, from left to right, show the results when each simulated
-    500,000-character \dataset has a probability of 100\%, 80\%, 60\%, and 40\%
-    of sampling each simulated singleton pattern.
-    E.g., each character matrix analyzed in the far right column is missing
-    approximately 60\% of characters where all but one gene copy has the same
-    allele.
-    The rows show the results when (top) all sites and (bottom) only variable
-    sites are analyzed.
+    \filtereddatafigurecolumndescription
+    \comparisoncolumndescription{S}{fig:valrootsizes}
+    \filtereddatafigurerowdescription
     \accuracyscatterplotannotations{\epopsize{}\murate{}}
     All simulated \datasets had three pairs of populations.
     \weusedmatplotlib
