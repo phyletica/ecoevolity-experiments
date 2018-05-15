@@ -1,249 +1,63 @@
-\mFigure{../../images/div-cartoon/div-cartoon.pdf}{
-    A cartoon depiction of the inference problem for three pairs of
-    insular lizard populations.
-    Three ancestral species of lizards co-occured on a paleo-island that was
-    fragmented into two islands by a rise in sea levels at \divtime[1].
-    The island fragmentation caused the second and third (from the top)
-    lineages to co-diverge; the first lineage diverged later (at \divtime[2])
-    via over-water dispersal.
-    The five possible divergence models are shown to the right, with the
-    correct model indicated.
-    The divergence-time parameters (\divtime[1] and \divtime[2])
-    and the pair-specific divergence times (\comparisondivtime[1],
-    \comparisondivtime[2], and \comparisondivtime[3])
-    are shown.
-    The third population pair shows the notation used in the text for the
-    biallelic character data
-    ($\leafallelecounts, \leafredallelecounts = (\allelecount[1],
-    \redallelecount[1]), (\allelecount[2], \redallelecount[2])$)
-    and effective sizes of the ancestral
-    (\epopsize[\rootpopindex{}]) and descendant
-    (\epopsize[\descendantpopindex{1}] and \epopsize[\descendantpopindex{2}])
-    populations.
-    The lizard silhouette for the middle pair is from pixabay.com, and the
-    other two are from phylopic.org; all were licensed under the Creative
-    Commons (CC0) 1.0 Universal Public Domain Dedication.
-}{fig:divCartoon}
+\input{fig-div-cartoon.tex}
 
-\mFigure{../../images/ecoevolity-dag-model.pdf}{
-    A directed graph representation of the model implemented in
-    \ecoevolity.
-    Each constant node represents the parameters of a prior for which the prior
-    distribution and values of the parameters can be choosen by the
-    investigator.
-    % \thought{This is so complex I don't know if it's worth it.}
-}{fig:dag}
+\clearpage
 
-\mFigure{../../../simulations/validation/plots/div-time-scatter.pdf}{
-    The accuracy and precision of divergence time estimates, in units of
-    expected subsitutions per site, when data are simulated and analyzed
-    under the same model
-    (i.e., no model misspecification).
-    \validationfiguregriddescription
-    Each plotted circle and associated error bars represent the posterior mean
-    and 95\% credibility interval for the time that a pair of populations
-    diverged.
-    Each plot consists of 1500 estimates---500 simulated \datasets, each with
-    three pairs of populations.
-    \accuracyscatterplotannotations{\comparisondivtime{}}
-    \weusedmatplotlib
-}{fig:valdivtimes}
+\input{fig-dag.tex}
 
-\mFigure{../../../simulations/validation/plots/100k-sites-est-vs-true-prob-nevent-1.pdf}{
-    Assessing frequentist behavior of divergence-model posterior probabilities
-    when there is no model misspecification.
-    20,500 \datasets were simulated and analyzed under the same model and
-    assigned to bins of width 0.2 based on the estimated posterior
-    probability of a single, shared divergence event.
-    The mean posterior probability of each bin is plotted agains the proportion
-    of \datasets in the bin for which a single, shared divergence is the
-    true model.
-    The number of \datasets within each bin is provided next to the
-    corresponding plotted point.
-    The left plot shows the results when all characters are analyzed, and the
-    right plot shows the results when only the variable characters are
-    analyzed.
-    All simulated \datasets had three pairs of populations, each with 100,000
-    characters.
-    \weusedmatplotlib
-}{fig:valpostprobs}
+\clearpage
 
-\mFigure{../../../simulations/validation/plots/nevents.pdf}{
-    The ability of the new method to estimate the number of divergence events
-    when data are simulated and analyzed
-    under the same model
-    (i.e., no model misspecification).
-    \validationfiguregriddescription
-    Each plot shows the results of the analyses of 500 simulated \datasets,
-    each with three population pairs;
-    the number of \datasets that fall within each possible cell
-    of true versus estimated numbers of events is shown, and cells with
-    more \datasets are shaded darker.
-    \neventplotannotations
-    \weusedmatplotlib
-}{fig:valnevents}
+\input{fig-val-div-times.tex}
 
+\clearpage
 
-\mFigure{../../../simulations/validation/plots/linkage-500k-div-time-scatter.pdf}{
-    Assessing the affect of linked sites on the
-    the accuracy and precision of divergence time estimates (in units of
-    expected subsitutions per site).
-    The columns, from left to right, show the results when loci are simulated
-    with 100, 500, and 1000 linked sites.
-    For each simulated \dataset, each of three population pairs has
-    500,000 sites total.
-    The rows show the results when (top) all sites, (middle) all variable
-    sites, and (bottom) at most one variable site per locus are analyzed.
-    \accuracyscatterplotannotations{\comparisondivtime{}}
-    \weusedmatplotlib
-}{fig:linkagedivtimes500k}
+\input{fig-val-post-probs.tex}
 
-\mFigure{../../../simulations/validation/plots/linkage-500k-nevents.pdf}{
-    Assessing the affect of linked sites on the ability of the new method to
-    estimate the number of divergence events.
-    The columns, from left to right, show the results when loci are simulated
-    with 100, 500, and 1000 linked sites.
-    For each simulated \dataset, each of three population pairs has
-    500,000 sites total.
-    The rows show the results when (top) all sites, (middle) all variable
-    sites, and (bottom) at most one variable site per locus are analyzed.
-    \neventplotannotations
-    \weusedmatplotlib
-}{fig:linkagenevents500k}
+\clearpage
 
-\mFigure{../../../simulations/validation/plots/linkage-100-100k-sites-est-vs-true-prob-nevent-1.pdf}{
-    Assessing the affect of linked sites on the frequentist behavior of
-    divergence-model posterior probabilities.
-    10,500 \datasets were simulated such that each of three population pairs
-    has 1000 loci, each with 100 linked sites (100,000 sites total).
-    Each simulated \dataset is assigned to a bin of width 0.2 based on the
-    estimated posterior probability of a single, shared divergence event.
-    The mean posterior probability of each bin is plotted agains the proportion
-    of \datasets in the bin for which a single, shared divergence is the
-    true model.
-    The number of \datasets within each bin is provided next to the
-    corresponding plotted point.
-    The plots show the results when (left) all characters, (middle) all
-    variable characters, and (right) at most one variable character per locus
-    is analyzed.
-    \weusedmatplotlib
-}{fig:linkagepostprobs}
+\input{fig-val-nevents.tex}
 
+\clearpage
 
-\mFigure{../../../simulations/validation/plots/missing-data-div-time-scatter.pdf}{
-    Assessing the affect of missing data on the
-    the accuracy and precision of divergence time estimates (in units of
-    expected subsitutions per site).
-    The columns, from left to right, show the results when each simulated
-    500,000-character matrix has approximately 0\%, 10\%, 25\%, and 50\%
-    missing cells.
-    The rows show the results when (top) all sites and (bottom) only variable
-    sites are analyzed.
-    \accuracyscatterplotannotations{\comparisondivtime{}}
-    All simulated \datasets had three pairs of populations.
-    \weusedmatplotlib
-}{fig:missingdivtimes}
+\input{fig-linkage-div-times-500k.tex}
 
-\mFigure{../../../simulations/validation/plots/missing-data-nevents.pdf}{
-    Assessing the affect of missing data on the ability of the new method to
-    estimate the number of divergence events.
-    The columns, from left to right, show the results when each simulated
-    500,000-character matrix has approximately 0\%, 10\%, 25\%, and 50\%
-    missing cells.
-    The rows show the results when (top) all sites and (bottom) only variable
-    sites are analyzed.
-    \neventplotannotations
-    All simulated \datasets had three pairs of populations.
-    \weusedmatplotlib
-}{fig:missingnevents}
+\clearpage
 
+\input{fig-linkage-nevents-500k.tex}
 
-\mFigure{../../../simulations/validation/plots/filtered-data-div-time-scatter.pdf}{
-    Assessing the affect of an acquisition bias against rare allele patterns on
-    the accuracy and precision of divergence time estimates (in units of
-    expected subsitutions per site).
-    The columns, from left to right, show the results when each simulated
-    500,000-character \dataset has a probability of 100\%, 80\%, 60\%, and 40\%
-    of sampling each simulated singleton pattern.
-    E.g., each character matrix analyzed in the far right column is missing
-    approximately 60\% of characters where all but one gene copy has the same
-    allele.
-    The rows show the results when (top) all sites and (bottom) only variable
-    sites are analyzed.
-    \accuracyscatterplotannotations{\comparisondivtime{}}
-    All simulated \datasets had three pairs of populations.
-    \weusedmatplotlib
-}{fig:filtereddivtimes}
+\clearpage
 
-\mFigure{../../../simulations/validation/plots/filtered-data-nevents.pdf}{
-    Assessing the affect of an acquisition bias against rare allele patterns
-    on the ability of the new method to estimate the number of divergence
-    events.
-    The columns, from left to right, show the results when each simulated
-    500,000-character \dataset has a probability of 100\%, 80\%, 60\%, and 40\%
-    of sampling each simulated singleton pattern.
-    E.g., each character matrix analyzed in the far right column is missing
-    approximately 60\% of characters where all but one gene copy has the same
-    allele.
-    The rows show the results when (top) all sites and (bottom) only variable
-    sites are analyzed.
-    \neventplotannotations
-    All simulated \datasets had three pairs of populations.
-    \weusedmatplotlib
-}{fig:filterednevents}
+\input{fig-linkage-post-probs.tex}
 
+\clearpage
 
-\mFigure{../../../bake-off/plots/divergence-time-scatter.pdf}{
-    Comparing the accuracy and precision of divergence-time estimates between
-    (left) the new full-likelihood Bayesian method, \ecoevolity, and (right)
-    the approximate-likelihood Bayesian method, \dppmsbayes.
-    Each plotted circle and associated error bars represent the posterior mean
-    and 95\% credibility interval for the time that a pair of populations
-    diverged.
-    Each plot consists of 1500 estimates---500 simulated \datasets, each with
-    three pairs of populations.
-    The simulated character matrix for each population pair consisted of 200 loci,
-    each with 200 linked sites (40,000 characters total).
-    \accuracyscatterplotannotations{\comparisondivtime{}}
-    \weusedmatplotlib
-}{fig:bakeoffdivtimes}
+\input{fig-missing-div-times.tex}
 
-\mFigure{../../../bake-off/plots/nevents.pdf}{
-    Comparing the ability to estimate the number of divergence events between
-    (left) the new full-likelihood Bayesian method, \ecoevolity, and (right)
-    the approximate-likelihood Bayesian method, \dppmsbayes.
-    Each plot shows the results of the analyses of 500 simulated \datasets;
-    the number of \datasets that fall within each possible cell
-    of true versus estimated numbers of events is shown, and cells with
-    more \datasets are shaded darker.
-    Each simulated \dataset contained three pairs of populations, and the
-    simulated character matrix for each pair consisted of 200 loci, each with
-    200 linked sites (40,000 characters total).
-    \neventplotannotations
-    \weusedmatplotlib
-}{fig:bakeoffnevents}
+\clearpage
 
+\input{fig-missing-nevents.tex}
 
-\mFigure{../../../gekko-results/sumevents.pdf}{
-    The prior (light bars) and approximated posterior (dark bars) probabilities
-    of the number of divergence events across \spp{Gekko} pairs of populations,
-    under eight different combinations of prior on the divergence times (rows)
-    and the concentration parameter of the Dirichlet process (columns).
-    For these analyses, constant characters were included, and all characters
-    with more than two alleles were recoded as biallelic.
-    The Bayes factor for each number of divergence times is given above the
-    corresponding bars.
-    Each Bayes factor compares the corresponding number of events 
-    to all other possible numbers of divergence events.
-    \weusedggplot
-}{fig:gekkonevents}
+\clearpage
 
-\mFigure{../../../gekko-results/sumtimes.pdf}{
-    The approximate marginal posterior densities of divergence times for each
-    \spp{Gekko} pair of populations,
-    under eight different combinations of prior on the divergence times (rows)
-    and the concentration parameter of the Dirichlet process (columns).
-    For these analyses, constant characters were included, and all characters
-    with more than two alleles were recoded as biallelic.
-    \weusedggridges
-}{fig:gekkodivtimes}
+\input{fig-filtered-div-times.tex}
+
+\clearpage
+
+\input{fig-filtered-nevents.tex}
+
+\clearpage
+
+\input{fig-bake-off-div-times.tex}
+
+\clearpage
+
+\input{fig-bake-off-nevents.tex}
+
+\clearpage
+
+\input{fig-gekko-nevents.tex}
+
+\clearpage
+
+\input{fig-gekko-div-times.tex}
+
+\clearpage

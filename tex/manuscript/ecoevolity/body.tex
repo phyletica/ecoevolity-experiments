@@ -31,6 +31,10 @@ whether any subsets of the taxa shared the same divergence times.
 % a robust method for inferring the temporal pattern of divergences across
 % multiple, independent lineages.
 
+\ifembed{
+\input{fig-div-cartoon.tex}
+}{}
+
 \begin{linenomath}
 If researchers are interested in comparing the divergence times among a number
 of pairs of populations,
@@ -145,6 +149,10 @@ copies of the green allele;
 Thus, for each population of a pair, and for each locus, we have a count of the
 total sampled gene copies and how many of those are the red allele.
 
+\ifembed{
+\input{../../tables/notation.tex}
+}{}
+
 We will use \leafallelecounts and \leafredallelecounts to denote allele counts
 for a locus from both populations of a pair; i.e., 
 $\leafallelecounts, \leafredallelecounts = (\allelecount[1], \redallelecount[1]), 
@@ -165,6 +173,9 @@ Note, because the pairs are unconnected
 different characters can be collected for each pair (i.e., characters do not
 need to be orthologous across the pairs).
 
+\ifembed{
+\input{fig-dag.tex}
+}{}
 
 \subsection{The model}
 
@@ -946,6 +957,10 @@ other nucleotides for that site as 1 (``red'').
 Thus, between including/excluding the constant sites and removing/re-coding the
 polyallelic characters, we analyzed four versions of the RADseq data.
 
+\ifembed{
+\input{../../tables/gekko-comparisons.tex}
+}{}
+
 To be conservative in assessing the ability of the new method to distinguish
 divergence times among the pairs, we set $\concentration = 0.44$, which places
 50\% of the prior probability on one divergence event (i.e., all four pairs
@@ -1029,6 +1044,12 @@ demonstrating that our likelihood correction for excluded constant
 characters is working correctly
 (Equation~\ref{eq:variablecomparisonlikelihood}).
 
+\ifembed{
+\input{fig-val-div-times.tex}
+
+\input{fig-val-post-probs.tex}
+}{}
+
 As expected, the precision of divergence time and population size estimates is
 greater when the constant characters are included and when there is greater
 prior information about the ancestral population size
@@ -1060,6 +1081,10 @@ When constant characters are used, the median posterior
 probability of the correct number of divergence events is high (over 0.89
 for all simulation conditions; 
 Figure~\ref{fig:valnevents}).
+
+\ifembed{
+\input{fig-val-nevents.tex}
+}{}
 
 For the \datasets simulated with 100,000 and 500,000 characters, the number of
 variable characters ranged from
@@ -1133,6 +1158,10 @@ We see the same behavior for estimating the effective sizes of the ancestral
 and descendant populations
 (Figures S\labelcref{fig:linkageleafsizes100k,fig:linkageleafsizes500k,fig:linkagerootsizes100k,fig:linkagerootsizes500k}).
 
+\ifembed{
+\input{fig-linkage-div-times-500k.tex}
+}{}
+
 The cost of removing data to avoid violating the assumption of unlinked
 characters is also very pronounced for estimating the number of divergence
 events.
@@ -1151,6 +1180,12 @@ estimated posterior probability of the one divergence model ($\nevents{} = 1$)
 However, the bias is moderate and makes the method conservative in the
 sense that it tends to underestimate the probability of shared
 divergence (Figure~\ref{fig:linkagepostprobs}).
+
+\ifembed{
+\input{fig-linkage-nevents-500k.tex}
+
+\input{fig-linkage-post-probs.tex}
+}{}
 
 For simulated \datasets with loci of length 100, 500, and 1000 base pairs, there
 were an average of 5.4, 27.1, and 54.1 variable characters per locus,
@@ -1189,6 +1224,12 @@ S\ref{fig:missingleafsizes}
 S\ref{fig:missingrootsizes}), or the number of divergence events
 (Figure~\ref{fig:missingnevents}).
 
+\ifembed{
+\input{fig-missing-div-times.tex}
+
+\input{fig-missing-nevents.tex}
+}{}
+
 
 \subsubsection{Assessing the effect of biases in character-pattern acquisition}
 
@@ -1209,6 +1250,10 @@ S\ref{fig:filteredleafsizes}
 \&
 S\ref{fig:filteredrootsizes}).
 
+\ifembed{
+\input{fig-filtered-div-times.tex}
+}{}
+
 However, in the face of data-acquisition bias, the method still estimates the
 number of divergence events well, especially when constant characters are used
 (Figure~\ref{fig:filterednevents}).
@@ -1217,6 +1262,9 @@ Even when the probability of sampling a character with a singleton pattern is
 events is 0.948.
 (Figure~\ref{fig:filterednevents}).
 
+\ifembed{
+\input{fig-filtered-nevents.tex}
+}{}
 
 \subsubsection{Comparison to ABC methods}
 
@@ -1236,6 +1284,10 @@ the ABC method, which suffers from saturated population-genetic summary
 statistics that assume an infinite-sites model of mutation
 (Figure~\ref{fig:bakeoffdivtimes}).
 
+\ifembed{
+\input{fig-bake-off-div-times.tex}
+}{}
+
 The new method also does a better job of estimating the number of divergence
 events (Figure~\ref{fig:bakeoffnevents}), with a median posterior probability
 of the correct number of events of 0.942, compared to 0.789 for the ABC method.
@@ -1243,6 +1295,10 @@ Importantly, the new method underestimates the number of events much less
 frequently (Figure~\ref{fig:bakeoffnevents}),
 which should lead to fewer erroneous interpretations of shared processes of
 divergence.
+
+\ifembed{
+\input{fig-bake-off-nevents.tex}
+}{}
 
 It is difficult to compare the computational effort between the two approaches,
 given that \ecoevolity is collecting autocorrelated samples from
@@ -1286,6 +1342,12 @@ S\ref{fig:gekkosizes},
 S\ref{fig:gekkonopolydivtimes},
 \&
 S\ref{fig:gekkonopolysizes}).
+
+\ifembed{
+\input{fig-gekko-nevents.tex}
+
+\input{fig-gekko-div-times.tex}
+}{}
 
 However, when only variable SNPs are analyzed, the behavior is much different.
 First, the estimated divergence times and population sizes are clearly far too

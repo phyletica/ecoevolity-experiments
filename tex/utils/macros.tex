@@ -32,7 +32,7 @@
 
 \newcommand{\heightFigure}[5]{\begin{figure}[htbp]
 \begin{center}
-    \includegraphics[height=#1]{#2}
+    \includegraphics[height=#1\textheight]{#2}
     \captionsetup{#3}
     \caption{#4}
     \label{#5}
@@ -51,6 +51,8 @@
 }
 
 \newcommand{\mFigure}[3]{\smartFigure{#1}{listformat=figList}{#2}{#3}\clearpage}
+\newcommand{\embedHeightFigure}[4]{\heightFigure{#1}{#2}{listformat=figList}{#3}{#4}}
+\newcommand{\embedWidthFigure}[4]{\widthFigure{#1}{#2}{listformat=figList}{#3}{#4}}
 \newcommand{\siFigure}[3]{\smartFigure{#1}{name=Figure S, labelformat=noSpace, listformat=sFigList}{#2}{#3}\clearpage}
 
 \newcommand{\validationfiguregriddescription}{The first four columns show the
