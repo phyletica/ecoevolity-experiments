@@ -349,6 +349,7 @@ def plot_nevents_estimated_vs_true_probs(
     for ax in all_axes:
         for sp in ax.spines.values():
             sp.set_visible(False)
+            sp.set_linewidth(2)
         if ax.is_first_row():
             ax.spines['top'].set_visible(True)
             ax.spines['bottom'].set_visible(True)
@@ -792,13 +793,13 @@ def plot_ess_versus_error(
                 else:
                     root_shape, root_scale = get_root_gamma_parameters(root_alpha_setting)
                     col_header = "$\\textrm{{\\sffamily Gamma}}({0}, {1})$".format(int(root_shape), root_scale)
-                ax.text(0.5, 1.0,
+                ax.text(0.5, 1.015,
                         col_header,
                         horizontalalignment = "center",
                         verticalalignment = "bottom",
                         transform = ax.transAxes)
             if col_idx == last_col_idx:
-                ax.text(1.0, 0.5,
+                ax.text(1.015, 0.5,
                         row_key,
                         horizontalalignment = "left",
                         verticalalignment = "center",
@@ -827,6 +828,7 @@ def plot_ess_versus_error(
     for ax in all_axes:
         for sp in ax.spines.values():
             sp.set_visible(False)
+            sp.set_linewidth(2)
         if ax.is_first_row():
             ax.spines['top'].set_visible(True)
             ax.spines['bottom'].set_visible(True)
@@ -916,13 +918,13 @@ def plot_ess_versus_error(
                 else:
                     root_shape, root_scale = get_root_gamma_parameters(root_alpha_setting)
                     col_header = "$\\textrm{{\\sffamily Gamma}}({0}, {1})$".format(int(root_shape), root_scale)
-                ax.text(0.5, 1.0,
+                ax.text(0.5, 1.015,
                         col_header,
                         horizontalalignment = "center",
                         verticalalignment = "bottom",
                         transform = ax.transAxes)
             if col_idx == last_col_idx:
-                ax.text(1.0, 0.5,
+                ax.text(1.015, 0.5,
                         row_key,
                         horizontalalignment = "left",
                         verticalalignment = "center",
@@ -951,6 +953,7 @@ def plot_ess_versus_error(
     for ax in all_axes:
         for sp in ax.spines.values():
             sp.set_visible(False)
+            sp.set_linewidth(2)
         if ax.is_first_row():
             ax.spines['top'].set_visible(True)
             ax.spines['bottom'].set_visible(True)
@@ -1181,13 +1184,13 @@ def generate_scatter_plots(
                     else:
                         root_shape, root_scale = get_root_gamma_parameters(root_alpha_setting)
                         col_header = "$\\textrm{{\\sffamily Gamma}}({0}, {1})$".format(int(root_shape), root_scale)
-                ax.text(0.5, 1.0,
+                ax.text(0.5, 1.015,
                         col_header,
                         horizontalalignment = "center",
                         verticalalignment = "bottom",
                         transform = ax.transAxes)
             if col_idx == last_col_idx:
-                ax.text(1.0, 0.5,
+                ax.text(1.015, 0.5,
                         row_key,
                         horizontalalignment = "left",
                         verticalalignment = "center",
@@ -1231,6 +1234,7 @@ def generate_scatter_plots(
     for ax in all_axes:
         for sp in ax.spines.values():
             sp.set_visible(False)
+            sp.set_linewidth(2)
         if ax.is_first_row():
             ax.spines['top'].set_visible(True)
             ax.spines['bottom'].set_visible(True)
@@ -1255,7 +1259,7 @@ def generate_scatter_plots(
             size = 18.0)
 
     if linked_loci:
-        gs.update(left = 0.11, right = 0.98, bottom = 0.08, top = 0.97)
+        gs.update(left = 0.11, right = 0.97, bottom = 0.08, top = 0.97)
     elif missing_data or filtered_data:
         gs.update(left = 0.09, right = 0.98, bottom = 0.1, top = 0.96)
     else:
@@ -1542,7 +1546,7 @@ def generate_histograms(
                     )
             if hist_bins is None:
                 hist_bins = bins
-            ax.text(1.0, 1.0,
+            ax.text(0.98, 0.98,
                     "\\scriptsize {mean:,.{ndigits}f} ({lower:,.{ndigits}f}--{upper:,.{ndigits}f})".format(
                             # int(round(summary["mean"])),
                             # int(round(summary[range_key][0])),
@@ -1574,13 +1578,13 @@ def generate_histograms(
                     else:
                         root_shape, root_scale = get_root_gamma_parameters(root_alpha_setting)
                         col_header = "$\\textrm{{\\sffamily Gamma}}({0}, {1})$".format(int(root_shape), root_scale)
-                ax.text(0.5, 1.0,
+                ax.text(0.5, 1.015,
                         col_header,
                         horizontalalignment = "center",
                         verticalalignment = "bottom",
                         transform = ax.transAxes)
             if (col_idx == last_col_idx) and (nrows > 1):
-                ax.text(1.0, 0.5,
+                ax.text(1.015, 0.5,
                         row_key,
                         horizontalalignment = "left",
                         verticalalignment = "center",
@@ -1619,6 +1623,7 @@ def generate_histograms(
     for ax in all_axes:
         for sp in ax.spines.values():
             sp.set_visible(False)
+            sp.set_linewidth(2)
         if ax.is_first_row():
             ax.spines['top'].set_visible(True)
             ax.spines['bottom'].set_visible(True)
@@ -1799,20 +1804,20 @@ def generate_model_plots(
                             str(num_events),
                             horizontalalignment = "center",
                             verticalalignment = "center")
-            ax.text(0.99, 0.01,
-                    "\\scriptsize$p(k \\in 95\\% \\textrm{{\\sffamily CS}}) = {0:.3f}$".format(
+            ax.text(0.98, 0.02,
+                    "\\scriptsize$p(k \\in \\textrm{{\\sffamily CS}}) = {0:.3f}$".format(
                             p_nevents_within_95_cred),
                     horizontalalignment = "right",
                     verticalalignment = "bottom",
                     transform = ax.transAxes)
-            ax.text(0.01, 0.99,
+            ax.text(0.02, 0.98,
                     "\\scriptsize$p(\\hat{{k}} = k) = {0:.3f}$".format(
                             p_correct),
                     horizontalalignment = "left",
                     verticalalignment = "top",
                     transform = ax.transAxes)
-            ax.text(0.99, 0.99,
-                    "\\scriptsize$\\widetilde{{p(k)}} = {0:.3f}$".format(
+            ax.text(0.98, 0.98,
+                    "\\scriptsize$\\widetilde{{p(k|\\mathbf{{D}})}} = {0:.3f}$".format(
                             median_true_nevents_prob),
                     horizontalalignment = "right",
                     verticalalignment = "top",
@@ -1849,13 +1854,13 @@ def generate_model_plots(
                     else:
                         root_shape, root_scale = get_root_gamma_parameters(root_alpha_setting)
                         col_header = "$\\textrm{{\\sffamily Gamma}}({0}, {1})$".format(int(root_shape), root_scale)
-                ax.text(0.5, 1.0,
+                ax.text(0.5, 1.015,
                         col_header,
                         horizontalalignment = "center",
                         verticalalignment = "bottom",
                         transform = ax.transAxes)
             if col_idx == last_col_idx:
-                ax.text(1.0, 0.5,
+                ax.text(1.015, 0.5,
                         row_key,
                         horizontalalignment = "left",
                         verticalalignment = "center",
@@ -1896,6 +1901,7 @@ def generate_model_plots(
     for ax in all_axes:
         for sp in ax.spines.values():
             sp.set_visible(False)
+            sp.set_linewidth(2)
         if ax.is_first_row():
             ax.spines['top'].set_visible(True)
             ax.spines['bottom'].set_visible(True)
@@ -1921,6 +1927,8 @@ def generate_model_plots(
 
     if missing_data or filtered_data:
         gs.update(left = 0.08, right = 0.98, bottom = 0.1, top = 0.96)
+    elif linked_loci:
+        gs.update(left = 0.08, right = 0.97, bottom = 0.08, top = 0.97)
     else:
         gs.update(left = 0.08, right = 0.98, bottom = 0.08, top = 0.97)
 
@@ -2036,7 +2044,7 @@ def generate_root_1000_500k_model_plots(
                             horizontalalignment = "center",
                             verticalalignment = "center")
             # ax.text(0.99, 0.01,
-            #         "$p(k \\in 95\\% \\textrm{{\\sffamily CS}}) = {0:.3f}$".format(
+            #         "$p(k \\in \\textrm{{\\sffamily CS}}) = {0:.3f}$".format(
             #                 p_nevents_within_95_cred),
             #         horizontalalignment = "right",
             #         verticalalignment = "bottom",
@@ -2048,7 +2056,7 @@ def generate_root_1000_500k_model_plots(
                     verticalalignment = "bottom",
                     transform = ax.transAxes)
             ax.text(0.99, 1.01,
-                    "$\\widetilde{{p(k)}} = {0:.3f}$".format(
+                    "$\\widetilde{{p(k|\\mathbf{{D}})}} = {0:.3f}$".format(
                             median_true_nevents_prob),
                     horizontalalignment = "right",
                     verticalalignment = "bottom",
@@ -2351,13 +2359,13 @@ def generate_bake_off_plots(
                                 str(num_events),
                                 horizontalalignment = "center",
                                 verticalalignment = "center")
-                ax.text(0.99, 0.01,
-                        "\\scriptsize$p(k \\in 95\\% \\textrm{{\\sffamily CS}}) = {0:.3f}$".format(
+                ax.text(0.98, 0.02,
+                        "\\scriptsize$p(k \\in \\textrm{{\\sffamily CS}}) = {0:.3f}$".format(
                                 p_nevents_within_95_cred),
                         horizontalalignment = "right",
                         verticalalignment = "bottom",
                         transform = ax.transAxes)
-                ax.text(0.01, 0.99,
+                ax.text(0.02, 0.98,
                         "\\scriptsize$p(\\hat{{k}} = k) = {0:.3f}$".format(
                                 p_correct),
                         horizontalalignment = "left",
@@ -2369,14 +2377,14 @@ def generate_bake_off_plots(
                 #         horizontalalignment = "right",
                 #         verticalalignment = "top",
                 #         transform = ax.transAxes)
-                ax.text(0.99, 0.99,
-                        "\\scriptsize$\\widetilde{{p(k)}} = {0:.3f}$".format(
+                ax.text(0.98, 0.98,
+                        "\\scriptsize$\\widetilde{{p(k|\\mathbf{{D}})}} = {0:.3f}$".format(
                                 median_true_nevents_prob),
                         horizontalalignment = "right",
                         verticalalignment = "top",
                         transform = ax.transAxes)
                 if row_idx == 0:
-                    ax.text(0.5, 1.0,
+                    ax.text(0.5, 1.015,
                             col_header,
                             horizontalalignment = "center",
                             verticalalignment = "bottom",
@@ -2416,6 +2424,7 @@ def generate_bake_off_plots(
             for ax in all_axes:
                 for sp in ax.spines.values():
                     sp.set_visible(False)
+                    sp.set_linewidth(2)
                 if ax.is_first_row():
                     ax.spines['top'].set_visible(True)
                     ax.spines['bottom'].set_visible(True)
@@ -2439,7 +2448,7 @@ def generate_bake_off_plots(
                     rotation = "vertical",
                     size = 12.0)
 
-            gs.update(left = 0.08, right = 0.995, bottom = 0.14, top = 0.92)
+            gs.update(left = 0.08, right = 0.995, bottom = 0.14, top = 0.91)
 
             plot_path = os.path.join(plot_dir,
                     "nevents.pdf")
@@ -2559,7 +2568,7 @@ def generate_bake_off_plots(
                     size = 6.0,
                     zorder = 200)
             if row_idx == 0:
-                ax.text(0.5, 1.0,
+                ax.text(0.5, 1.015,
                         col_header,
                         horizontalalignment = "center",
                         verticalalignment = "bottom",
@@ -2589,6 +2598,7 @@ def generate_bake_off_plots(
         for ax in all_axes:
             for sp in ax.spines.values():
                 sp.set_visible(False)
+                sp.set_linewidth(2)
             if ax.is_first_row():
                 ax.spines['top'].set_visible(True)
                 ax.spines['bottom'].set_visible(True)
@@ -2612,7 +2622,7 @@ def generate_bake_off_plots(
                 rotation = "vertical",
                 size = 12.0)
 
-        gs.update(left = 0.11, right = 0.995, bottom = 0.17, top = 0.925)
+        gs.update(left = 0.11, right = 0.995, bottom = 0.17, top = 0.92)
 
         plot_file_prefix = parameter_label.replace(" ", "-")
         plot_path = os.path.join(plot_dir,
