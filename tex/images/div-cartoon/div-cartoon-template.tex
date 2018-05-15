@@ -121,13 +121,13 @@ node lower right/.style={font=\small,anchor=north west,text height=0.240cm,text 
 
 
 %% maintain canvas size for pair plot
-\maintainTreeCanvasSize{\draw [black!00] (n1p) -- (n1);}
-\maintainTreeCanvasSize{\draw [black!00] (n2p) -- (n2);}
-\maintainTreeCanvasSize{\draw [black!00] (n5p) -- (n5);}
-\maintainTreeCanvasSize{\draw [black!00] (n6p) -- (n6);}
-\maintainTreeCanvasSize{\draw [black!00] (n9p) -- (n9);}
-\maintainTreeCanvasSize{\draw [black!00, line cap=rect] (n2p) -- (n5p);}
-\maintainTreeCanvasSize{\draw [black!00, line cap=rect] (n6p) -- (n9p);}
+% \maintainTreeCanvasSize{\draw [black!00] (n1p) -- (n1);}
+% \maintainTreeCanvasSize{\draw [black!00] (n2p) -- (n2);}
+% \maintainTreeCanvasSize{\draw [black!00] (n5p) -- (n5);}
+% \maintainTreeCanvasSize{\draw [black!00] (n6p) -- (n6);}
+% \maintainTreeCanvasSize{\draw [black!00] (n9p) -- (n9);}
+% \maintainTreeCanvasSize{\draw [black!00, line cap=rect] (n2p) -- (n5p);}
+% \maintainTreeCanvasSize{\draw [black!00, line cap=rect] (n6p) -- (n9p);}
 
 %% events
 \draw [\firstEventLineColor,very thick,dashed] (\firstdepth,-0.500) -- (\firstdepth,5.500);
@@ -171,7 +171,7 @@ node lower right/.style={font=\small,anchor=north west,text height=0.240cm,text 
 \coordinate (n9m) at (\maximumdepth-\stemlength,0.500);
 \coordinate (n9s) at (\thirddepth-\stemlength,0.500);
 \includeForPairs{
-    \maintainPairCanvasSize{\draw [black!00] (n2m) -- (n2);}
+    % \maintainPairCanvasSize{\draw [black!00] (n2m) -- (n2);}
     % \draw (n2s) -- (n2);
     \draw (n2m) -- (n2);
     % \draw (n6s) -- (n6);
