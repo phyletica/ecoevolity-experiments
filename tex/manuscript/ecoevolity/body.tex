@@ -149,7 +149,9 @@ We will use \leafallelecounts and \leafredallelecounts to denote allele counts
 for a locus from both populations of a pair; i.e., 
 $\leafallelecounts, \leafredallelecounts = (\allelecount[1], \redallelecount[1]), 
 (\allelecount[2], \redallelecount[2])$
-(Figure~\ref{fig:divCartoon}).
+(Figure~\ref{fig:divCartoon}
+and
+Table~\ref{table:notation}).
 We will also use ``character pattern'' to refer to $\leafallelecounts,
 \leafredallelecounts$.
 We will use \comparisondata[i] to denote these counts across all the loci from
@@ -697,6 +699,10 @@ other pairs associated with the same divergence time (see above).
 While this tends to improve mixing slightly, it does not change the results we
 present here in a meaningful way.
 Our results can be reproduced exactly with Version 0.1.
+To help facilitate reproducibility, a detailed history of this
+project is available at
+\url{https://github.com/phyletica/ecoevolity-experiments},
+including all of the data and scripts needed to produce our results.
 
 
 \subsection{Analyses of simulated data}
@@ -920,8 +926,7 @@ Previous methods for estimating shared divergence times often over-cluster taxa
 \citep{Oaks2012,Oaks2014reply}.
 Thus, a good empirical test of the new method would be pairs of populations
 that we expect diverged independently of one another.
-We analyzed RADseq data from four pairs of populations of \spp{Gekko} lizards;
-the collection of these data are detailed in \citep{Oaks2018paic}.
+We analyzed RADseq data from four pairs of populations of \spp{Gekko} lizards.
 Each pair of populations inhabit two different oceanic islands in the
 Philippines that were never connected during lower sea levels of glacial
 periods.
@@ -988,6 +993,13 @@ reduction factor (the square root of Equation 1.1 in
 log-likelihood and all parameters.
 We also inspected the chains visually with the program Tracer version 1.6
 \citep{Tracer16}.
+
+The collection and assembly of the \spp{Gekko} RADseq data are detailed in
+\citep{Oaks2018paic}.
+The sequence reads are available on the NCBI Sequence Read Archive (accession
+\highLight{XXXXXX})
+and the assembled data matrices are available in our project repository
+(\url{https://github.com/phyletica/ecoevolity-experiments}).
 
 
 \section{Results}
