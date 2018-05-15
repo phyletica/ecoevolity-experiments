@@ -50,7 +50,7 @@
 \begin{abstract}
     \input{abstract.tex}
 
-    \vspace{12pt}
+    \vspace{6pt}
     \noindent\textbf{KEY WORDS:
         phylogeography,
         biogeography,
@@ -70,6 +70,7 @@
 \bibliography{../../bib/references}
 
 %% LIST OF FIGURES %%%%%%%%%%%%%%%%%%%%%%%%%%
+\ifembed{}{
 \newpage
 \singlespacing
 
@@ -79,6 +80,7 @@
 \setlength\cftbeforefigskip{10pt}
 \cftpagenumbersoff{fig}
 \listoffigures
+}
 
 
 \iflinenumbers{
@@ -86,24 +88,25 @@
 }{}
 
 %% TABLES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ifembed{}{
 \newpage
 \singlespacing
 
-\ifembed{}{
 \input{tables.tex}
-}
 
 \clearpage
+}
 
 %% FIGURES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ifembed{}{
 \newpage
 
-\ifembed{}{
 \input{figures.tex}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SUPPORTING INFO %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
 \setcounter{figure}{0}
 \setcounter{table}{0}
 \setcounter{page}{1}

@@ -15,3 +15,17 @@
 \newenvironment{veryTightEnumerate}{%
 \begin{enumerate}[noitemsep, topsep=0pt, parsep=0pt, partopsep=0pt, leftmargin=*]}
 {\end{enumerate}}
+
+% Redefine abstract environment as a list to control left/right margins
+% From https://tex.stackexchange.com/a/151589
+\renewenvironment{abstract}
+ {\small
+  \begin{center}
+  \bfseries \abstractname\vspace{-.5em}\vspace{0pt}
+  \end{center}
+  \list{}{%
+    \setlength{\leftmargin}{5mm}%
+    \setlength{\rightmargin}{\leftmargin}%
+  }%
+  \item\relax}
+ {\endlist}

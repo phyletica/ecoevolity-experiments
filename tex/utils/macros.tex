@@ -77,10 +77,10 @@
     posterior probability matched the true number of events---$p(\hat{\nevents}
     = \nevents)$---is shown in the upper left corner,
     the median posterior probability of the correct number of events across all
-    \datasets---$\widetilde{p(\nevents)}$---is shown in the upper right corner,
-    and
+    \datasets---$\widetilde{p(\nevents|\alldata)}$---is shown in the upper
+    right corner, and
     the proportion of \datasets for which the true divergence model was
-    included in the 95\% posterior credibility set---$p(\nevents \in 95\%
+    included in the 95\% posterior credibility set---$p(\nevents \in
     \textrm{CS})$---is shown in the lower right.
 }
 \newcommand{\accuracyscatterplotannotations}[1]{For each plot, the
@@ -88,3 +88,11 @@
     95\% posterior credibility interval contained the true value---$p(#1 \in
     \textrm{CI})$---is given.
 }
+
+%% macro to make long strings breakable over lines
+\makeatletter
+\def\breakable#1{\xHyphen@te#1$\unskip}
+\def\xHyphen@te{\@ifnextchar${\@gobble}{\sw@p{\allowbreak{}\xHyphen@te}}}
+% \def\xHyphen@te{\@ifnextchar${\@gobble}{\sw@p{\hskip 0pt plus 1pt\xHyphen@te}}}
+\def\sw@p#1#2{#2#1}
+\makeatother
