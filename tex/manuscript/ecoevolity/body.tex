@@ -727,6 +727,8 @@ data under the model described above.
 All data were simulated under the following settings:
 \begin{enumerate}
     \item $\ncomparisons = 3$
+    \item $\allelecount = 10$ (i.e., 10 alleles---5 diploid
+        individuals---sampled from each population)
     \item $\concentration = 1.414216$, which corresponds with a prior mean of
         $\nevents = 2$ divergence events
     \item $\divtime \sim \dexponential{0.01}$
@@ -907,6 +909,8 @@ For simulations and analyses of both \ecoevolity and \dppmsbayes, the settings
 were
 \begin{enumerate}
     \item $\ncomparisons = 3$
+    \item $\allelecount = 10$ (i.e., 10 alleles---5 diploid
+        individuals---sampled from each population)
     \item $\concentration = 1.414216$, which corresponds with a prior mean of
         $\nevents = 2$ divergence events
     \item $\divtime \sim \dgamma{2}{0.05}$
@@ -1005,9 +1009,11 @@ characters, we used the following priors:
 For all analyses, we ran 10 independent MCMC chains for 150,000 generations,
 sampling every 100th generation.
 Convergence and mixing of the chains was assessed by the potential scale
-reduction factor (the square root of Equation 1.1 in
-\citet{Brooks1998}) and effective sample size \citep{Gong2014} of the
-log-likelihood and all parameters.
+reduction factor
+\citep[PSRF; the square root of Equation 1.1 in][]{Brooks1998}
+and effective sample size
+\citep[ESS;][]{Gong2014}
+of the log-likelihood and all parameters.
 We also inspected the chains visually with the program Tracer version 1.6
 \citep{Tracer16}.
 
