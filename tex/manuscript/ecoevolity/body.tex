@@ -937,13 +937,19 @@ Previous methods for estimating shared divergence times often over-cluster taxa
 \citep{Oaks2012,Oaks2014reply}.
 Thus, a good empirical test of the new method would be pairs of populations
 that we expect diverged independently of one another.
-We analyzed RADseq data from four pairs of populations of \spp{Gekko} lizards.
+We analyzed restriction-site-associated sequence (RADseq) data from four pairs
+of populations of \spp{Gekko} lizards
+(Table~\ref{table:gekkocomparisons}).
 Each pair of populations inhabit two different oceanic islands in the
 Philippines that were never connected during lower sea levels of glacial
 periods.
 Because these islands were never connected, the divergence between the
 populations of each pair is likely due to over-water dispersal, the timing of
 which should be idiosyncratic to each pair.
+
+\ifembed{
+\input{../../tables/gekko-comparisons.tex}
+}{}
 
 We analyzed the data with and without the constant characters.
 Also, there were a small number of sites that had more than two nucleotides
@@ -956,10 +962,6 @@ We explored two ways of handling these sites:
 other nucleotides for that site as 1 (``red'').
 Thus, between including/excluding the constant sites and removing/re-coding the
 polyallelic characters, we analyzed four versions of the RADseq data.
-
-\ifembed{
-\input{../../tables/gekko-comparisons.tex}
-}{}
 
 To be conservative in assessing the ability of the new method to distinguish
 divergence times among the pairs, we set $\concentration = 0.44$, which places
@@ -1025,7 +1027,7 @@ and the assembled data matrices are available in our project repository
 
 When there is no model misspecification, our new method has the desired
 frequentist behavior wherein 95\% of the time the true value of a parameter
-falls within the 95\% credibility interval.
+falls within the 95\% credible interval.
 We see this for
 divergence times
 (Figure~\ref{fig:valdivtimes})
@@ -1065,7 +1067,7 @@ of sampled characters (100k to 500k) is relatively modest (Figures
 Retaining the constant characters results in a much larger increase in
 precision than collecting five times more characters.
 
-The true number of divergence events is included in the 95\% credibility set
+The true number of divergence events is included in the 95\% credible set
 greater than 98\% of the time for all the simulation conditions
 (Figure~\ref{fig:valnevents}).
 The frequency at which the correct number of events has the largest posterior
@@ -1135,7 +1137,7 @@ S\ref{fig:linkagedivtimes100k}).
 However,
 as the length of loci increases, we do see an underestimation
 of posterior uncertainty (i.e., the 
-true divergence time is contained within the 95\% credibility interval 
+true divergence time is contained within the 95\% credible interval
 less frequently than 95\% of the time;
 Figures \ref{fig:linkagedivtimes500k}
 \&
@@ -1549,8 +1551,8 @@ simulation-based analyses to assess their statistical behavior.
 \section{Conclusions}
 We introduced a new Bayesian model-choice method for estimating shared
 divergence times across taxa.
-By using the full likelihood and genome-scale data, the new method is much more
-accurate, precise, and robust than existing methods based on approximate
-likelihoods.
+By using the full likelihood and genome-scale data, the new method is more
+accurate, precise, robust, and efficient than existing methods based on
+approximate likelihoods.
 This new tool will allow biologists to leverage comparative genomic data to
 test hypotheses about the effects of environmental change on diversification.
