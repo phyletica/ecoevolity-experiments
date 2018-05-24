@@ -12,3 +12,6 @@ do
     convert -density 450 -compress jpeg -quality 70 $f $n
 done
 
+pdf2svg "../images/div-cartoon/div-cartoon.pdf" "../images/div-cartoon/div-cartoon.svg"
+pdf2svg "../images/ecoevolity-dag-model.pdf" "../images/ecoevolity-dag-model.svg"
+convert -density 450 -compress jpeg -quality 70 "../images/div-cartoon/div-cartoon.pdf" "../images/div-cartoon/div-cartoon-compressed.png"
