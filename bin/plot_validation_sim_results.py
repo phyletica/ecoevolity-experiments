@@ -995,7 +995,8 @@ def generate_scatter_plots(
         include_root_size_fixed = False,
         linked_loci = None,
         missing_data = False,
-        filtered_data = False):
+        filtered_data = False,
+        include_variable_only = True):
     if int(bool(linked_loci)) + int(missing_data) + int(filtered_data) > 1:
         raise Exception("Can only specify linked_loci, missing_data, or filtered_data")
     _LOG.info("Generating scatter plots for {0}...".format(parameter_label))
@@ -1011,21 +1012,21 @@ def generate_scatter_plots(
     row_keys, results_batches = get_results_paths(project_util.VAL_DIR,
             include_all_sizes_fixed = include_all_sizes_fixed,
             include_root_size_fixed = include_root_size_fixed,
-            include_variable_only = True)
+            include_variable_only = include_variable_only)
     if linked_loci:
         row_keys, results_batches = get_linked_loci_results_paths(
                 project_util.VAL_DIR,
                 data_set_size = linked_loci,
-                include_variable_only = True,
+                include_variable_only = include_variable_only,
                 include_unlinked_only = True)
     if missing_data:
         row_keys, results_batches = get_missing_data_results_paths(
                 project_util.VAL_DIR,
-                include_variable_only = True)
+                include_variable_only = include_variable_only)
     if filtered_data:
         row_keys, results_batches = get_filtered_data_results_paths(
                 project_util.VAL_DIR,
-                include_variable_only = True)
+                include_variable_only = include_variable_only)
 
     # Very inefficient, but parsing all results to get min/max for parameter
     parameter_min = float('inf')
@@ -1053,7 +1054,10 @@ def generate_scatter_plots(
     if missing_data or filtered_data:
         fig = plt.figure(figsize = (9, 4.0))
     elif linked_loci:
-        fig = plt.figure(figsize = (7.25, 6.5))
+        if include_variable_only:
+            fig = plt.figure(figsize = (7.25, 6.5))
+        else:
+            fig = plt.figure(figsize = (7.25, 4.2))
     else:
         fig = plt.figure(figsize = (9, 6.5))
     nrows = len(results_batches)
@@ -1259,7 +1263,10 @@ def generate_scatter_plots(
             size = 18.0)
 
     if linked_loci:
-        gs.update(left = 0.11, right = 0.97, bottom = 0.08, top = 0.97)
+        if include_variable_only:
+            gs.update(left = 0.11, right = 0.97, bottom = 0.08, top = 0.97)
+        else:
+            gs.update(left = 0.11, right = 0.97, bottom = 0.13, top = 0.95)
     elif missing_data or filtered_data:
         gs.update(left = 0.09, right = 0.98, bottom = 0.1, top = 0.96)
     else:
@@ -1673,7 +1680,8 @@ def generate_model_plots(
         include_root_size_fixed = False,
         linked_loci = None,
         missing_data = False,
-        filtered_data = False):
+        filtered_data = False,
+        include_variable_only = True):
     if int(bool(linked_loci)) + int(missing_data) + int(filtered_data) > 1:
         raise Exception("Can only specify linked_loci, missing_data, or filtered_data")
     _LOG.info("Generating model plots...")
@@ -1690,27 +1698,30 @@ def generate_model_plots(
     row_keys, results_batches = get_results_paths(project_util.VAL_DIR,
             include_all_sizes_fixed = include_all_sizes_fixed,
             include_root_size_fixed = include_root_size_fixed,
-            include_variable_only = True)
+            include_variable_only = include_variable_only)
     if linked_loci:
         row_keys, results_batches = get_linked_loci_results_paths(
                 project_util.VAL_DIR,
                 data_set_size = linked_loci,
-                include_variable_only = True,
+                include_variable_only = include_variable_only,
                 include_unlinked_only = True)
     if missing_data:
         row_keys, results_batches = get_missing_data_results_paths(
                 project_util.VAL_DIR,
-                include_variable_only = True)
+                include_variable_only = include_variable_only)
     if filtered_data:
         row_keys, results_batches = get_filtered_data_results_paths(
                 project_util.VAL_DIR,
-                include_variable_only = True)
+                include_variable_only = include_variable_only)
 
     plt.close('all')
     if missing_data or filtered_data:
         fig = plt.figure(figsize = (9, 4.0))
     elif linked_loci:
-        fig = plt.figure(figsize = (7.25, 6.5))
+        if include_variable_only:
+            fig = plt.figure(figsize = (7.25, 6.5))
+        else:
+            fig = plt.figure(figsize = (7.25, 4.6))
     else:
         fig = plt.figure(figsize = (9, 6.5))
     nrows = len(results_batches)
@@ -1928,7 +1939,10 @@ def generate_model_plots(
     if missing_data or filtered_data:
         gs.update(left = 0.08, right = 0.98, bottom = 0.1, top = 0.96)
     elif linked_loci:
-        gs.update(left = 0.08, right = 0.97, bottom = 0.08, top = 0.97)
+        if include_variable_only:
+            gs.update(left = 0.08, right = 0.97, bottom = 0.08, top = 0.97)
+        else:
+            gs.update(left = 0.08, right = 0.97, bottom = 0.13, top = 0.95)
     else:
         gs.update(left = 0.08, right = 0.98, bottom = 0.08, top = 0.97)
 
@@ -1936,8 +1950,12 @@ def generate_model_plots(
     if not os.path.exists(plot_dir):
         os.mkdir(plot_dir)
     if linked_loci:
-        plot_path = os.path.join(plot_dir,
-                "linkage-{0}-nevents.pdf".format(linked_loci))
+        if include_variable_only:
+            plot_path = os.path.join(plot_dir,
+                    "linkage-{0}-nevents.pdf".format(linked_loci))
+        else:
+            plot_path = os.path.join(plot_dir,
+                    "linkage-{0}-nevents-no-vo.pdf".format(linked_loci))
     elif missing_data:
         plot_path = os.path.join(plot_dir,
                 "missing-data-nevents.pdf")
@@ -2676,6 +2694,19 @@ def main_cli(argv = sys.argv):
                     ],
             parameter_label = "divergence time",
             parameter_symbol = "t",
+            plot_file_prefix = "linkage-500k-div-time-no-vo",
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            linked_loci = "500k",
+            include_variable_only = False)
+    generate_scatter_plots(
+            parameters = [
+                    "root_height_c1sp1",
+                    "root_height_c2sp1",
+                    "root_height_c3sp1",
+                    ],
+            parameter_label = "divergence time",
+            parameter_symbol = "t",
             plot_file_prefix = "missing-data-div-time",
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
@@ -2860,6 +2891,12 @@ def main_cli(argv = sys.argv):
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
             linked_loci = "500k")
+    generate_model_plots(
+            number_of_comparisons = 3,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            linked_loci = "500k",
+            include_variable_only = False)
     generate_model_plots(
             number_of_comparisons = 3,
             include_all_sizes_fixed = True,
