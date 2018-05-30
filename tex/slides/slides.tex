@@ -1,0 +1,141 @@
+\input{../utils/slide-preamble.tex}
+\input{../utils/color-palettes.tex}
+\input{../utils/dpp-preamble.tex}
+\input{../utils/macros.tex}
+\input{../utils/notation.tex}
+\input{../utils/slide-macros.tex}
+\bibliography{../bib/references}
+
+\input{title-info.tex}
+
+\setbeamersize{text margin left=3mm, text margin right=3mm}
+
+\begin{document}
+
+\input{title.tex}
+
+% \input{intro-general.tex}
+
+% \input{shared-divs.tex}
+
+\input{shared-div-example-very-short.tex}
+
+
+\input{div-model-cartoons.tex}
+    
+\input{div-model-choice.tex}
+
+
+
+% \input{paic-study.tex}
+
+% \input{approach-1-challenges.tex}
+
+% \input{approach-1-results.tex}
+
+% \input{approach-2-challenges.tex}
+
+% \input{dpp-3-example.tex}
+
+% \input{approach-2-challenges.tex}
+
+% \input{abc.tex}
+
+% \blankslide
+
+% \againframe<15->{fullmodel}
+
+% \input{new-method.tex}
+
+% \input{approach-2-results.tex}
+
+\input{approach-3-challenges.tex}
+
+\input{dpp-intro.tex}
+
+\input{dpp-3-example.tex}
+
+
+\begin{frame}
+    \begin{center}
+        \LARGE
+        \href{https://github.com/phyletica/ecoevolity}{
+            \textbf{\textcolor{pgreen}{E}\textcolor{pteal}{co\textcolor{pauburn}{evo}lity}}}:
+        \textcolor{pgreen}{\bf E}stimating \textcolor{pauburn}{\bf evo}lutionary \textcolor{pteal}{\bf coevality}
+    \end{center}
+
+    \begin{itemize}
+        \item<2-> CTMC model of characters evolving along genealogies
+        \item<2-> Coalescent model of genealogies branching within populations
+        \item<2-> Dirichlet-process prior across divergence models
+        \item<2-> Gibbs sampling\footnote{\tiny\shortfullcite{Neal2000}}
+                  to numerically sample models
+        \item<2-> Analytically integrate over genealogies\footnote{\tiny\shortfullcite{Bryant2012}}
+
+        \bigskip
+        \item<3-> \textsl{Goal: Fast, full-likelihood Bayesian method to infer
+                patterns of co-diversification from genome-scale data}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \begin{center}
+        \LARGE
+        Does it work?
+    \end{center}
+\end{frame}
+
+% \input{new-method-testing.tex}
+
+% \section{Empirical applications}
+
+% \begin{frame}
+% \frametitle{Outline}
+% \tableofcontents[currentsection,currentsubsection]
+% \end{frame}
+
+% \input{paic-study.tex}
+\input{ecoevolity-testing.tex}
+
+\input{ecoevolity-linkage-results.tex}
+
+% \input{msg-data.tex}
+
+% \input{ecoevolity-results.tex}
+
+% \input{africa.tex}
+
+% \input{empirical-conclusions.tex}
+
+% \section{Current and future directions}
+
+% \begin{frame}
+% \frametitle{Outline}
+% \tableofcontents[currentsection,currentsubsection]
+% \end{frame}
+
+% \input{full-likelihood.tex}
+
+% \input{full-phylo.tex}
+
+\input{bayes-demo.tex}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Marginal like coin flip example
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \input{open-science.tex}
+
+% \input{end-slides.tex}
+
+% Extra slides
+%%%%%%%%%%%%%%
+
+% \begin{frame}[noframenumbering]
+% \end{frame
+\input{ecoevolity-bakeoff.tex}
+
+\end{document}

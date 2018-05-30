@@ -1,0 +1,79 @@
+\input{intro-shared-divs.tex}
+
+% \input{shared-div-example-long.tex}
+\input{shared-div-example-medium.tex}
+
+\begin{frame}[c,label=violations]
+    % \frametitle{Violations are pervasive and interesting}
+    % \frametitle{Shared divergences are pervasive and interesting}
+
+    \begin{columns}
+
+        \column{0.52\textwidth}
+
+        \begin{minipage}[c][\frametextheight][c]{0.95\columnwidth}
+            \raggedright
+            \uncover<1->{
+            Biogeography
+            \begin{itemize}
+                \item Environmental changes that affect whole communities of species
+            \end{itemize}
+            }
+
+            \uncover<2->{
+            Gene family evolution
+            \begin{itemize}
+                \item Chromosomal duplications
+            \end{itemize}
+            }
+
+            \uncover<3->{
+            Epidemiology
+            \begin{itemize}
+                \item Disease spread via co-infected individuals
+                \item Transmission at social gatherings
+            \end{itemize}
+            }
+
+            \uncover<4->{
+            Endosymbiont evolution (e.g., parasites, microbiome)
+            \begin{itemize}
+                \item Speciation of the host
+                \item Co-colonization of new host species
+            \end{itemize}
+            }
+        \end{minipage}
+
+        \column{0.46\textwidth}
+
+        \begin{minipage}[c][\contentheight][c]{\columnwidth}
+            \centering
+            % \resizebox{!}{0.75\frametextheight}{%
+            \resizebox{!}{0.71\frametextheight}{%
+                \input{shared-div-tree.tex}
+            }
+        \end{minipage}
+    \end{columns}
+
+\end{frame}
+
+\begin{frame}<handout:0|beamer:0>[noframenumbering,label=whycare]
+    \frametitle{Why account for shared divergences?}
+
+    \begin{enumerate}
+        \item<2-> Improve inference
+        \vspace{3mm}
+        \item<3-> \textbf{Provide a framework for studying processes of
+                co-diversification}
+    \end{enumerate}
+
+\end{frame}
+
+\againframe<1-2>{whycare}
+
+% \input{shared-div-advantages.tex}
+\input{shared-div-advantages-bare.tex}
+
+\againframe<2->{whycare}
+
+\againframe<4->{violations}

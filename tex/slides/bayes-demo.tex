@@ -1,0 +1,106 @@
+\begin{frame}
+
+    \begin{itemize}
+        \item<1-> Let's assume we are interested in the probability of a coin we
+            have not seen landing heads-side up when it is flipped
+            (\probheads)
+
+        \item<2-> Before flipping, we decide to compare two models that vary in our
+            prior assumptions about the probability of the coin landing heads
+            up
+
+        \item<3-> We assume:
+        \begin{enumerate}
+            \item The coin is probably fair \\
+
+                \vspace{1.0ex}
+                \coinmodel[1]: $\probheads \sim \textrm{Beta}(5.0, 5.0)$
+
+            \vspace{2ex}
+            \item the coin is weighted to land tails side up most of time \\
+
+                \vspace{1.0ex}
+                \coinmodel[2]: $\probheads \sim \textrm{Beta}(1.0, 5.0)$
+        \end{enumerate}
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+    \begin{itemize}
+        \item<1-> We do 100 flips and 50 land heads up
+
+        \item<2-> Now, we can calculate the posterior distribution for
+            the probability of landing heads up under both our models
+    \end{itemize}
+
+    \onslide<3->{
+    \begin{displaybox}[0.60\linewidth]
+        \[
+            p(\probheads \given \flipdata, \coinmodel[i]) = \frac{
+                p(\flipdata \given \probheads, \coinmodel[i]) p(\probheads \given \coinmodel[i])
+            }{
+                p(\flipdata \given \coinmodel[i])
+            }
+        \]
+    \end{displaybox}
+    }
+
+    \begin{itemize}
+        \item<4-> We see the posterior distribution of \probheads is very
+            robust to our prior assumptions
+
+        \item<4-> \href{https://kerrycobb.github.io/beta-binomial-web-demo/}{https://kerrycobb.github.io/beta-binomial-web-demo/}
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+    \begin{itemize}
+        \item<1-> However, we want to compare the ability of the models to explain the
+            data
+        \item<2-> We need to average (integrate) the likelihood density function
+            over all possible values of \probheads, weighting by the prior
+    \end{itemize}
+
+    \onslide<3->{
+    \begin{displaybox}[0.60\linewidth]
+        \vspace{-2ex}
+        \[
+            p(\flipdata \given \coinmodel[1]) =
+            \int_{\probheads}
+            p( \flipdata \given \probheads, \coinmodel[1])
+            p(\probheads \given \coinmodel[1])
+            \diff{\probheads}
+        \]
+    \end{displaybox}
+    }
+\end{frame}
+
+
+\begin{frame}
+    \begin{itemize}
+        \item<1-> Why do we care about the marginal likelihood?
+        \item<2-> It's \emph{the evidence} that updates our prior to give us
+            the posterior probability of the model
+    \end{itemize}
+
+    \onslide<3->{
+    \begin{displaybox}[0.80\linewidth]
+        \vspace{0.7ex}
+        \[
+            p(\coinmodel[1] \given \flipdata) = \frac{
+                p(\flipdata \given \coinmodel[1])
+                p(\coinmodel[1])
+            }{
+                p(\flipdata \given \coinmodel[1])
+                p(\coinmodel[1])
+                +
+                p(\flipdata \given \coinmodel[2])
+                p(\coinmodel[2])
+            }
+        \]
+        \vspace{0ex}
+    \end{displaybox}
+    }
+\end{frame}
