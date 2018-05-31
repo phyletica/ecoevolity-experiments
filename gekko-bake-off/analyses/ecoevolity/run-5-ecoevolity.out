@@ -1,0 +1,464 @@
+======================================================================
+                              Ecoevolity
+                  Estimating evolutionary coevality
+      Version 0.2.0 (master c59888c: 2018-05-27T13:26:11-05:00)
+======================================================================
+
+Seed: 882041982
+Using data in order to sample from the posterior distribution...
+Config path: ../configs/ecoevolity-config.yml
+Parsing config file...
+
+----------------------------------------------------------------------
+---
+event_model_prior:
+    dirichlet_process:
+        parameters:
+            concentration:
+                value: 1.41422
+                estimate: false
+event_time_prior:
+    exponential_distribution:
+        rate: 10
+mcmc_settings:
+    chain_length: 12000
+    sample_frequency: 10
+comparisons:
+- comparison:
+    path: ../configs/../nexus-alignments/G-crombota-rossi-BabuyanClaro-Calayan-300-424654214.nex
+    ploidy: 2
+    genotypes_are_diploid: true
+    markers_are_dominant: false
+    population_name_delimiter: ' '
+    population_name_is_prefix: false
+    constant_sites_removed: false
+    equal_population_sizes: false
+    parameters:
+        population_size:
+            value: 0.002
+            estimate: true
+            prior:
+                gamma_distribution:
+                    shape: 5
+                    scale: 0.0004
+                    offset: 0
+        root_relative_population_size:
+            value: 1
+            estimate: true
+            prior:
+                gamma_distribution:
+                    shape: 100
+                    scale: 0.01
+                    offset: 0
+        mutation_rate:
+            value: 1
+            estimate: false
+        freq_1:
+            value: 0.5
+            estimate: false
+    operators:
+        TimeSizeRateMixer:
+            weight: 0
+            scale: 0.1
+        TimeSizeRateScaler:
+            weight: 0
+            scale: 0.1
+        EventTimeScaler:
+            weight: 0
+            scale: 0.1
+        RootPopulationSizeScaler:
+            weight: 1
+            scale: 0.1
+        LeafPopulationSizeScaler:
+            weight: 1
+            scale: 0.1
+        MutationRateScaler:
+            weight: 0
+            scale: 0.3
+        FreqMover:
+            weight: 0
+            window: 0.1
+        TimeRootSizeMixer:
+            weight: 0
+            scale: 0.05
+- comparison:
+    path: ../configs/../nexus-alignments/G-mindorensis-mindorensis-MaestreDeCampo-Masbate-300-424654214.nex
+    ploidy: 2
+    genotypes_are_diploid: true
+    markers_are_dominant: false
+    population_name_delimiter: ' '
+    population_name_is_prefix: false
+    constant_sites_removed: false
+    equal_population_sizes: false
+    parameters:
+        population_size:
+            value: 0.002
+            estimate: true
+            prior:
+                gamma_distribution:
+                    shape: 5
+                    scale: 0.0004
+                    offset: 0
+        root_relative_population_size:
+            value: 1
+            estimate: true
+            prior:
+                gamma_distribution:
+                    shape: 100
+                    scale: 0.01
+                    offset: 0
+        mutation_rate:
+            value: 1
+            estimate: false
+        freq_1:
+            value: 0.5
+            estimate: false
+    operators:
+        TimeSizeRateMixer:
+            weight: 0
+            scale: 0.1
+        TimeSizeRateScaler:
+            weight: 0
+            scale: 0.1
+        EventTimeScaler:
+            weight: 0
+            scale: 0.1
+        RootPopulationSizeScaler:
+            weight: 1
+            scale: 0.1
+        LeafPopulationSizeScaler:
+            weight: 1
+            scale: 0.1
+        MutationRateScaler:
+            weight: 0
+            scale: 0.3
+        FreqMover:
+            weight: 0
+            window: 0.1
+        TimeRootSizeMixer:
+            weight: 0
+            scale: 0.05
+- comparison:
+    path: ../configs/../nexus-alignments/G-sp_a-sp_b-Dalupiri-CamiguinNorte-300-424654214.nex
+    ploidy: 2
+    genotypes_are_diploid: true
+    markers_are_dominant: false
+    population_name_delimiter: ' '
+    population_name_is_prefix: false
+    constant_sites_removed: false
+    equal_population_sizes: false
+    parameters:
+        population_size:
+            value: 0.002
+            estimate: true
+            prior:
+                gamma_distribution:
+                    shape: 5
+                    scale: 0.0004
+                    offset: 0
+        root_relative_population_size:
+            value: 1
+            estimate: true
+            prior:
+                gamma_distribution:
+                    shape: 100
+                    scale: 0.01
+                    offset: 0
+        mutation_rate:
+            value: 1
+            estimate: false
+        freq_1:
+            value: 0.5
+            estimate: false
+    operators:
+        TimeSizeRateMixer:
+            weight: 0
+            scale: 0.1
+        TimeSizeRateScaler:
+            weight: 0
+            scale: 0.1
+        EventTimeScaler:
+            weight: 0
+            scale: 0.1
+        RootPopulationSizeScaler:
+            weight: 1
+            scale: 0.1
+        LeafPopulationSizeScaler:
+            weight: 1
+            scale: 0.1
+        MutationRateScaler:
+            weight: 0
+            scale: 0.3
+        FreqMover:
+            weight: 0
+            window: 0.1
+        TimeRootSizeMixer:
+            weight: 0
+            scale: 0.05
+operator_settings:
+    auto_optimize: true
+    auto_optimize_delay: 1000
+    operators:
+        ModelOperator:
+            weight: 10
+            number_of_auxiliary_categories: 4
+        ConcentrationScaler:
+            weight: 0
+            scale: 1
+        TimeSizeRateMixer:
+            weight: 6
+            scale: 0.1
+        TimeSizeRateScaler:
+            weight: 0
+            scale: 0.1
+        EventTimeScaler:
+            weight: 1
+            scale: 0.1
+        TimeRootSizeMixer:
+            weight: 6
+            scale: 0.05
+----------------------------------------------------------------------
+
+Configuring model...
+storing read block: TAXA
+storing read block: CHARACTERS
+
+#######################################################################
+##############################  WARNING  ##############################
+1 sites had more than two nucleotide states from the alignment in:
+    '../configs/../nexus-alignments/G-crombota-rossi-BabuyanClaro-Calayan-300-424654214.nex'.
+These sites have been recoded as biallelic, by treating the first
+nucleotide as 0 and all others as 1. If you would prefer to ignore
+these sites, please remove all sites with more than two nucleotide
+states from your DNA alignments and re-run the analysis.
+#######################################################################
+
+
+#######################################################################
+##############################  WARNING  ##############################
+25 sites will be ignored from the alignment in:
+    '../configs/../nexus-alignments/G-crombota-rossi-BabuyanClaro-Calayan-300-424654214.nex'
+due to at least one population with no data.
+#######################################################################
+
+storing read block: TAXA
+storing read block: CHARACTERS
+
+#######################################################################
+##############################  WARNING  ##############################
+1 sites had more than two nucleotide states from the alignment in:
+    '../configs/../nexus-alignments/G-mindorensis-mindorensis-MaestreDeCampo-Masbate-300-424654214.nex'.
+These sites have been recoded as biallelic, by treating the first
+nucleotide as 0 and all others as 1. If you would prefer to ignore
+these sites, please remove all sites with more than two nucleotide
+states from your DNA alignments and re-run the analysis.
+#######################################################################
+
+
+#######################################################################
+##############################  WARNING  ##############################
+48 sites will be ignored from the alignment in:
+    '../configs/../nexus-alignments/G-mindorensis-mindorensis-MaestreDeCampo-Masbate-300-424654214.nex'
+due to at least one population with no data.
+#######################################################################
+
+storing read block: TAXA
+storing read block: CHARACTERS
+
+#######################################################################
+##############################  WARNING  ##############################
+1 sites had more than two nucleotide states from the alignment in:
+    '../configs/../nexus-alignments/G-sp_a-sp_b-Dalupiri-CamiguinNorte-300-424654214.nex'.
+These sites have been recoded as biallelic, by treating the first
+nucleotide as 0 and all others as 1. If you would prefer to ignore
+these sites, please remove all sites with more than two nucleotide
+states from your DNA alignments and re-run the analysis.
+#######################################################################
+
+
+#######################################################################
+##############################  WARNING  ##############################
+38 sites will be ignored from the alignment in:
+    '../configs/../nexus-alignments/G-sp_a-sp_b-Dalupiri-CamiguinNorte-300-424654214.nex'
+due to at least one population with no data.
+#######################################################################
+
+
+----------------------------------------------------------------------
+Summary of data from 3 comparisons:
+    Summary of data from '../configs/../nexus-alignments/G-crombota-rossi-BabuyanClaro-Calayan-300-424654214.nex':
+        Genotypes: diploid
+        Markers are dominant? false
+        Number of populations: 2
+        Number of sites: 27340
+        Number of variable sites: 102
+        Number of patterns: 71
+        Patterns folded? true
+        Population label (max # of alleles sampled):
+            BabuyanClaro0 (10)
+            Calayan0 (10)
+    Summary of data from '../configs/../nexus-alignments/G-mindorensis-mindorensis-MaestreDeCampo-Masbate-300-424654214.nex':
+        Genotypes: diploid
+        Markers are dominant? false
+        Number of populations: 2
+        Number of sites: 27311
+        Number of variable sites: 257
+        Number of patterns: 51
+        Patterns folded? true
+        Population label (max # of alleles sampled):
+            MaestreDeCampo1 (6)
+            Masbate1 (6)
+    Summary of data from '../configs/../nexus-alignments/G-sp_a-sp_b-Dalupiri-CamiguinNorte-300-424654214.nex':
+        Genotypes: diploid
+        Markers are dominant? false
+        Number of populations: 2
+        Number of sites: 27285
+        Number of variable sites: 112
+        Number of patterns: 76
+        Patterns folded? true
+        Population label (max # of alleles sampled):
+            CamiguinNorte2 (10)
+            Dalupiri2 (10)
+----------------------------------------------------------------------
+
+Number of threads: 1
+Firing up MCMC...
+State log path: ../analyses/ecoevolity/run-5ecoevolity-config-state-run-1.log
+Operator log path: ../analyses/ecoevolity/run-5ecoevolity-config-operator-run-1.log
+generation	ln_likelihood	ln_prior	number_of_events	concentration
+0	-78833.1	43.1316	3	1.41422
+100	-61681.5	-14.7153	3	1.41422
+200	-61285.4	25.8396	3	1.41422
+300	-61245.7	19.293	2	1.41422
+400	-61218.9	13.7529	3	1.41422
+500	-61220	17.3373	3	1.41422
+600	-61219	18.3849	3	1.41422
+700	-61218.9	18.443	3	1.41422
+800	-61220.1	12.7136	3	1.41422
+900	-61220.2	14.135	3	1.41422
+1000	-61220.2	17.0356	3	1.41422
+1100	-61218	15.4739	3	1.41422
+1200	-61222.6	16.5359	3	1.41422
+1300	-61225	17.2709	3	1.41422
+1400	-61220.9	16.0241	3	1.41422
+1500	-61218	15.8627	3	1.41422
+1600	-61223.5	20.5011	3	1.41422
+1700	-61219.1	11.7235	3	1.41422
+1800	-61220.5	12.2382	3	1.41422
+1900	-61222.8	15.9583	3	1.41422
+2000	-61231.4	22.1457	3	1.41422
+2100	-61218.4	12.6495	3	1.41422
+2200	-61222.9	14.9697	3	1.41422
+2300	-61218.9	15.6447	3	1.41422
+2400	-61222.5	17.3394	3	1.41422
+2500	-61220.8	16.1367	3	1.41422
+2600	-61221.5	15.3621	3	1.41422
+2700	-61220.2	15.2561	3	1.41422
+2800	-61220.5	14.8845	3	1.41422
+2900	-61216.2	15.0954	3	1.41422
+3000	-61220.6	18.898	3	1.41422
+3100	-61220.8	18.7956	3	1.41422
+3200	-61226.7	19.5811	3	1.41422
+3300	-61219.3	17.3979	3	1.41422
+3400	-61222	17.8267	3	1.41422
+3500	-61221.8	16.3725	3	1.41422
+3600	-61222.3	15.2523	3	1.41422
+3700	-61223.8	17.9672	3	1.41422
+3800	-61219.6	15.4756	3	1.41422
+3900	-61218.2	16.1739	3	1.41422
+4000	-61221.5	13.8084	3	1.41422
+4100	-61221.7	18.1412	3	1.41422
+4200	-61216.1	14.4799	3	1.41422
+4300	-61221.3	12.5881	3	1.41422
+4400	-61217.9	16.7568	3	1.41422
+4500	-61218.7	15.7524	3	1.41422
+4600	-61218.4	17.5866	3	1.41422
+4700	-61223.1	19.3212	3	1.41422
+4800	-61221.1	19.1188	3	1.41422
+4900	-61221.8	17.8426	3	1.41422
+5000	-61221.1	16.2958	3	1.41422
+5100	-61224.7	17.3864	3	1.41422
+5200	-61223.3	18.6883	3	1.41422
+5300	-61220.2	16.1944	3	1.41422
+5400	-61218.4	17.3117	3	1.41422
+5500	-61217.5	16.4778	3	1.41422
+5600	-61219.6	17.9803	3	1.41422
+5700	-61221.4	19.124	3	1.41422
+5800	-61217.5	11.8554	3	1.41422
+5900	-61219.5	14.9615	3	1.41422
+6000	-61218.8	15.6541	3	1.41422
+6100	-61222.5	15.505	3	1.41422
+6200	-61223.3	20.3461	3	1.41422
+6300	-61224.5	19.1979	3	1.41422
+6400	-61216.9	16.4958	3	1.41422
+6500	-61221.3	17.0932	3	1.41422
+6600	-61217.2	16.5336	3	1.41422
+6700	-61219	14.7731	3	1.41422
+6800	-61218.8	17.1444	3	1.41422
+6900	-61219.7	16.239	3	1.41422
+7000	-61220.9	17.3405	3	1.41422
+7100	-61221.5	16.39	3	1.41422
+7200	-61225.2	19.1445	3	1.41422
+7300	-61220.8	10.8535	3	1.41422
+7400	-61219.8	17.3883	3	1.41422
+7500	-61217.2	15.7003	3	1.41422
+7600	-61223.2	18.3375	3	1.41422
+7700	-61220	17.3787	3	1.41422
+7800	-61220.7	16.2487	3	1.41422
+7900	-61222.4	14.4269	3	1.41422
+8000	-61230.1	19.9632	3	1.41422
+8100	-61224.4	18.536	3	1.41422
+8200	-61219	17.5959	3	1.41422
+8300	-61216.6	16.1258	3	1.41422
+8400	-61222	17.0307	3	1.41422
+8500	-61221.1	17.0566	3	1.41422
+8600	-61220.3	16.6607	3	1.41422
+8700	-61218.8	17.6319	3	1.41422
+8800	-61222.8	15.7388	3	1.41422
+8900	-61220.7	15.6608	3	1.41422
+9000	-61224	18.1491	3	1.41422
+9100	-61220.2	15.7329	3	1.41422
+9200	-61221	17.0437	3	1.41422
+9300	-61224.9	18.8493	3	1.41422
+9400	-61220.3	19.5045	3	1.41422
+9500	-61219.5	15.1666	3	1.41422
+9600	-61220.9	18.0686	3	1.41422
+9700	-61218.4	15.4586	3	1.41422
+9800	-61228.1	13.5124	3	1.41422
+9900	-61227.2	20.9157	3	1.41422
+10000	-61219.9	18.4952	3	1.41422
+10100	-61222.2	16.615	3	1.41422
+10200	-61220.2	18.0549	3	1.41422
+10300	-61222.6	16.9581	3	1.41422
+10400	-61217.5	16.2772	3	1.41422
+10500	-61228.7	17.5627	3	1.41422
+10600	-61216.5	15.6236	3	1.41422
+10700	-61221.5	14.5034	3	1.41422
+10800	-61220.1	18.5897	3	1.41422
+10900	-61218.4	14.3369	3	1.41422
+11000	-61220.8	17.2118	3	1.41422
+11100	-61221	19.0262	3	1.41422
+11200	-61222.8	17.1752	3	1.41422
+11300	-61218.7	15.997	3	1.41422
+11400	-61228.7	21.4094	3	1.41422
+11500	-61221.6	18.9927	3	1.41422
+11600	-61221.3	19.3363	3	1.41422
+11700	-61220.1	14.1469	3	1.41422
+11800	-61220.6	17.9916	3	1.41422
+11900	-61223.5	16.6242	3	1.41422
+12000	-61219.2	17.0311	3	1.41422
+
+Operator stats:
+name	number_accepted	number_rejected	weight	weight_prob	tuning_parameter
+DirichletProcessGibbsSampler	4094	0	10	0.344828	none	
+TimeSizeRateMixer	4022	3466	6	0.206897	0.202196	
+TimeRootSizeMixer	3913	3738	6	0.206897	0.28007	
+EventTimeScaler	13619	15053	1	0.0344828	0.372273	
+RootPopulationSizeScaler0	2660	2842	1	0.0344828	0.307121	
+LeafPopulationSizeScaler0	3415	2038	1	0.0344828	0.426971	
+RootPopulationSizeScaler1	2708	2750	1	0.0344828	0.306595	
+LeafPopulationSizeScaler1	2567	2871	1	0.0344828	0.395123	
+RootPopulationSizeScaler2	2745	2730	1	0.0344828	0.28005	
+LeafPopulationSizeScaler2	3212	2204	1	0.0344828	0.378202	
+
+Runtime: 486 seconds.

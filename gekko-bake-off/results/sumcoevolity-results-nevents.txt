@@ -1,0 +1,4 @@
+number_of_events	post_prob	cumulative_post_prob	prior_prob	bf
+3	0.9944	0.9944	0.241982	556.249
+2	0.0056	1	0.51513	0.00530073
+1	<0.0002	1	0.242888	<0.000623549

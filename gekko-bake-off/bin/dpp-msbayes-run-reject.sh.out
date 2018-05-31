@@ -1,0 +1,46 @@
+Batch size is 0 prior samples.
+Calculating summary statistics from sequence data...
+Manager-2 (28858): starting worker ObsSumStatsWorker-1
+Manager-3 (28859): work queue is empty
+Manager-1 (28857): work queue is empty
+Manager-4 (28860): work queue is empty
+Manager-5 (28861): work queue is empty
+Manager-6 (28862): work queue is empty
+Manager-7 (28863): work queue is empty
+Manager-8 (28864): work queue is empty
+Manager-2 (28858): worker ObsSumStatsWorker-1 finished
+Manager-2 (28858): work queue is empty
+Running full analysis...
+Running full analyses on provided priors...
+Manager-9 (28870): starting worker EuRejectWorker-1
+Manager-11 (28872): work queue is empty
+Manager-10 (28871): work queue is empty
+Manager-13 (28874): work queue is empty
+Manager-12 (28873): work queue is empty
+Manager-14 (28875): work queue is empty
+Manager-16 (28877): work queue is empty
+Manager-15 (28876): work queue is empty
+Manager-9 (28870): worker EuRejectWorker-1 finished
+Manager-9 (28870): work queue is empty
+Running final regressions...
+Manager-17 (28885): starting worker PosteriorWorker-1
+ABCToolBoxRegressWorker-1: did not produce summary file
+ABCToolBoxRegressWorker-1: did not produce posterior density file
+Manager-20 (28888): work queue is empty
+Manager-18 (28886): work queue is empty
+Manager-19 (28887): work queue is empty
+Manager-21 (28889): work queue is empty
+Manager-23 (28891): work queue is empty
+Manager-22 (28890): work queue is empty
+Manager-24 (28892): work queue is empty
+PosteriorWorker-1: Problem parsing posterior density file '/home/jamie/Downloads/gekko-bake-off/analyses/pymsbayes/posterior/pymsbayes-results/pymsbayes-output/d1/m1/d1-m1-s1-500000-glm-posterior-density-estimates.txt.gz'... Returning unadjusted results
+PosteriorWorker-1: Parsing of regression summary file '/home/jamie/Downloads/gekko-bake-off/analyses/pymsbayes/posterior/pymsbayes-results/pymsbayes-output/d1/m1/d1-m1-s1-500000-glm-posterior-summary.txt.gz' failed... Returning unadjusted summary
+Manager-17 (28885): worker PosteriorWorker-1 finished
+Manager-17 (28885): work queue is empty
+Number of samples processed:
+    500000
+Done!
+	[[run_stats]]
+		start_time = 2018-05-30 18:29:48.662624
+		stop_time = 2018-05-30 18:29:57.808767
+		total_duration = 0:00:09.146143

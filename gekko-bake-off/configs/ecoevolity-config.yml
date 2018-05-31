@@ -1,0 +1,56 @@
+---
+event_model_prior:
+    dirichlet_process:
+        parameters:
+            concentration:
+                value:      1.414216
+                estimate:   false
+
+event_time_prior:
+    exponential_distribution:
+        rate: 10.0
+
+mcmc_settings:
+    chain_length: 12000
+    sample_frequency: 10
+
+global_comparison_settings:
+    ploidy: 2
+    genotypes_are_diploid: true
+    markers_are_dominant: false
+    population_name_delimiter: " "
+    population_name_is_prefix: false
+    constant_sites_removed: false
+    equal_population_sizes: false
+    parameters:
+        population_size:
+            value: 0.002
+            estimate: true
+            prior:
+                gamma_distribution:
+                    shape: 5.0
+                    scale: 0.0004
+                    offset: 0.0
+        root_relative_population_size:
+            value: 1.0
+            estimate: true
+            prior:
+                gamma_distribution:
+                    shape: 100.0
+                    scale: 0.01
+                    offset: 0.0
+        freq_1:
+            value: 0.5
+            estimate: false
+
+        mutation_rate:
+            value: 1.0
+            estimate: false
+
+comparisons:
+- comparison:
+    path: "../nexus-alignments/G-crombota-rossi-BabuyanClaro-Calayan-300-424654214.nex"
+- comparison:
+    path: "../nexus-alignments/G-mindorensis-mindorensis-MaestreDeCampo-Masbate-300-424654214.nex"
+- comparison:
+    path: "../nexus-alignments/G-sp_a-sp_b-Dalupiri-CamiguinNorte-300-424654214.nex"

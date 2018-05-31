@@ -1,0 +1,3 @@
+model	post_prob	cumulative_post_prob	prior_prob	bf
+0,1,2	0.9944	0.9944	0.241982	556.249
+0,1,0	0.0056	1	0.171847	0.0271391
