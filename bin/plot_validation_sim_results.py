@@ -1981,7 +1981,7 @@ def generate_root_1000_500k_model_plots(
     row_keys, results_batches = get_root_1000_500k_results_paths(project_util.VAL_DIR)
 
     plt.close('all')
-    fig = plt.figure(figsize = (3.5, 3.0))
+    fig = plt.figure(figsize = (3.5, 3.3))
     nrows = 1
     ncols = 1 
     gs = gridspec.GridSpec(nrows, ncols,
@@ -2118,7 +2118,7 @@ def generate_root_1000_500k_model_plots(
             ax.set_xticklabels(xtick_labels)
             ax.set_yticklabels(ytick_labels)
 
-    gs.update(left = 0.11, right = 0.99, bottom = 0.12, top = 0.92)
+    gs.update(left = 0.14, right = 0.99, bottom = 0.16, top = 0.92)
 
     plot_dir = os.path.join(project_util.VAL_DIR, "plots")
     if not os.path.exists(plot_dir):
