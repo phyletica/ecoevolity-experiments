@@ -48,17 +48,17 @@
     \vspace{-1mm}
 
     \begin{minipage}[t][0.45\textheight][t]{\linewidth}
-        \begin{onlyenv}<2-6>
+        \begin{onlyenv}<2->
             \begin{center}
                 We want to infer the model and divergence times given genetic data
             \end{center}
         \end{onlyenv}
 
         \vspace{-3mm}
-        \begin{onlyenv}<4-6>
+        \begin{onlyenv}<4->
             \begin{displaybox}[0.60\linewidth]
                 \vspace{-1.3mm}
-                \only<4-6>{
+                \only<4->{
                     \[
                         p(\divModel{i} \given \alignmentVector) \propto
                         % \frac{
@@ -77,10 +77,10 @@
         \end{onlyenv}
 
         \vspace{0.5mm}
-        \begin{onlyenv}<5-6>
+        \begin{onlyenv}<5->
             \begin{displaybox}[0.60\linewidth]
                 \vspace{-4.1mm}
-                \only<5-6>{
+                \only<5->{
                     \[
                         p(\alignmentVector \given \divModel{i}) = 
                         \int_{\allParameters{}}
@@ -96,7 +96,7 @@
         \end{onlyenv}
 
         \vspace{-1.5mm}
-        \begin{onlyenv}<6>
+        \begin{onlyenv}<6->
             \begin{columns}
 
                 \column{0.42\linewidth}
@@ -117,27 +117,27 @@
             \end{columns}
         \end{onlyenv}
         
-        \begin{onlyenv}<7->
-            \vspace{3.0mm}
-            \textbf{Challenges:} \\
-            \vspace{-6mm}
-            \begin{enumerate}
-                % \item<8-> Cannot solve all the integrals analytically
-                \item<8-> Likelihood is tractable, but difficult 
-                % \begin{itemize}
-                %     \item<10-> Numerical approximation via approximate-likelihood Bayesian computation (ABC)
-                % \end{itemize}
-                \item<9-> Sampling over all possible models
-                \begin{itemize}
-                    \item<10-> 5 taxa = 52 models
-                    \item<11-> 10 taxa = 115,975 models
-                    \item<12-> 20 taxa = 51,724,158,235,372 models!!
-                    % \item<15-> A ``diffuse'' Dirichlet process prior (DPP)
-                \end{itemize}
-            \end{enumerate}
-        \end{onlyenv}
+        % \begin{onlyenv}<7->
+        %     \vspace{3.0mm}
+        %     \textbf{Challenges:} \\
+        %     \vspace{-6mm}
+        %     \begin{enumerate}
+        %         % \item<8-> Cannot solve all the integrals analytically
+        %         \item<8-> Likelihood is tractable, but difficult 
+        %         % \begin{itemize}
+        %         %     \item<10-> Numerical approximation via approximate-likelihood Bayesian computation (ABC)
+        %         % \end{itemize}
+        %         \item<9-> Sampling over all possible models
+        %         \begin{itemize}
+        %             \item<10-> 5 taxa = 52 models
+        %             \item<11-> 10 taxa = 115,975 models
+        %             \item<12-> 20 taxa = 51,724,158,235,372 models!!
+        %             % \item<15-> A ``diffuse'' Dirichlet process prior (DPP)
+        %         \end{itemize}
+        %     \end{enumerate}
+        % \end{onlyenv}
     \end{minipage}
-    \vspace{-0.5cm}
+    % \vspace{-0.5cm}
     % \barefootnote{\tiny \shortfullcite{Oaks2012}, \shortfullcite{Oaks2014dpp}}
 \end{frame}
 
