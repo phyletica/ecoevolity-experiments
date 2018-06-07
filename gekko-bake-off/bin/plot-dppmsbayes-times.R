@@ -21,10 +21,10 @@ ggplot(data, aes(x = time, y = comparison, height = ..density..)) +
     geom_density_ridges(stat = "density", scale = 8, rel_min_height = 0.001) +
     theme_minimal(base_size = 14) +
     theme(axis.text.y = element_text(vjust = 0)) +
-    scale_x_continuous(expand = c(0.05, 0), limits = c(0, NA)) +
+    scale_x_continuous(expand = c(0.05, 0), limits = c(0, 0.008)) +
     scale_y_discrete(expand = c(0.01, 0)) +
     labs(x = "Divergence time") +
-    labs(y = "Comparison")
+    labs(y = "")
 
 ggsave("../results/dppmsbayes-times.pdf", width = 7.0, height = 4.32623789116916, units = "in")
 ggsave("../results/dppmsbayes-times.png", width = 7.0, height = 4.32623789116916, units = "in")

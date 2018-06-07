@@ -46,6 +46,8 @@ labels='-l "BabuyanClaro0" "Babuyan Claro" -l "Calayan0" "Calayan" -l "MaestreDe
 
 convert_labels_to_array $labels
 
-pyco-sumtimes -f -z -x "Divergence time" -b "$burnin" "${label_array[@]}" -p "${output_dir}/" ${eco_dir}/*state*log.gz
-sumcoevolity -b $burnin -n 1000000 -p "${output_dir}/" -c "../configs/ecoevolity-config.yml" ${eco_dir}/*state*log
+gzip -f -d -k ${eco_dir}/*state*log.gz
+
+pyco-sumtimes -f --x-limits 0.0 0.008 -x "Divergence time" -y "" -b "$burnin" "${label_array[@]}" -p "${output_dir}/" ${eco_dir}/*state*log.gz
+sumcoevolity -f -b $burnin -n 1000000 -p "${output_dir}/" -c "../configs/ecoevolity-config.yml" ${eco_dir}/*state*log
 pyco-sumevents -p "${output_dir}/" -f --no-legend "${output_dir}/sumcoevolity-results-nevents.txt"
