@@ -11,14 +11,19 @@
 
 \newcommand{\ifembed}[2]{#1}
 % \newcommand{\ifembed}[2]{#2}
-% \newcommand{\ifdoublespacing}[2]{#1}
-\newcommand{\ifdoublespacing}[2]{#2}
-% \newcommand{\iflinenumbers}[2]{#1}
-\newcommand{\iflinenumbers}[2]{#2}
+\newcommand{\ifdoublespacing}[2]{#1}
+% \newcommand{\ifdoublespacing}[2]{#2}
+\newcommand{\iflinenumbers}[2]{#1}
+% \newcommand{\iflinenumbers}[2]{#2}
+\newcommand{\ifragged}[2]{#1}
+% \newcommand{\ifragged}[2]{#2}
+
+\newcommand{\mytitle}{Full Bayesian Comparative Phylogeography from Genomic Data}
+\newcommand{\myrunninghead}{\uppercase{Full Bayesian comparative phylogeography}}
 
 \usepackage[round]{natbib}
 
-\title{Full Bayesian comparative phylogeography from genomic data}
+\title{\mytitle}
 
 \author[1]{Jamie R.\ Oaks\thanks{Corresponding author: \href{mailto:joaks@auburn.edu}{\tt joaks@auburn.edu}}}
 \affil[1]{Department of Biological Sciences \& Museum of Natural History, Auburn University, Auburn, Alabama 36849}
@@ -26,7 +31,7 @@
 % \date{\today}
 \date{\parbox{\linewidth}{\centering%
     \today\endgraf\bigskip
-    \textbf{Running head}: Full Bayesian comparative phylogeography}}
+    \textbf{Running head}: \myrunninghead}}
 
 \makeatletter
 \let\msTitle\@title
@@ -38,9 +43,16 @@
 
 \begin{document}
 
+
 \ifdoublespacing{
 \doublespacing
 }{}
+
+\ifragged{
+\raggedright
+}{}
+
+\input{ssb-title-page.tex}
 
 \iflinenumbers{
 \begin{linenumbers}
@@ -70,7 +82,7 @@
 \bibliography{../../bib/references}
 
 %% LIST OF FIGURES %%%%%%%%%%%%%%%%%%%%%%%%%%
-\ifembed{}{
+% \ifembed{}{
 \newpage
 \singlespacing
 
@@ -80,7 +92,7 @@
 \setlength\cftbeforefigskip{10pt}
 \cftpagenumbersoff{fig}
 \listoffigures
-}
+% }
 
 
 \iflinenumbers{
