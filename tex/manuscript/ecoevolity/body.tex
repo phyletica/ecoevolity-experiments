@@ -933,8 +933,21 @@ assumption of unlinked characters was violated by the 200-character loci.
 For the analysis of each simulated \dataset with \ecoevolity, three independent
 MCMC chains were run for 75,000 generations, sampling every 50th generation.
 For the \dppmsbayes analyses, 500,000 samples were simulated from the joint
-prior distribution, 2,000 of which were retained for the approximate posterior
-sample.
+prior distribution.
+To determine which samples to retain for the approximate posterior, for each
+pair we used the mean of four summary statistics across all the loci:
+\begin{enumerate}
+    \item The number of segregating sites \citep[$\theta_W$;][]{Watterson1975},
+    \item the average number of pairwise differences across all gene copies
+        \citep[$\pi$;][]{NeiLi1979},
+    \item the net number of pairwise differences between the two populations
+        \citep[Equation 25 in][]{NeiLi1979}, and
+    \item the standard deviation in the difference between $\pi$ and $\theta_W$
+        \citep{Tajima1989}.
+\end{enumerate}
+After standardizing these statistics, the 2,000 prior samples that were closest
+to the same statistics calculated from a simulated \dataset were retained as
+the approximate posterior.
 
 \subsection{Empirical application}
 Previous methods for estimating shared divergence times often over-cluster taxa
@@ -1023,6 +1036,39 @@ The sequence reads are available on the NCBI Sequence Read Archive (accession
 \highLight{XXXXXX})
 and the assembled data matrices are available in our project repository
 (\url{https://github.com/phyletica/ecoevolity-experiments}).
+
+\subsubsection{Empirical comparison to ABC}
+The \spp{Gekko} \dataset is much too large to analyze with existing ABC
+methods for estimating co-divergences.
+In order to compare the results of the new full-likelihood method, \ecoevolity,
+to the ABC method, \dppmsbayes, we randomly sampled (without replacement) 200
+loci from three of the pairs of \emph{Gekko} populations.
+The prior settings we used for the \ecoevolity analysis of this reduced
+\dataset was:
+\begin{itemize}
+    \item $\concentration = 1.414216$, which corresponds with a prior mean
+        number of divergence events of two
+    \item $\divtime \sim \dexponential{0.1}$
+    \item $\epopsize[\descendantpopindex{}] \sim \dgamma{5}{0.002}$
+    \item $\rootrelativepopsize \sim \dgamma{100}{1}$
+    \item $\gfreq = 0.5$
+    \item $\murate = 1$ for all three pairs
+\end{itemize}
+For the \dppmsbayes analysis, the only difference was the prior we used for
+effective size of the ancestral population, which was \dgamma{5}{0.002}.
+
+For the \ecoevolity analysis, we ran five independent MCMC chains for 12,000
+generations, sampling every 10th generation.
+We assessed convergence and mixing using the same methods as we did for the
+analyses of the full \spp{Gekko} \dataset, described above.
+For the \dppmsbayes analysis, we simulated 500,000 samples from the joint
+prior, and to get a sample from the approximate posterior, we retained the
+5,000 samples with summary statistics most similar to those calculated
+from the reduced \spp{Gekko} \dataset.
+For each pair, we used two summary statistics:
+The average number of pairwise differences across all gene copies ($\pi$) and
+between the gene copies from the two populations ($\pi_b$) \citep{NeiLi1979}.
+For each pair, we used the mean of both statistics across the 200 loci.
 
 
 \section{Results}
@@ -1393,6 +1439,29 @@ acquisition and assembly of the RADseq data, and the model is sensitive to
 these missing variable sites, especially when only variable characters are
 analyzed.
 
+\subsubsection{Empirical comparison to ABC}
+
+Figure~\ref{fig:gekkobakeoff} shows the dramatic difference between the results
+of the new full-likelihood method, \ecoevolity, and the ABC method,
+\dppmsbayes, when analyzing a random subset of the \spp{Gekko} data.
+For \dppmsbayes, there is strong support for a single, shared divergence
+(Figure~\ref{fig:gekkobakeoff}C),
+and the marginal posterior distributions of divergence times are almost
+completely overlapping among the three pairs of populations
+(Figure~\ref{fig:gekkobakeoff}D).
+In contrast,
+\ecoevolity strongly supports three independent divergences
+(Figure~\ref{fig:gekkobakeoff}A),
+and the marginal posterior divergence-time distributions are almost completely
+non-overlapping
+(Figure~\ref{fig:gekkobakeoff}B).
+Furthermore, the computing time for \ecoevolity and \dppmsbayes was 7.6
+minutes and 47.3 days, respectively.
+
+\ifembed{
+\input{fig-gekko-bake-off.tex}
+}{}
+
 
 \section{Discussion}
 
@@ -1511,7 +1580,7 @@ Each of the four pairs of populations of \spp{Gekko} occur on two different
 oceanic islands that were never connected.
 Thus, we do not expect shared divergence times across the pairs.
 However, based on previous findings \citep{Siler2012, Siler2014kikuchii}, all
-these pairs likely diverged very recently.
+of these pairs likely diverged very recently.
 This is a challenging region of parameter space for this type of method: Very
 similar and recent divergence times that are nonetheless independent.
 % We used the new method to compare the divergence times of four pairs
@@ -1525,9 +1594,19 @@ diverging very recently.
 \ref{fig:gekkonevents}
 \& 
 \ref{fig:gekkodivtimes}).
+
+We found similar results when we analyzed a random subset of 200 loci from
+three of the pairs of \spp{Gekko} populations
+(Figure \ref{fig:gekkobakeoff} A \& B).
+In contrast, when we analyzed these 200 loci with the ABC method, \dppmsbayes,
+we found strong support for the opposite conclusion that all three pairs
+diverged at the same time
+(Figure \ref{fig:gekkobakeoff} C \& D).
+In addition, \ecoevolity took almost 9,000-fold less computing time than
+\dppmsbayes.
 These results demonstrate that using the likelihood from genomic data provides
-enough information to unambiguously separate divergences across very narrow
-timescales.
+enough information to efficiently and unambiguously separate divergences across
+very narrow timescales, and avoids erroneous inferences of shared divergences.
 
 \subsection{Caveats}
 This method is subject to the caveats associated with all model-based
