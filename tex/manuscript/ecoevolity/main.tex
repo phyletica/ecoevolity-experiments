@@ -18,20 +18,17 @@
 \newcommand{\ifragged}[2]{#1}
 % \newcommand{\ifragged}[2]{#2}
 
-\newcommand{\mytitle}{Full Bayesian Comparative Phylogeography from Genomic Data}
-\newcommand{\myrunninghead}{\uppercase{Full Bayesian comparative phylogeography}}
-
 \usepackage[round]{natbib}
 
-\title{\mytitle}
+\title{Full Bayesian Comparative Phylogeography from Genomic Data}
 
 \author[1]{Jamie R.\ Oaks\thanks{Corresponding author: \href{mailto:joaks@auburn.edu}{\tt joaks@auburn.edu}}}
 \affil[1]{Department of Biological Sciences \& Museum of Natural History, Auburn University, Auburn, Alabama 36849}
 
-% \date{\today}
-\date{\parbox{\linewidth}{\centering%
-    \today\endgraf\bigskip
-    \textbf{Running head}: \myrunninghead}}
+\date{\today}
+% \date{\parbox{\linewidth}{\centering%
+%     \today\endgraf\bigskip
+%     \textbf{Running head}: \myrunninghead}}
 
 \makeatletter
 \let\msTitle\@title
@@ -52,13 +49,15 @@
 \raggedright
 }{}
 
-\input{ssb-title-page.tex}
-
 \iflinenumbers{
 \begin{linenumbers}
 }{}
 
-\maketitle
+\textbf{Running head}: \uppercase{Full Bayesian comparative phylogeography}
+
+{\let\newpage\relax\maketitle}
+
+\newpage
 
 \begin{abstract}
     \input{abstract.tex}
