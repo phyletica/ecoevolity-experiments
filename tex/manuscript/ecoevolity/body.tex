@@ -915,14 +915,24 @@ were
         $\nevents = 2$ divergence events
     \item $\divtime \sim \dgamma{2}{0.05}$
     \item $\murate = 1$
-    \item $\epopsize[\descendantpopindex{}] \sim \dgamma{5}{0.002}$
+    % \item $\epopsize[\descendantpopindex{}] \sim \dgamma{5}{0.002}$
 \end{enumerate}
-For analyses with \dppmsbayes, the effective size of the ancestral population,
-\epopsize[\rootpopindex], was also distributed as \dgamma{5}{0.002}, whereas
-for \ecoevolity, the relative effective size of the ancestral population,
-\rootrelativepopsize, was distributed as \dgamma{100}{1};
-the marginal prior on \epopsize[\rootpopindex] induced by the latter is similar
-to the former.
+% For analyses with \dppmsbayes, the effective size of the ancestral population,
+% \epopsize[\rootpopindex], was also distributed as \dgamma{5}{0.002}, whereas
+% for \ecoevolity, the relative effective size of the ancestral population,
+% \rootrelativepopsize, was distributed as \dgamma{100}{1};
+% the marginal prior on \epopsize[\rootpopindex] induced by the latter is similar
+% to the former.
+For \dppmsbayes,
+we placed a distribution of \dgamma{5}{0.008} on $4\epopsize{}\murate{}$
+for the ancestral and both descendant populations of each pair.
+Accordingly, for \ecoevolity, we used a distribution of \dgamma{5}{0.002} on
+$\epopsize{}\murate{}$ for both descendant popuations of each pair.
+For the relative effective size of the ancestrol population in \ecoevolity,
+we used a distribution of
+\dgamma{100}{1};
+this induces a marginal distribution on \epopsize[\rootpopindex] similar to
+that used for \dppmsbayes.
 For analyses with \dppmsbayes, we assumed a Jukes-Cantor model of nucleotide
 substitution, whereas for the \ecoevolity, we assumed the two-state equivalent
 (i.e., $\gfreq = 0.5$).
@@ -1344,7 +1354,7 @@ statistics that assume an infinite-sites model of mutation
 
 The new method also does a better job of estimating the number of divergence
 events (Fig.~\ref{fig:bakeoffnevents}), with a median posterior probability
-of the correct number of events of 0.942, compared to 0.789 for the ABC method.
+of the correct number of events of 0.942, compared to 0.7 for the ABC method.
 Importantly, the new method underestimates the number of events much less
 frequently (Fig.~\ref{fig:bakeoffnevents}),
 which should lead to fewer erroneous interpretations of shared processes of
@@ -1364,14 +1374,14 @@ To compare the overall amount of computation required by the two approaches
 we look at the average time it takes to analyze a simulated \dataset
 on a single processor 
 (2.6GHz Intel Xeon CPU E5-2660 v3).
-This was 34.6 days for \dppmsbayes (2,991,304 seconds)
+This was 38.8 days for \dppmsbayes (3,350,465 seconds)
 and only 33.4 minutes (2004.5 seconds) for \ecoevolity.
 The majority of the runtime for the ABC method is spent simulating samples
 from the prior distribution.
 While this step can be parallelized, the likelihood computations of \ecoevolity
 can also be multi-threaded.
 Regardless of the difficulties associated with comparing the approaches, the
-1,492-fold difference in computation time clearly demonstrates the
+1,671-fold difference in computation time clearly demonstrates the
 full-likelihood method is much more efficient than ABC.
 
 
