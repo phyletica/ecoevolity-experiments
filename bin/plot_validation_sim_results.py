@@ -2165,8 +2165,12 @@ def get_msbayes_results(
             for parameter_key, header_prefixes in column_header_prefixes.items():
                 for header_prefix in header_prefixes:
                     header = "{0}{1}".format(header_prefix, pair_idx + 1)
-                    true_val = float(true_values[header][sim_idx])
-                    post_sum = pycoevolity.stats.get_summary(float(x) for x in posterior[header])
+                    if parameter_key.endswith("size"):
+                        true_val = float(true_values[header][sim_idx]) / 4.0
+                        post_sum = pycoevolity.stats.get_summary((float(x) / 4.0) for x in posterior[header])
+                    else:
+                        true_val = float(true_values[header][sim_idx])
+                        post_sum = pycoevolity.stats.get_summary(float(x) for x in posterior[header])
                     results[parameter_key]['true'].append(true_val)
                     results[parameter_key]['mean'].append(post_sum['mean'])
                     results[parameter_key]['lower'].append(post_sum['qi_95'][0])
