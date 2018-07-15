@@ -1064,8 +1064,12 @@ The prior settings we used for the \ecoevolity analysis of this reduced
     \item $\gfreq = 0.5$
     \item $\murate = 1$ for all three pairs
 \end{itemize}
-For the \dppmsbayes analysis, the only difference was the prior we used for
-effective size of the ancestral population, which was \dgamma{5}{0.002}.
+We used the same settings for the \dppmsbayes analysis, except to account for
+the different parameterization of effective population sizes, we used
+\dgamma{5}{0.008}
+for the prior on
+$4\epopsize{}\murate{}$
+for the ancestral and descendant populations.
 
 For the \ecoevolity analysis, we ran five independent MCMC chains for 12,000
 generations, sampling every 10th generation.
@@ -1466,7 +1470,7 @@ and the marginal posterior divergence-time distributions are almost completely
 non-overlapping
 (Fig.~\ref{fig:gekkobakeoff}b).
 Furthermore, the computing time for \ecoevolity and \dppmsbayes was 7.6
-minutes and 47.3 days, respectively.
+minutes and 49.3 days, respectively.
 
 \ifembed{
 \input{fig-gekko-bake-off.tex}
@@ -1612,7 +1616,7 @@ In contrast, when we analyzed these 200 loci with the ABC method, \dppmsbayes,
 we found strong support for the opposite conclusion that all three pairs
 diverged at the same time
 (Fig.~\ref{fig:gekkobakeoff}c\&d).
-In addition, \ecoevolity took almost 9,000-fold less computing time than
+In addition, \ecoevolity took approximately 9,300-fold less computing time than
 \dppmsbayes.
 These results demonstrate that using the likelihood from genomic data provides
 enough information to efficiently and unambiguously separate divergences across
