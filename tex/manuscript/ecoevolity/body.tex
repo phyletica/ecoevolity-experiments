@@ -923,6 +923,7 @@ were
 % \rootrelativepopsize, was distributed as \dgamma{100}{1};
 % the marginal prior on \epopsize[\rootpopindex] induced by the latter is similar
 % to the former.
+\jroedit{}{
 For \dppmsbayes,
 we placed a distribution of \dgamma{5}{0.008} on $4\epopsize{}\murate{}$
 for the ancestral and both descendant populations of each pair.
@@ -933,6 +934,7 @@ we used a distribution of
 \dgamma{100}{1};
 this induces a marginal distribution on \epopsize[\rootpopindex] similar to
 that used for \dppmsbayes.
+}
 For analyses with \dppmsbayes, we assumed a Jukes-Cantor model of nucleotide
 substitution, whereas for the \ecoevolity, we assumed the two-state equivalent
 (i.e., $\gfreq = 0.5$).
@@ -1064,12 +1066,14 @@ The prior settings we used for the \ecoevolity analysis of this reduced
     \item $\gfreq = 0.5$
     \item $\murate = 1$ for all three pairs
 \end{itemize}
+\jroedit{}{
 We used the same settings for the \dppmsbayes analysis, except to account for
 the different parameterization of effective population sizes, we used
 \dgamma{5}{0.008}
 for the prior on
 $4\epopsize{}\murate{}$
 for the ancestral and descendant populations.
+}
 
 For the \ecoevolity analysis, we ran five independent MCMC chains for 12,000
 generations, sampling every 10th generation.
