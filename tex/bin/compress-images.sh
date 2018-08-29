@@ -2,11 +2,18 @@
 
 paths="$(ls ../../simulations/validation/plots/*nevents*.pdf)
 $(ls ../../simulations/validation/plots/*scatter*pdf)
+$(ls ../../simulations/validation/plots/*model*pdf)
 $(ls ../../bake-off/plots/*.pdf)
 ../images/div-cartoon/div-cartoon.pdf"
 
 for f in $paths
 do
+    filesuffix="${f##*-}"
+    if [ "$filesuffix" = "compressed.pdf" ]
+    then
+        continue
+    fi
+    
     echo "Rasterizing and compressing $f"
     n=${f/\.pdf/-compressed\.pdf}
     convert -density 450 -compress jpeg -quality 70 $f $n
