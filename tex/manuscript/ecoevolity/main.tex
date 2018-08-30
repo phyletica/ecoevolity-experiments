@@ -17,6 +17,8 @@
 % \newcommand{\iflinenumbers}[2]{#2}
 \newcommand{\ifragged}[2]{#1}
 % \newcommand{\ifragged}[2]{#2}
+\newcommand{\ifincludefigcaptionlist}[2]{#1}
+% \newcommand{ifincludefigcaptionlist}[2]{#2}
 
 \newcommand{\ifuserasterizedplots}[2]{#1}
 % \newcommand{\ifuserasterizedplots}[2]{#2}
@@ -98,7 +100,7 @@
 \bibliography{../../bib/references}
 
 %% LIST OF FIGURES %%%%%%%%%%%%%%%%%%%%%%%%%%
-% \ifembed{}{
+\ifincludefigcaptionlist{
 \newpage
 \singlespacing
 
@@ -108,7 +110,7 @@
 \setlength\cftbeforefigskip{10pt}
 \cftpagenumbersoff{fig}
 \listoffigures
-% }
+}{}
 
 
 \iflinenumbers{
