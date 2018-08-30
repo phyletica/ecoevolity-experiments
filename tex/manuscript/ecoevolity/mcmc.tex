@@ -1,15 +1,15 @@
-\subsubsection{Approximating the posterior with MCMC}
+% \section{Approximating the posterior with MCMC}
 
-We use Markov chain Monte Carlo (MCMC) algorithms to numerically approximate
-the joint posterior in Equation~\ref{eq:bayesruleexpanded}.
-We use the Gibbs sampling algorithm (Algorithm 8) of \citet{Neal2000}
-to update the divergence model (\divtimemodel) during the chain.
-We also use univariate Metropolis-Hastings algorithms
-\citep{Metropolis1953,Hastings1970} to update each parameter of the model
-during the MCMC.
-To improve mixing of the chain when there are strong correlations between
-divergence times, effective population sizes, and mutation rates we use
-multivariate Metropolis-Hastings algorithms.
+% We use Markov chain Monte Carlo (MCMC) algorithms to sample from the joint
+% posterior in Equation~\ref{eq:bayesruleexpanded} of the paper.
+% To update the divergence model (\divtimemodel) during the chain,
+% we use the Gibbs sampling algorithm (Algorithm 8) of \citet{Neal2000}.
+% To update each parameter of the model during the MCMC, we use univariate
+% Metropolis-Hastings algorithms
+% \citep{Metropolis1953,Hastings1970}.
+Here, we describe the multivariate Metropolis-Hastings moves that improve
+mixing of the MCMC chain when there are strong correlations between divergence
+times, effective population sizes, and mutation rates.
 The probability of accepting a Metropolis-Hastings proposal is determined
 by the product of three terms, the first two of which are the
 ratios of the likelihood and prior probability densities of the proposed
@@ -18,9 +18,10 @@ The third term, the Hastings ratio (HR), accounts for any difference in the
 probability of the proposed move versus the probability of the move that
 would exactly reverse the proposed state back to the current state of the
 model.
-Below, we detail the Hastings ratio for two of our multivariate moves.
+Below, we detail the Hastings ratios for two of our multivariate moves.
 
-\paragraph{\timerootsizemixer proposal}
+\subsection{\timerootsizemixer proposal}
+% \paragraph{\timerootsizemixer proposal}
 One case of poor mixing can occur for pairs that diverge long enough ago such
 that only a single coalescence occurs within the root for most loci.
 In this scenario there is very little information in the character patterns
@@ -104,7 +105,7 @@ and the Hastings ratio reduces to just the Jacobian term,
 \def\arraystretch{1.5}
 }
 \begin{split}
-    J & = \left|\begin{array}{ccc}
+    J & = \left[\begin{array}{ccc}
         \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \sepopsize[\rootpopindex]{}_i} &
         \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \divtime} &
         \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \uniformdeviate} \\
@@ -114,8 +115,8 @@ and the Hastings ratio reduces to just the Jacobian term,
         \frac{\partial \uniformdeviate\proposed}{\partial \sepopsize[\rootpopindex]{}_i} &
         \frac{\partial \uniformdeviate\proposed}{\partial \divtime} &
         \frac{\partial \uniformdeviate\proposed}{\partial \uniformdeviate}
-    \end{array}\right| \\
-    & = \left|\begin{array}{ccc}
+    \end{array}\right] \\
+    & = \left[\begin{array}{ccc}
         e^{\uniformdeviate} &
         0 &
         \sepopsize[\rootpopindex]e^{\uniformdeviate} \\
@@ -125,7 +126,7 @@ and the Hastings ratio reduces to just the Jacobian term,
         0 &
         0 &
         -1
-    \end{array}\right| \\
+    \end{array}\right] \\
     \det(J) & = e^{\uniformdeviate} \left|\begin{array}{cc}
         1 &
         -2\sepopsize[\rootpopindex]e^{\uniformdeviate} \\
@@ -182,7 +183,7 @@ The Jacobian term then becomes
 \def\arraystretch{1.5}
 }
 \begin{split}
-    J & = \left|\begin{array}{cccccccc}
+    J & = \left[\begin{array}{cccccccc}
         \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \sepopsize[\rootpopindex]{}_i} &
         \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \divtime} &
         \frac{\partial \sepopsize[\rootpopindex]{}_i\proposed}{\partial \sepopsize[\rootpopindex]{}_j} &
@@ -247,8 +248,8 @@ The Jacobian term then becomes
         \frac{\partial \uniformdeviate\proposed}{\partial \sepopsize[\rootpopindex]{}_{n-1}} &
         \frac{\partial \uniformdeviate\proposed}{\partial \sepopsize[\rootpopindex]{}_n} &
         \frac{\partial \uniformdeviate\proposed}{\partial \uniformdeviate}
-    \end{array}\right| \\
-    & = \left|\begin{array}{cccccccc}
+    \end{array}\right] \\
+    & = \left[\begin{array}{cccccccc}
         e^{\uniformdeviate} &
         0 &
         0 &
@@ -313,7 +314,7 @@ The Jacobian term then becomes
         0 &
         0 &
         -1
-    \end{array}\right| \\
+    \end{array}\right] \\
     \det(J) & = -e^{\uniformdeviate} \\
     |\det(J)| & = |-e^{\uniformdeviate}| = e^{\uniformdeviate} = \textrm{Hastings ratio}.
 \end{split}
@@ -321,7 +322,8 @@ The Jacobian term then becomes
 \end{linenomath}
 % }
 
-\paragraph{\timesizeratemixer proposal}
+\subsection{\timesizeratemixer proposal}
+% \paragraph{\timesizeratemixer proposal}
 This proposal is designed to improve mixing of the MCMC chain when there are
 strong posterior correlations among divergence time, population size, and
 mutation rate parameters.
@@ -384,7 +386,7 @@ the Jacobian term is
 \def\arraystretch{1.5}
 }
 \begin{split}
-    J & = \left|\begin{array}{ccccccccccc}
+    J & = \left[\begin{array}{ccccccccccc}
         \frac{\partial \parameter[1]\proposed}{\partial \parameter[1]} &
         \frac{\partial \parameter[1]\proposed}{\partial \parameter[2]} &
         \ldots &
@@ -506,8 +508,8 @@ the Jacobian term is
         \frac{\partial \parameter[\uniformdeviate]\proposed}{\partial \parameter[n-1]} &
         \frac{\partial \parameter[\uniformdeviate]\proposed}{\partial \parameter[n]} &
         \frac{\partial \parameter[\uniformdeviate]\proposed}{\partial \uniformdeviate} \\
-    \end{array}\right| \\
-    & = \left|\begin{array}{ccccccccccc}
+    \end{array}\right] \\
+    & = \left[\begin{array}{ccccccccccc}
         e^{\uniformdeviate} &
         0 &
         \ldots &
@@ -629,7 +631,7 @@ the Jacobian term is
         0 &
         0 &
         -1 \\
-    \end{array}\right| \\
+    \end{array}\right] \\
     \det(J) & = -e^{\uniformdeviate{}m}e^{-\uniformdeviate{}(n - m)} \\
     & = -e^{2\uniformdeviate{}m - \uniformdeviate{}n} \\
     |\det(J)| & = e^{\uniformdeviate{}(2m - n)} = \textrm{Hastings ratio}.

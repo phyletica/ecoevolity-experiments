@@ -169,13 +169,13 @@ population pair $i$.
 Finally, we use \alldata to represent the data across all the pairs of
 populations of which we wish to compare the divergence times.
 Note, because the pairs are unconnected
-(Fig.~\labelcref{fig:divCartoon,fig:dag}),
+(Fig.~\ref{fig:divCartoon} \& S\ref{fig:dag}),
 different characters can be collected for each pair (i.e., characters do not
 need to be orthologous across the pairs).
 
-\ifembed{
-\input{fig-dag.tex}
-}{}
+% \ifembed{
+% \input{fig-dag.tex}
+% }{}
 
 \subsection{The model}
 
@@ -278,7 +278,9 @@ simply taking the product over them,
     \pr(\leafallelecounts[i], \leafredallelecounts[i] \given \sptree, \murate, \gfreq).
     \label{eq:comparisonlikelihood}
 \end{equation}
-Finally, the likelihood across all of our \ncomparisons{} pairs is simply the
+Finally, \jroedit{}{assuming our \ncomparisons{} pairs are independent,} the
+\jroedit{}{overall} likelihood \jroedit{across all of our \ncomparisons{}
+pairs}{} is simply the
 product of the likelihood of each pair,
 \begin{equation}
     \pr(
@@ -624,7 +626,7 @@ population sizes are scaled by \murate.
 However, what about the second pair of populations for which we wish to compare
 the divergence time to the first?
 Because the species trees in our model are disconnected
-(Fig.~\labelcref{fig:divCartoon,fig:dag}),
+(Fig.~\ref{fig:divCartoon} \& S\ref{fig:dag}),
 we cannot learn about
 the relative rates of mutation across the population pairs from the data.
 As a result, we need strong prior information about the relative rates of
@@ -661,7 +663,22 @@ However, if the genetic markers are naturally biallelic, the frequencies of the
 two states can be meaningfully estimated, making the model a two-state general
 time-reversible model \citep{Tavare1986}.
 
-\input{mcmc.tex}
+% \input{mcmc.tex}
+\subsubsection{Approximating the posterior with MCMC}
+
+We use Markov chain Monte Carlo (MCMC) algorithms to \jroedit{numerically
+approximate}{sample (approximately) from} the joint posterior in
+Equation~\ref{eq:bayesruleexpanded}.
+To update the divergence model (\divtimemodel) during the chain, we use the
+Gibbs sampling algorithm (Algorithm 8) of \citet{Neal2000}.
+We also use univariate Metropolis-Hastings algorithms
+\citep{Metropolis1953,Hastings1970} to update each parameter of the model
+during the MCMC.
+To improve mixing of the chain when there are strong correlations between
+divergence times, effective population sizes, and mutation rates we use
+multivariate Metropolis-Hastings algorithms.
+\jroedit{}{The details of these multivariate moves can be found in
+Appendix~\ref{appendix:mcmc}.}
 
 \subsection{Software implementation}
 The method outlined above is implemented in the open-source software package,
@@ -915,14 +932,24 @@ were
         $\nevents = 2$ divergence events
     \item $\divtime \sim \dgamma{2}{0.05}$
     \item $\murate = 1$
-    \item $\epopsize[\descendantpopindex{}] \sim \dgamma{5}{0.002}$
+    % \item $\epopsize[\descendantpopindex{}] \sim \dgamma{5}{0.002}$
 \end{enumerate}
-For analyses with \dppmsbayes, the effective size of the ancestral population,
-\epopsize[\rootpopindex], was also distributed as \dgamma{5}{0.002}, whereas
-for \ecoevolity, the relative effective size of the ancestral population,
-\rootrelativepopsize, was distributed as \dgamma{100}{1};
-the marginal prior on \epopsize[\rootpopindex] induced by the latter is similar
-to the former.
+% For analyses with \dppmsbayes, the effective size of the ancestral population,
+% \epopsize[\rootpopindex], was also distributed as \dgamma{5}{0.002}, whereas
+% for \ecoevolity, the relative effective size of the ancestral population,
+% \rootrelativepopsize, was distributed as \dgamma{100}{1};
+% the marginal prior on \epopsize[\rootpopindex] induced by the latter is similar
+% to the former.
+\jroedit{}{For \dppmsbayes,
+we placed a \dgamma{5}{0.008} distribution on $4\epopsize{}\murate{}$
+for the ancestral and both descendant populations of each pair.
+Accordingly, for \ecoevolity, we used a \dgamma{5}{0.002} distribution on
+$\epopsize{}\murate{}$ for both descendant populations of each pair.
+For the relative effective size of the ancestral population in \ecoevolity,
+we used a \dgamma{100}{1} distribution;
+this induces a marginal prior distribution on \epopsize[\rootpopindex] similar
+to that used for \dppmsbayes.
+}
 For analyses with \dppmsbayes, we assumed a Jukes-Cantor model of nucleotide
 substitution, whereas for the \ecoevolity, we assumed the two-state equivalent
 (i.e., $\gfreq = 0.5$).
@@ -963,6 +990,11 @@ periods.
 Because these islands were never connected, the divergence between the
 populations of each pair is likely due to over-water dispersal, the timing of
 which should be idiosyncratic to each pair.
+\jroedit{}{We used previous phylogenetic results based on different genetic
+data \citep{Siler2012,Siler2014kikuchii} to help ensure that the pairs are
+independent (i.e., they do not overlap each other in the phylogeny of
+\emph{Gekko}).}
+   
 
 \ifembed{
 \input{../../tables/gekko-comparisons.tex}
@@ -1030,10 +1062,10 @@ of the log-likelihood and all parameters.
 We also inspected the chains visually with the program Tracer version 1.6
 \citep{Tracer16}.
 
-The collection and assembly of the \spp{Gekko} RADseq data are detailed in
-\citeauthor{Oaks2018paic} (in prep.).
-The sequence reads are available on the NCBI Sequence Read Archive (accession
-\highLight{XXXXXX})
+The collection and assembly of the \spp{Gekko} RADseq data are detailed by
+\citet{Oaks2018paic}.
+The sequence reads are available on the NCBI Sequence Read Archive
+\jroedit{}{(Bioproject PRJNA486413, SRA Study SRP158258)}
 and the assembled data matrices are available in our project repository
 (\url{https://github.com/phyletica/ecoevolity-experiments}).
 
@@ -1054,8 +1086,14 @@ The prior settings we used for the \ecoevolity analysis of this reduced
     \item $\gfreq = 0.5$
     \item $\murate = 1$ for all three pairs
 \end{itemize}
-For the \dppmsbayes analysis, the only difference was the prior we used for
-effective size of the ancestral population, which was \dgamma{5}{0.002}.
+\jroedit{}{We used the same settings for the \dppmsbayes analysis, except to
+account for the different parameterization of effective population sizes, we
+used a
+\dgamma{5}{0.008}
+prior on
+$4\epopsize{}\murate{}$
+for the ancestral and descendant populations.
+}
 
 For the \ecoevolity analysis, we ran five independent MCMC chains for 12,000
 generations, sampling every 10th generation.
@@ -1069,6 +1107,9 @@ For each pair, we used two summary statistics:
 The average number of pairwise differences across all gene copies ($\pi$) and
 between the gene copies from the two populations ($\pi_b$) \citep{NeiLi1979}.
 For each pair, we used the mean of both statistics across the 200 loci.
+\jroedit{}{The results from simulated data demonstrate that additional
+statistics that summarize information about effective population sizes are not
+informing the ABC method (see below).}
 
 
 \section{Results}
@@ -1119,22 +1160,31 @@ of sampled characters (100k to 500k) is relatively modest (Fig.\
 Retaining the constant characters results in a much larger increase in
 precision than collecting five times more characters.
 
-The true number of divergence events is included in the 95\% credible set
-greater than 98\% of the time for all the simulation conditions
-(Fig.~\ref{fig:valnevents}).
+The true \jroedit{}{model and} number of divergence events is included in the
+95\% credible set greater than \jroedit{98\%}{97\%} of the time for all the
+simulation conditions
+(Fig.~\ref{fig:valnevents} \jroedit{}{\& S\ref{fig:valmodels}}).
 The frequency at which the correct number of events has the largest posterior
 probability, and the median posterior probability of the correct number of
 events,
 increases when constant characters are retained and as prior information about
 the ancestral population size increases 
 (Fig.~\ref{fig:valnevents}).
+\jroedit{}{We see the same patterns for inferring the correct divergence model
+(Fig.~S\ref{fig:valmodels}).
+}
 As with the parameter estimates, the performance increase associated with the
 increase from 100k to 500k sampled characters is moderate; retaining the
-constant characters has a much larger effect (Fig.~\ref{fig:valnevents}).
+constant characters has a much larger effect
+(Fig.~\ref{fig:valnevents} \jroedit{}{\& S\ref{fig:valmodels}}).
 When constant characters are used, the median posterior
 probability of the correct number of divergence events is high (over 0.89
 for all simulation conditions; 
 Fig.~\ref{fig:valnevents}).
+\jroedit{}{Likewise, the median posterior probability of the correct divergence
+model is greater than 0.887 across all simulation conditions when constant
+characters are used
+(Fig.~S\ref{fig:valmodels}).}
 
 \ifembed{
 \input{fig-val-nevents.tex}
@@ -1217,17 +1267,22 @@ and descendant populations
 }{}
 
 The cost of removing data to avoid violating the assumption of unlinked
-characters is also very pronounced for estimating the number of divergence
-events.
-The method better estimates the correct number of events, and with much higher
-posterior probability, when the constant characters are retained 
+characters is also very pronounced for estimating the \jroedit{}{divergence
+model and} number of divergence events.
+The method better estimates the correct \jroedit{}{model and} number of events,
+\jroedit{and}{both} with much higher posterior probability, when the constant
+characters are retained 
 (Fig.\ 
-\ref{fig:linkagenevents500k}
+\ref{fig:linkagenevents500k},
+S\ref{fig:linkagemodels500k},
+S\ref{fig:linkagenevents100k},
 \&
-S\ref{fig:linkagenevents100k}).
-The median posterior probability of the correct number of divergence events is
-over 0.95 for all 500k-character \datasets, even when loci were 1000bp long
-(Fig.~\ref{fig:linkagenevents500k}).
+S\ref{fig:linkagemodels100k}).
+The median posterior probability of \jroedit{}{both} the correct number of
+divergence events \jroedit{}{and the correct model} is over 0.95 for all
+500k-character \datasets, even when loci were 1000bp long
+(Fig. \ref{fig:linkagenevents500k}
+\jroedit{}{\& S\ref{fig:linkagemodels500k}}).
 However, our results show that linked characters do introduce bias in the
 estimated posterior probability of the one divergence model ($\nevents{} = 1$)
 (Fig.~\ref{fig:linkagepostprobs}).
@@ -1275,8 +1330,11 @@ effective population sizes
 (Fig.\ 
 S\ref{fig:missingleafsizes}
 \&
-S\ref{fig:missingrootsizes}), or the number of divergence events
-(Fig.~\ref{fig:missingnevents}).
+S\ref{fig:missingrootsizes}),
+\jroedit{or}{} the number of divergence events
+(Fig.~\ref{fig:missingnevents})\jroedit{}{, or
+the divergence model
+(Fig.~S\ref{fig:missingmodels}).}
 
 \ifembed{
 \input{fig-missing-div-times.tex}
@@ -1309,12 +1367,17 @@ S\ref{fig:filteredrootsizes}).
 }{}
 
 However, in the face of data-acquisition bias, the method still estimates the
-number of divergence events well, especially when constant characters are used
-(Fig.~\ref{fig:filterednevents}).
+number of divergence events \jroedit{}{and the divergence model} well,
+especially when constant characters are used
+(Fig.~\ref{fig:filterednevents}
+\jroedit{}{\&
+S\ref{fig:filteredmodels}}).
 Even when the probability of sampling a character with a singleton pattern is
 0.4, the median posterior probability of the correct number of divergence
-events is 0.948.
-(Fig.~\ref{fig:filterednevents}).
+events is 0.948
+(Fig.~\ref{fig:filterednevents})\jroedit{}{,
+and the median posterior probability of the correct model is 0.945
+(Fig.~S\ref{fig:filteredmodels}).}
 
 \ifembed{
 \input{fig-filtered-nevents.tex}
@@ -1337,6 +1400,15 @@ Notably, the new method does not underestimate the older divergence times like
 the ABC method, which suffers from saturated population-genetic summary
 statistics that assume an infinite-sites model of mutation
 (Fig.~\ref{fig:bakeoffdivtimes}).
+\jroedit{}{Also, the ABC approach gleans no information from the data about
+effective population sizes; the posterior distribution nearly matches the prior
+for all analyses (Fig.\ 
+S\ref{fig:bakeoffleafsizes}
+\&
+S\ref{fig:bakeoffrootsizes}).
+This is despite the fact that three of the four statistics used for the ABC
+approach summarize information about population sizes.
+}
 
 \ifembed{
 \input{fig-bake-off-div-times.tex}
@@ -1344,9 +1416,13 @@ statistics that assume an infinite-sites model of mutation
 
 The new method also does a better job of estimating the number of divergence
 events (Fig.~\ref{fig:bakeoffnevents}), with a median posterior probability
-of the correct number of events of 0.942, compared to 0.789 for the ABC method.
+of the correct number of events of 0.942, compared to 0.7 for the ABC method.
+\jroedit{}{Similarly, the new method is better at estimating the divergence
+model (Fig.~S\ref{fig:bakeoffmodels}), with a median posterior probability of
+the correct model of 0.942, compared to 0.685 for the ABC method.}
 Importantly, the new method underestimates the number of events much less
-frequently (Fig.~\ref{fig:bakeoffnevents}),
+frequently
+(Fig.~\ref{fig:bakeoffnevents} \jroedit{}{\& S\ref{fig:bakeoffmodels}}),
 which should lead to fewer erroneous interpretations of shared processes of
 divergence.
 
@@ -1364,14 +1440,14 @@ To compare the overall amount of computation required by the two approaches
 we look at the average time it takes to analyze a simulated \dataset
 on a single processor 
 (2.6GHz Intel Xeon CPU E5-2660 v3).
-This was 34.6 days for \dppmsbayes (2,991,304 seconds)
+This was 38.8 days for \dppmsbayes (3,350,465 seconds)
 and only 33.4 minutes (2004.5 seconds) for \ecoevolity.
 The majority of the runtime for the ABC method is spent simulating samples
 from the prior distribution.
 While this step can be parallelized, the likelihood computations of \ecoevolity
 can also be multi-threaded.
 Regardless of the difficulties associated with comparing the approaches, the
-1,492-fold difference in computation time clearly demonstrates the
+1,671-fold difference in computation time clearly demonstrates the
 full-likelihood method is much more efficient than ABC.
 
 
@@ -1456,7 +1532,7 @@ and the marginal posterior divergence-time distributions are almost completely
 non-overlapping
 (Fig.~\ref{fig:gekkobakeoff}b).
 Furthermore, the computing time for \ecoevolity and \dppmsbayes was 7.6
-minutes and 47.3 days, respectively.
+minutes and 49.3 days, respectively.
 
 \ifembed{
 \input{fig-gekko-bake-off.tex}
@@ -1602,7 +1678,7 @@ In contrast, when we analyzed these 200 loci with the ABC method, \dppmsbayes,
 we found strong support for the opposite conclusion that all three pairs
 diverged at the same time
 (Fig.~\ref{fig:gekkobakeoff}c\&d).
-In addition, \ecoevolity took almost 9,000-fold less computing time than
+In addition, \ecoevolity took approximately 9,300-fold less computing time than
 \dppmsbayes.
 These results demonstrate that using the likelihood from genomic data provides
 enough information to efficiently and unambiguously separate divergences across

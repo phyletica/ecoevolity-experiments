@@ -1,7 +1,7 @@
 [pymsbayes]
 	version = Version 0.2.4
 	output_directory = /home/jamie/Downloads/gekko-bake-off/analyses/pymsbayes/prior/pymsbayes-results
-	temp_directory = /home/jamie/Downloads/gekko-bake-off/analyses/pymsbayes/prior/pymsbayes-results/temp-files-ZYP9IR
+	temp_directory = /home/jamie/Downloads/gekko-bake-off/analyses/pymsbayes/prior/pymsbayes-results/temp-files-3hs2MC
 	sort_index = 11
 	simulation_reps = 0
 	seed = 845225390
@@ -26,6 +26,6 @@
 	[[prior_configs]]
 		1 = ../../../../configs/dpp-msbayes-300-424654214.cfg
 	[[run_stats]]
-		start_time = 2018-05-24 20:30:52.482431
-		stop_time = 2018-05-30 18:26:06.591894
-		total_duration = 5 days, 21:55:14.109463
+		start_time = 2018-07-07 22:41:26.932991
+		stop_time = 2018-07-14 02:30:38.265175
+		total_duration = 6 days, 3:49:11.332184

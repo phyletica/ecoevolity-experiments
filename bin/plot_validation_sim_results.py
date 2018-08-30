@@ -47,6 +47,23 @@ mpl.rcParams.update(tex_font_settings)
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 
+def get_standardized_partiton(element_vector):
+    el_map = {}
+    next_idx = 0
+    partition = []
+    values = {}
+    for i, el in enumerate(element_vector):
+        if not el_map.has_key(el):
+            el_map[el] = next_idx
+            values[next_idx] = [el]
+            next_idx += 1
+        partition.append(el_map[el])
+    return partition
+
+def get_standardized_partiton_str(element_vector):
+    p = get_standardized_partiton(element_vector)
+    return "".join(str(e) for e in p)
+
 def get_nevents_probs(
         nevents = 1,
         sim_dir = "03pairs-dpp-root-0100-100k",
@@ -1681,7 +1698,10 @@ def generate_model_plots(
         linked_loci = None,
         missing_data = False,
         filtered_data = False,
-        include_variable_only = True):
+        include_variable_only = True,
+        show_all_models = False):
+    if show_all_models and (number_of_comparisons != 3):
+        raise Exception("show all models only supported for 3 comparisons")
     if int(bool(linked_loci)) + int(missing_data) + int(filtered_data) > 1:
         raise Exception("Can only specify linked_loci, missing_data, or filtered_data")
     _LOG.info("Generating model plots...")
@@ -1730,6 +1750,17 @@ def generate_model_plots(
             wspace = 0.0,
             hspace = 0.0)
 
+    model_to_index = {
+            "000": 0,
+            "001": 1,
+            "010": 2,
+            "011": 3,
+            "012": 4,
+            }
+    index_to_model = {}
+    for k, v in model_to_index.items():
+        index_to_model[v] = k
+
     for row_idx, row_key in enumerate(row_keys):
         results_batch = results_batches[row_key]
         last_col_idx = len(results_batch) - 1
@@ -1746,17 +1777,25 @@ def generate_model_plots(
                     row_idx, col_idx, sim_dir, len(results_paths)))
 
             true_map_nevents = []
+            true_map_model = []
             true_map_nevents_probs = []
             for i in range(number_of_comparisons):
                 true_map_nevents.append([0 for i in range(number_of_comparisons)])
                 true_map_nevents_probs.append([[] for i in range(number_of_comparisons)])
+            for i in range(5):
+                true_map_model.append([0 for i in range(5)])
+                true_map_nevents_probs.append([[] for i in range(5)])
             true_nevents = tuple(int(x) for x in results["true_num_events"])
             map_nevents = tuple(int(x) for x in results["map_num_events"])
+            true_model = tuple(x for x in results["true_model"])
+            map_model = tuple(x for x in results["map_model"])
             true_nevents_cred_levels = tuple(float(x) for x in results["true_num_events_cred_level"])
             true_model_cred_levels = tuple(float(x) for x in results["true_model_cred_level"])
             assert(len(true_nevents) == len(map_nevents))
             assert(len(true_nevents) == len(true_nevents_cred_levels))
             assert(len(true_nevents) == len(true_model_cred_levels))
+            assert(len(true_nevents) == len(true_model))
+            assert(len(true_nevents) == len(map_model))
 
             true_nevents_probs = []
             map_nevents_probs = []
@@ -1771,68 +1810,113 @@ def generate_model_plots(
             mean_true_nevents_prob = sum(true_nevents_probs) / len(true_nevents_probs)
             median_true_nevents_prob = pycoevolity.stats.median(true_nevents_probs)
 
+            true_model_probs = tuple(float(x) for x in results["true_model_p"])
+            assert(len(true_nevents) == len(true_model_probs))
+
+            mean_true_model_prob = sum(true_model_probs) / len(true_model_probs)
+            median_true_model_prob = pycoevolity.stats.median(true_model_probs)
+
             nevents_within_95_cred = 0
             model_within_95_cred = 0
             ncorrect = 0
+            model_ncorrect = 0
             for i in range(len(true_nevents)):
                 true_map_nevents[map_nevents[i] - 1][true_nevents[i] - 1] += 1
                 true_map_nevents_probs[map_nevents[i] - 1][true_nevents[i] - 1].append(map_nevents_probs[i])
+                if show_all_models:
+                    true_map_model[model_to_index[map_model[i]]][model_to_index[true_model[i]]] += 1
                 if true_nevents_cred_levels[i] <= 0.95:
                     nevents_within_95_cred += 1
                 if true_model_cred_levels[i] <= 0.95:
                     model_within_95_cred += 1
                 if true_nevents[i] == map_nevents[i]:
                     ncorrect += 1
+                if true_model[i] == map_model[i]:
+                    model_ncorrect += 1
             p_nevents_within_95_cred = nevents_within_95_cred / float(len(true_nevents))
             p_model_within_95_cred = model_within_95_cred / float(len(true_nevents))
             p_correct = ncorrect / float(len(true_nevents))
+            p_model_correct = model_ncorrect /  float(len(true_nevents))
 
             _LOG.info("p(nevents within CS) = {0:.4f}".format(p_nevents_within_95_cred))
             _LOG.info("p(model within CS) = {0:.4f}".format(p_model_within_95_cred))
             ax = plt.subplot(gs[row_idx, col_idx])
 
-            ax.imshow(true_map_nevents,
-                    origin = 'lower',
-                    cmap = cmap,
-                    interpolation = 'none',
-                    aspect = 'auto'
-                    # extent = [0.5, 3.5, 0.5, 3.5]
-                    )
-            for i, row_list in enumerate(true_map_nevents):
-                for j, num_events in enumerate(row_list):
-                    # if num_events > 0:
-                    #     n_probs = true_map_nevents_probs[i][j]
-                    #     assert len(n_probs) == num_events
-                    #     mean_p = sum(n_probs) / len(n_probs)
-                    #     median_p = pycoevolity.stats.median(n_probs)
-                    #     ax.text(j, i,
-                    #             "{0:d}\n{1:.3f}".format(num_events, median_p),
-                    #             horizontalalignment = "center",
-                    #             verticalalignment = "center",
-                    #             size = 8.0)
-                    # else:
-                    ax.text(j, i,
-                            str(num_events),
-                            horizontalalignment = "center",
-                            verticalalignment = "center")
-            ax.text(0.98, 0.02,
-                    "\\scriptsize$p(k \\in \\textrm{{\\sffamily CS}}) = {0:.3f}$".format(
-                            p_nevents_within_95_cred),
-                    horizontalalignment = "right",
-                    verticalalignment = "bottom",
-                    transform = ax.transAxes)
-            ax.text(0.02, 0.98,
-                    "\\scriptsize$p(\\hat{{k}} = k) = {0:.3f}$".format(
-                            p_correct),
-                    horizontalalignment = "left",
-                    verticalalignment = "top",
-                    transform = ax.transAxes)
-            ax.text(0.98, 0.98,
-                    "\\scriptsize$\\widetilde{{p(k|\\mathbf{{D}})}} = {0:.3f}$".format(
-                            median_true_nevents_prob),
-                    horizontalalignment = "right",
-                    verticalalignment = "top",
-                    transform = ax.transAxes)
+            if show_all_models:
+                ax.imshow(true_map_model,
+                        origin = 'lower',
+                        cmap = cmap,
+                        interpolation = 'none',
+                        aspect = 'auto'
+                        )
+                for i, row_list in enumerate(true_map_model):
+                    for j, n in enumerate(row_list):
+                        ax.text(j, i,
+                                str(n),
+                                horizontalalignment = "center",
+                                verticalalignment = "center",
+                                fontsize = 6)
+                ax.text(0.98, 0.01,
+                        "\\tiny$p(\\mathcal{{T}} \\in \\textrm{{\\sffamily CS}}) = {0:.3f}$".format(
+                                p_model_within_95_cred),
+                        horizontalalignment = "right",
+                        verticalalignment = "bottom",
+                        transform = ax.transAxes)
+                ax.text(0.02, 1.01,
+                        "\\tiny$p(\\hat{{\\mathcal{{T}}}} = \\mathcal{{T}}) = {0:.3f}$".format(
+                                p_model_correct),
+                        horizontalalignment = "left",
+                        verticalalignment = "top",
+                        transform = ax.transAxes)
+                ax.text(0.98, 1.01,
+                        "\\tiny$\\widetilde{{p(\\mathcal{{T}}|\\mathbf{{D}})}} = {0:.3f}$".format(
+                                median_true_model_prob),
+                        horizontalalignment = "right",
+                        verticalalignment = "top",
+                        transform = ax.transAxes)
+            else:
+                ax.imshow(true_map_nevents,
+                        origin = 'lower',
+                        cmap = cmap,
+                        interpolation = 'none',
+                        aspect = 'auto'
+                        # extent = [0.5, 3.5, 0.5, 3.5]
+                        )
+                for i, row_list in enumerate(true_map_nevents):
+                    for j, num_events in enumerate(row_list):
+                        # if num_events > 0:
+                        #     n_probs = true_map_nevents_probs[i][j]
+                        #     assert len(n_probs) == num_events
+                        #     mean_p = sum(n_probs) / len(n_probs)
+                        #     median_p = pycoevolity.stats.median(n_probs)
+                        #     ax.text(j, i,
+                        #             "{0:d}\n{1:.3f}".format(num_events, median_p),
+                        #             horizontalalignment = "center",
+                        #             verticalalignment = "center",
+                        #             size = 8.0)
+                        # else:
+                        ax.text(j, i,
+                                str(num_events),
+                                horizontalalignment = "center",
+                                verticalalignment = "center")
+                ax.text(0.98, 0.02,
+                        "\\scriptsize$p(k \\in \\textrm{{\\sffamily CS}}) = {0:.3f}$".format(
+                                p_nevents_within_95_cred),
+                        horizontalalignment = "right",
+                        verticalalignment = "bottom",
+                        transform = ax.transAxes)
+                ax.text(0.02, 0.98,
+                        "\\scriptsize$p(\\hat{{k}} = k) = {0:.3f}$".format(
+                                p_correct),
+                        horizontalalignment = "left",
+                        verticalalignment = "top",
+                        transform = ax.transAxes)
+                ax.text(0.98, 0.98,
+                        "\\scriptsize$\\widetilde{{p(k|\\mathbf{{D}})}} = {0:.3f}$".format(
+                                median_true_nevents_prob),
+                        horizontalalignment = "right",
+                        verticalalignment = "top",
+                        transform = ax.transAxes)
             if row_idx == 0:
                 if linked_loci:
                     # locus_size = 1
@@ -1890,15 +1974,25 @@ def generate_model_plots(
     all_axes = fig.get_axes()
     for ax in all_axes:
         # Make sure ticks correspond only with number of events
-        ax.xaxis.set_ticks(range(number_of_comparisons))
-        ax.yaxis.set_ticks(range(number_of_comparisons))
+        if not show_all_models:
+            ax.xaxis.set_ticks(range(number_of_comparisons))
+            ax.yaxis.set_ticks(range(number_of_comparisons))
+        else:
+            ax.xaxis.set_ticks(range(5))
+            ax.yaxis.set_ticks(range(5))
         if ax.is_last_row() and ax.is_first_col():
             xtick_labels = [item for item in ax.get_xticklabels()]
             for i in range(len(xtick_labels)):
-                xtick_labels[i].set_text(str(i + 1))
+                if show_all_models:
+                    xtick_labels[i].set_text(index_to_model[i])
+                else:
+                    xtick_labels[i].set_text(str(i + 1))
             ytick_labels = [item for item in ax.get_yticklabels()]
             for i in range(len(ytick_labels)):
-                ytick_labels[i].set_text(str(i + 1))
+                if show_all_models:
+                    ytick_labels[i].set_text(index_to_model[i])
+                else:
+                    ytick_labels[i].set_text(str(i + 1))
             ax.set_xticklabels(xtick_labels)
             ax.set_yticklabels(ytick_labels)
         else:
@@ -1924,17 +2018,30 @@ def generate_model_plots(
         else:
             ax.spines['right'].set_visible(True)
 
-    fig.text(0.5, 0.001,
-            "True number of events ($k$)",
-            horizontalalignment = "center",
-            verticalalignment = "bottom",
-            size = 18.0)
-    fig.text(0.005, 0.5,
-            "Estimated number of events ($\\hat{{k}}$)",
-            horizontalalignment = "left",
-            verticalalignment = "center",
-            rotation = "vertical",
-            size = 18.0)
+    if show_all_models:
+        fig.text(0.5, 0.001,
+                "True model ($\\mathcal{{T}}$)",
+                horizontalalignment = "center",
+                verticalalignment = "bottom",
+                size = 18.0)
+        fig.text(0.005, 0.5,
+                "MAP model ($\\hat{{\\mathcal{{T}}}}$)",
+                horizontalalignment = "left",
+                verticalalignment = "center",
+                rotation = "vertical",
+                size = 18.0)
+    else:
+        fig.text(0.5, 0.001,
+                "True number of events ($k$)",
+                horizontalalignment = "center",
+                verticalalignment = "bottom",
+                size = 18.0)
+        fig.text(0.005, 0.5,
+                "MAP number of events ($\\hat{{k}}$)",
+                horizontalalignment = "left",
+                verticalalignment = "center",
+                rotation = "vertical",
+                size = 18.0)
 
     if missing_data or filtered_data:
         gs.update(left = 0.08, right = 0.98, bottom = 0.1, top = 0.96)
@@ -1942,29 +2049,35 @@ def generate_model_plots(
         if include_variable_only:
             gs.update(left = 0.08, right = 0.97, bottom = 0.08, top = 0.97)
         else:
-            gs.update(left = 0.08, right = 0.97, bottom = 0.13, top = 0.95)
+            if show_all_models:
+                gs.update(left = 0.09, right = 0.97, bottom = 0.13, top = 0.95)
+            else:
+                gs.update(left = 0.08, right = 0.97, bottom = 0.13, top = 0.95)
     else:
         gs.update(left = 0.08, right = 0.98, bottom = 0.08, top = 0.97)
 
     plot_dir = os.path.join(project_util.VAL_DIR, "plots")
+    plot_type = "nevents"
+    if show_all_models:
+        plot_type = "models"
     if not os.path.exists(plot_dir):
         os.mkdir(plot_dir)
     if linked_loci:
         if include_variable_only:
             plot_path = os.path.join(plot_dir,
-                    "linkage-{0}-nevents.pdf".format(linked_loci))
+                    "linkage-{0}-{1}.pdf".format(linked_loci, plot_type))
         else:
             plot_path = os.path.join(plot_dir,
-                    "linkage-{0}-nevents-no-vo.pdf".format(linked_loci))
+                    "linkage-{0}-{1}-no-vo.pdf".format(linked_loci, plot_type))
     elif missing_data:
         plot_path = os.path.join(plot_dir,
-                "missing-data-nevents.pdf")
+                "missing-data-{0}.pdf".format(plot_type))
     elif filtered_data:
         plot_path = os.path.join(plot_dir,
-                "filtered-data-nevents.pdf")
+                "filtered-data-{0}.pdf".format(plot_type))
     else:
         plot_path = os.path.join(plot_dir,
-                "nevents.pdf")
+                "{0}.pdf".format(plot_type))
     plt.savefig(plot_path)
     _LOG.info("Plots written to {0!r}\n".format(plot_path))
 
@@ -2141,6 +2254,7 @@ def get_msbayes_results(
             'root population size': {'true': [], 'mean': [], 'lower': [], 'upper': []},
             'leaf population size': {'true': [], 'mean': [], 'lower': [], 'upper': []},
             'nevents': {'true': [], 'map': [], 'cred_level': [], 'true_prob': [], 'map_prob': []},
+            'model': {'true': [], 'map': [], 'cred_level': [], 'true_prob': [], 'map_prob': []},
             }
     column_header_prefixes = {
             'divergence time': ("PRI.t.",),
@@ -2165,12 +2279,42 @@ def get_msbayes_results(
             for parameter_key, header_prefixes in column_header_prefixes.items():
                 for header_prefix in header_prefixes:
                     header = "{0}{1}".format(header_prefix, pair_idx + 1)
-                    true_val = float(true_values[header][sim_idx])
-                    post_sum = pycoevolity.stats.get_summary(float(x) for x in posterior[header])
+                    if parameter_key.endswith("size"):
+                        true_val = float(true_values[header][sim_idx]) / 4.0
+                        post_sum = pycoevolity.stats.get_summary((float(x) / 4.0) for x in posterior[header])
+                    else:
+                        true_val = float(true_values[header][sim_idx])
+                        post_sum = pycoevolity.stats.get_summary(float(x) for x in posterior[header])
                     results[parameter_key]['true'].append(true_val)
                     results[parameter_key]['mean'].append(post_sum['mean'])
                     results[parameter_key]['lower'].append(post_sum['qi_95'][0])
                     results[parameter_key]['upper'].append(post_sum['qi_95'][1])
+        true_div_times = [float(true_values["PRI.t.{0}".format(i + 1)][sim_idx]) for i in range(number_of_pairs)]
+        n_post_samples = len(posterior["PRI.Psi"])
+
+        div_times = []
+        for post_idx in range(n_post_samples):
+            div_times.append([float(posterior["PRI.t.{0}".format(i + 1)][post_idx]) for i in range(number_of_pairs)])
+        assert len(div_times) == n_post_samples
+        true_model = get_standardized_partiton_str(true_div_times)
+        models = [get_standardized_partiton_str(t) for t in div_times]
+        model_freqs = pycoevolity.stats.get_freqs(models)
+        sorted_model_freqs = sorted(model_freqs.items(), reverse = True,
+                key = lambda x: x[1])
+        map_model = sorted_model_freqs[0][0]
+        true_model_prob = model_freqs[true_model]
+        map_model_prob = model_freqs[map_model]
+        model_cred_level = 0.0
+        for n, p in sorted_model_freqs:
+            if n == true_model:
+                break
+            model_cred_level += p
+        results['model']['true'].append(true_model)
+        results['model']['map'].append(map_model)
+        results['model']['true_prob'].append(true_model_prob)
+        results['model']['map_prob'].append(map_model_prob)
+        results['model']['cred_level'].append(model_cred_level)
+
         true_nevents = int(true_values["PRI.Psi"][sim_idx])
         nevent_freqs = pycoevolity.stats.get_freqs(int(x) for x in posterior["PRI.Psi"])
         sorted_nevent_freqs = sorted(nevent_freqs.items(), reverse = True,
@@ -2192,6 +2336,7 @@ def get_msbayes_results(
     assert (len(results['root population size']['true']) == number_of_sims * number_of_pairs)
     assert (len(results['leaf population size']['true']) == number_of_sims * number_of_pairs * 2)
     assert (len(results['nevents']['true']) == number_of_sims)
+    assert (len(results['model']['true']) == number_of_sims)
     return results
 
 def generate_bake_off_plots(
@@ -2273,6 +2418,7 @@ def generate_bake_off_plots(
                     "pop_size_c3sp2",
                     ],
             "nevents": [],
+            "model": [],
     }
     col_headers = [
             'ecoevolity',
@@ -2460,7 +2606,7 @@ def generate_bake_off_plots(
                     verticalalignment = "bottom",
                     size = 12.0)
             fig.text(0.005, 0.5,
-                    "Estimated number of events ($\\hat{{k}}$)",
+                    "MAP number of events ($\\hat{{k}}$)",
                     horizontalalignment = "left",
                     verticalalignment = "center",
                     rotation = "vertical",
@@ -2470,6 +2616,193 @@ def generate_bake_off_plots(
 
             plot_path = os.path.join(plot_dir,
                     "nevents.pdf")
+            plt.savefig(plot_path)
+            _LOG.info("Plots written to {0!r}\n".format(plot_path))
+            continue
+
+        if parameter_key == "model":
+            if number_of_pairs != 3:
+                continue
+
+            model_to_index = {
+                    "000": 0,
+                    "001": 1,
+                    "010": 2,
+                    "011": 3,
+                    "012": 4,
+                    }
+            number_of_models = len(model_to_index)
+            index_to_model = {}
+            for k, v in model_to_index.items():
+                index_to_model[v] = k
+
+            ecoevolity_results = {'true': [], 'map': [], 'cred_level': [],
+                    'true_prob': [], 'map_prob': []}
+            ecoevolity_results['true'].extend(x for x in results["true_model"])
+            ecoevolity_results['map'].extend(x for x in results["map_model"])
+            ecoevolity_results['cred_level'].extend(float(x) for x in results["true_model_cred_level"])
+            ecoevolity_results['true_prob'].extend(float(x) for x in results["true_model_p"])
+            ecoevolity_results['map_prob'].extend(float(x) for x in results["map_model_p"])
+            all_results = {
+                'ecoevolity' : ecoevolity_results,
+                'dpp-msbayes': dpp_msbayes_results[parameter_key],
+                }
+            if include_msbayes:
+                all_results['msbayes'] = msbayes_results[parameter_key]
+
+            row_idx = 0
+            for col_idx, col_header in enumerate(col_headers):
+                r = all_results[col_header]
+                true_model = r['true']
+                map_model = r['map']
+                map_model_probs = r['map_prob']
+                true_model_probs = r['true_prob']
+                true_model_cred_levels = r['cred_level']
+
+                assert(len(true_model) == len(map_model))
+                assert(len(true_model) == len(true_model_cred_levels))
+                assert(len(true_model) == len(map_model_probs))
+                assert(len(true_model) == len(true_model_probs))
+
+                mean_true_model_prob = sum(true_model_probs) / len(true_model_probs)
+                median_true_model_prob = pycoevolity.stats.median(true_model_probs)
+
+                model_within_95_cred = 0
+                ncorrect = 0
+                true_map_model = []
+                true_map_probs = []
+                for i in range(number_of_models):
+                    true_map_model.append([0 for i in range(number_of_models)])
+                    true_map_probs.append([[] for i in range(number_of_models)])
+                for i in range(len(true_model)):
+                    true_map_model[model_to_index[map_model[i]]][model_to_index[true_model[i]]] += 1
+                    true_map_probs[model_to_index[map_model[i]]][model_to_index[true_model[i]]].append(map_model_probs[i])
+                    if true_model_cred_levels[i] <= 0.95:
+                        model_within_95_cred += 1
+                    if true_model[i] == map_model[i]:
+                        ncorrect += 1
+                p_model_within_95_cred = model_within_95_cred / float(len(true_model))
+                p_correct = ncorrect / float(len(true_model))
+
+                _LOG.info("p(model within CS) = {0:.4f}".format(p_model_within_95_cred))
+                ax = plt.subplot(gs[row_idx, col_idx])
+
+                ax.imshow(true_map_model,
+                        origin = 'lower',
+                        cmap = cmap,
+                        interpolation = 'none',
+                        aspect = 'auto'
+                        # extent = [0.5, 3.5, 0.5, 3.5]
+                        )
+                for i, row_list in enumerate(true_map_model):
+                    for j, num_events in enumerate(row_list):
+                        # if num_events > 0:
+                        #     map_probs = true_map_probs[i][j]
+                        #     assert len(map_probs) == num_events
+                        #     mean_prob = sum(map_probs) / len(map_probs)
+                        #     median_prob = pycoevolity.stats.median(map_probs)
+                        #     ax.text(j, i,
+                        #             "{0:d}\n{1:.3f}".format(num_events, median_prob),
+                        #             horizontalalignment = "center",
+                        #             verticalalignment = "center")
+                        # else:
+                        ax.text(j, i,
+                                str(num_events),
+                                horizontalalignment = "center",
+                                verticalalignment = "center")
+                ax.text(0.98, 0.02,
+                        "\\scriptsize$p(\\mathcal{{T}} \\in \\textrm{{\\sffamily CS}}) = {0:.3f}$".format(
+                                p_model_within_95_cred),
+                        horizontalalignment = "right",
+                        verticalalignment = "bottom",
+                        transform = ax.transAxes)
+                ax.text(0.02, 0.98,
+                        "\\scriptsize$p(\\hat{{\\mathcal{{T}}}} = \\mathcal{{T}}) = {0:.3f}$".format(
+                                p_correct),
+                        horizontalalignment = "left",
+                        verticalalignment = "top",
+                        transform = ax.transAxes)
+                # ax.text(0.99, 0.99,
+                #         "\\scriptsize$\\overline{{pp(k)}} = {0:.3f}$".format(
+                #                 mean_true_model_prob),
+                #         horizontalalignment = "right",
+                #         verticalalignment = "top",
+                #         transform = ax.transAxes)
+                ax.text(0.98, 0.98,
+                        "\\scriptsize$\\widetilde{{p(\\mathcal{{T}}|\\mathbf{{D}})}} = {0:.3f}$".format(
+                                median_true_model_prob),
+                        horizontalalignment = "right",
+                        verticalalignment = "top",
+                        transform = ax.transAxes)
+                if row_idx == 0:
+                    ax.text(0.5, 1.015,
+                            col_header,
+                            horizontalalignment = "center",
+                            verticalalignment = "bottom",
+                            size = 16.0,
+                            transform = ax.transAxes)
+
+            # show only the outside ticks
+            all_axes = fig.get_axes()
+            for ax in all_axes:
+                if not ax.is_last_row():
+                    ax.set_xticks([])
+                if not ax.is_first_col():
+                    ax.set_yticks([])
+
+            # show tick labels only for lower-left plot 
+            all_axes = fig.get_axes()
+            for ax in all_axes:
+                ax.xaxis.set_ticks(range(number_of_models))
+                ax.yaxis.set_ticks(range(number_of_models))
+                if ax.is_last_row() and ax.is_first_col():
+                    xtick_labels = [item for item in ax.get_xticklabels()]
+                    for i in range(len(xtick_labels)):
+                        xtick_labels[i].set_text(index_to_model[i])
+                    ytick_labels = [item for item in ax.get_yticklabels()]
+                    for i in range(len(ytick_labels)):
+                        ytick_labels[i].set_text(index_to_model[i])
+                    ax.set_xticklabels(xtick_labels)
+                    ax.set_yticklabels(ytick_labels)
+                else:
+                    xtick_labels = ["" for item in ax.get_xticklabels()]
+                    ytick_labels = ["" for item in ax.get_yticklabels()]
+                    ax.set_xticklabels(xtick_labels)
+                    ax.set_yticklabels(ytick_labels)
+
+            # avoid doubled spines
+            all_axes = fig.get_axes()
+            for ax in all_axes:
+                for sp in ax.spines.values():
+                    sp.set_visible(False)
+                    sp.set_linewidth(2)
+                if ax.is_first_row():
+                    ax.spines['top'].set_visible(True)
+                    ax.spines['bottom'].set_visible(True)
+                else:
+                    ax.spines['bottom'].set_visible(True)
+                if ax.is_first_col():
+                    ax.spines['left'].set_visible(True)
+                    ax.spines['right'].set_visible(True)
+                else:
+                    ax.spines['right'].set_visible(True)
+
+            fig.text(0.5, 0.002,
+                    "True model ($\\mathcal{{T}}$)",
+                    horizontalalignment = "center",
+                    verticalalignment = "bottom",
+                    size = 12.0)
+            fig.text(0.005, 0.5,
+                    "MAP model ($\\hat{{\\mathcal{{T}}}}$)",
+                    horizontalalignment = "left",
+                    verticalalignment = "center",
+                    rotation = "vertical",
+                    size = 12.0)
+
+            gs.update(left = 0.095, right = 0.995, bottom = 0.14, top = 0.91)
+
+            plot_path = os.path.join(plot_dir,
+                    "model.pdf")
             plt.savefig(plot_path)
             _LOG.info("Plots written to {0!r}\n".format(plot_path))
             continue
@@ -2885,7 +3218,18 @@ def main_cli(argv = sys.argv):
             number_of_comparisons = 3,
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
+            show_all_models = True)
+    generate_model_plots(
+            number_of_comparisons = 3,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
             linked_loci = "100k")
+    generate_model_plots(
+            number_of_comparisons = 3,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            linked_loci = "100k",
+            show_all_models = True)
     generate_model_plots(
             number_of_comparisons = 3,
             include_all_sizes_fixed = True,
@@ -2896,7 +3240,20 @@ def main_cli(argv = sys.argv):
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
             linked_loci = "500k",
+            show_all_models = True)
+    generate_model_plots(
+            number_of_comparisons = 3,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            linked_loci = "500k",
             include_variable_only = False)
+    generate_model_plots(
+            number_of_comparisons = 3,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            linked_loci = "500k",
+            include_variable_only = False,
+            show_all_models = True)
     generate_model_plots(
             number_of_comparisons = 3,
             include_all_sizes_fixed = True,
@@ -2908,8 +3265,23 @@ def main_cli(argv = sys.argv):
             include_all_sizes_fixed = True,
             include_root_size_fixed = False,
             linked_loci = None,
+            missing_data = True,
+            show_all_models = True)
+    generate_model_plots(
+            number_of_comparisons = 3,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            linked_loci = None,
             missing_data = False,
             filtered_data = True)
+    generate_model_plots(
+            number_of_comparisons = 3,
+            include_all_sizes_fixed = True,
+            include_root_size_fixed = False,
+            linked_loci = None,
+            missing_data = False,
+            filtered_data = True,
+            show_all_models = True)
     generate_root_1000_500k_model_plots(
             number_of_comparisons = 3)
     generate_histograms(

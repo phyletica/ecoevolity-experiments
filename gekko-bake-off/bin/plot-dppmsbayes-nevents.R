@@ -5,11 +5,10 @@ library(ggridges)
 
 plot_prior <- TRUE
 nevents <- c("1", "2", "3")
-posterior_probs <- c(0.8852, 0.1122, 0.0026)
+posterior_probs <- c(0.8582, 0.138, 0.0038)
 prior_probs <- c(0.242888, 0.51513, 0.241982)
-bf_labels <- c("<0.000624", "0.0053", "556")
-bf_labels <- c("24.0355", "0.1190", "0.0082")
-max_prob <- 0.8852
+bf_labels <- c("18.9", "0.151", "0.0119")
+max_prob <- 0.8582
 bf_position_bottom <- max_prob + (max_prob * 0.04)
 bf_position_top <- bf_position_bottom + 0.04
 bf_positions <- c()

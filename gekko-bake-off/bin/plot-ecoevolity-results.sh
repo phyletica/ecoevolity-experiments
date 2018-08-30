@@ -48,6 +48,6 @@ convert_labels_to_array $labels
 
 gzip -f -d -k ${eco_dir}/*state*log.gz
 
-pyco-sumtimes -f --x-limits 0.0 0.008 -x "Divergence time" -y "" -b "$burnin" "${label_array[@]}" -p "${output_dir}/" ${eco_dir}/*state*log.gz
+pyco-sumtimes -f --x-limits 0.0 0.0118 -x "Divergence time" -y "" -b "$burnin" "${label_array[@]}" -p "${output_dir}/" ${eco_dir}/*state*log.gz
 sumcoevolity -f -b $burnin -n 1000000 -p "${output_dir}/" -c "../configs/ecoevolity-config.yml" ${eco_dir}/*state*log
 pyco-sumevents -p "${output_dir}/" -f --no-legend "${output_dir}/sumcoevolity-results-nevents.txt"
