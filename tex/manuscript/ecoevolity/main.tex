@@ -16,6 +16,11 @@
 % \newcommand{\iflinenumbers}[2]{#1}
 \newcommand{\iflinenumbers}[2]{#2}
 
+\newcommand{\ifuserasterizedplots}[2]{#1}
+% \newcommand{\ifuserasterizedplots}[2]{#2}
+\newcommand{\ifuserasterizedplotsinsi}[2]{#1}
+% \newcommand{\ifuserasterizedplotsinsi}[2]{#2}
+
 \usepackage[round]{natbib}
 
 \title{Full Bayesian comparative phylogeography from genomic data}
@@ -63,8 +68,20 @@
 
 \input{body.tex}
 
+\jroedit{}{
+\section{Funding}
+\input{funding.tex}
+}
+
 \section{Acknowledgments}
 \input{acknowledgments.tex}
+
+% \section{Appendix}
+\begin{appendices}
+\section{Multivariate Metropolis-Hastings Moves}
+\label{appendix:mcmc}
+\input{mcmc.tex}
+\end{appendices}
 
 \bibliographystyle{../../bib/sysbio}
 \bibliography{../../bib/references}

@@ -1,3 +1,5 @@
+\input{fig-dag.tex}
+
 \siFigure{../../../simulations/validation/plots/leaf-pop-size-scatter.pdf}{
     The accuracy and precision of estimates of the descendant (leaf) population
     sizes (scaled by the mutation rate), when data are simulated and analyzed
@@ -37,6 +39,21 @@
     \accuracyscatterplotannotations{\epopsize{}\murate{}}
     \weusedmatplotlib
 }{fig:valrootsizes}
+
+\siFigure{\ifuserasterizedplotsinsi{../../../simulations/validation/plots/models-compressed.pdf}{../../../simulations/validation/plots/models.pdf}}{
+    \jroedit{}{The ability of the new method to estimate the model of
+    divergence when data are simulated and analyzed under the same model (i.e.,
+    no model misspecification).
+    \validationfiguregriddescription
+    Each plot shows the results of the analyses of 500 simulated \datasets,
+    each with three population pairs;
+    the number of \datasets that fall within each possible cell
+    of true versus estimated model is shown, and cells with
+    more \datasets are shaded darker.
+    \modelplotannotations
+    \weusedmatplotlib
+    }
+}{fig:valmodels}
 
 \siFigure{../../../simulations/validation/plots/number-of-variable-sites-100k-histograms.pdf}{
     The number of variable characters in the simulated \datasets with 100,000
@@ -106,7 +123,7 @@
 }{fig:valessvserror}
 
 \siFigure{../../../simulations/validation/plots/linkage-100k-div-time-scatter.pdf}{
-    Assessing the affect of linked sites on the
+    Assessing the \jroedit{a}{e}ffect of linked sites on the
     the accuracy and precision of divergence time estimates (in units of
     expected subsitutions per site).
     The columns, from left to right, show the results when loci are simulated
@@ -120,7 +137,7 @@
 }{fig:linkagedivtimes100k}
 
 \siFigure{../../../simulations/validation/plots/linkage-100k-leaf-pop-size-scatter.pdf}{
-    Assessing the affect of linked sites on the accuracy and precision of
+    Assessing the \jroedit{a}{e}ffect of linked sites on the accuracy and precision of
     estimates of descendant (leaf) population sizes (scaled by the mutation
     rate).
     The columns, from left to right, show the results when loci are simulated
@@ -134,7 +151,7 @@
 }{fig:linkageleafsizes100k}
 
 \siFigure{../../../simulations/validation/plots/linkage-500k-leaf-pop-size-scatter.pdf}{
-    Assessing the affect of linked sites on the accuracy and precision of
+    Assessing the \jroedit{a}{e}ffect of linked sites on the accuracy and precision of
     estimates of descendant (leaf) population sizes (scaled by the mutation
     rate).
     The columns, from left to right, show the results when loci are simulated
@@ -148,7 +165,7 @@
 }{fig:linkageleafsizes500k}
 
 \siFigure{../../../simulations/validation/plots/linkage-100k-root-pop-size-scatter.pdf}{
-    Assessing the affect of linked sites on the accuracy and precision of
+    Assessing the \jroedit{a}{e}ffect of linked sites on the accuracy and precision of
     estimates of ancestral (root) population size (scaled by the mutation
     rate).
     The columns, from left to right, show the results when loci are simulated
@@ -162,7 +179,7 @@
 }{fig:linkagerootsizes100k}
 
 \siFigure{../../../simulations/validation/plots/linkage-500k-root-pop-size-scatter.pdf}{
-    Assessing the affect of linked sites on the accuracy and precision of
+    Assessing the \jroedit{a}{e}ffect of linked sites on the accuracy and precision of
     estimates of ancestral (root) population size (scaled by the mutation
     rate).
     The columns, from left to right, show the results when loci are simulated
@@ -175,9 +192,23 @@
     \weusedmatplotlib
 }{fig:linkagerootsizes500k}
 
-% \siFigure{../../../simulations/validation/plots/linkage-100k-nevents.pdf}{
-\siFigure{../../../simulations/validation/plots/linkage-100k-nevents-compressed.pdf}{
-    Assessing the affect of linked sites on estimating the number of divergence
+\siFigure{\ifuserasterizedplotsinsi{../../../simulations/validation/plots/linkage-500k-models-compressed.pdf}{../../../simulations/validation/plots/linkage-500k-models.pdf}}{
+    \jroedit{}{Assessing the effect of linked sites on estimating the
+    divergence model.
+    The columns, from left to right, show the results when loci are simulated
+    with 100, 500, and 1000 linked sites.
+    For each simulated \dataset, each of three population pairs has
+    500,000 sites total.
+    The rows show the results when (top) all sites, (middle) all variable
+    sites, and (bottom) at most one variable site per locus are analyzed.
+    \modelshadingdescription
+    \modelplotannotations
+    \weusedmatplotlib
+    }
+}{fig:linkagemodels500k}
+
+\siFigure{\ifuserasterizedplotsinsi{../../../simulations/validation/plots/linkage-100k-nevents-compressed.pdf}{../../../simulations/validation/plots/linkage-100k-nevents.pdf}}{
+    Assessing the \jroedit{a}{e}ffect of linked sites on estimating the number of divergence
     events.
     The columns, from left to right, show the results when loci are simulated
     with 100, 500, and 1000 linked sites.
@@ -189,6 +220,21 @@
     \neventplotannotations
     \weusedmatplotlib
 }{fig:linkagenevents100k}
+
+\siFigure{\ifuserasterizedplotsinsi{../../../simulations/validation/plots/linkage-100k-models-compressed.pdf}{../../../simulations/validation/plots/linkage-100k-models.pdf}}{
+    \jroedit{}{Assessing the effect of linked sites on estimating the
+    divergence model.
+    The columns, from left to right, show the results when loci are simulated
+    with 100, 500, and 1000 linked sites.
+    For each simulated \dataset, each of three population pairs has
+    100,000 sites total.
+    The rows show the results when (top) all sites, (middle) all variable
+    sites, and (bottom) at most one variable site per locus are analyzed.
+    \modelshadingdescription
+    \modelplotannotations
+    \weusedmatplotlib
+    }
+}{fig:linkagemodels100k}
 
 
 \siFigure{../../../simulations/validation/plots/linkage-100k-number-of-variable-sites-histograms.pdf}{
@@ -215,7 +261,7 @@
 
 
 \siFigure{../../../simulations/validation/plots/missing-data-leaf-pop-size-scatter.pdf}{
-    Assessing the affect of missing data on the the accuracy and precision of
+    Assessing the \jroedit{a}{e}ffect of missing data on the the accuracy and precision of
     estimates of descendant (leaf) population sizes (scaled by the mutation
     rate).
     \missingdatafigurecolumndescription
@@ -227,7 +273,7 @@
 }{fig:missingleafsizes}
 
 \siFigure{../../../simulations/validation/plots/missing-data-root-pop-size-scatter.pdf}{
-    Assessing the affect of missing data on the the accuracy and precision of
+    Assessing the \jroedit{a}{e}ffect of missing data on the the accuracy and precision of
     estimating ancestral (root) population size (scaled by the mutation rate).
     \missingdatafigurecolumndescription
     \comparisoncolumndescription{S}{fig:valrootsizes}
@@ -237,9 +283,22 @@
     \weusedmatplotlib
 }{fig:missingrootsizes}
 
+\siFigure{\ifuserasterizedplotsinsi{../../../simulations/validation/plots/missing-data-models-compressed.pdf}{../../../simulations/validation/plots/missing-data-models.pdf}}{
+    \jroedit{}{Assessing the effect of missing data on the ability of the new
+    method to estimate the divergence model.
+    \missingdatafigurecolumndescription
+    \comparisoncolumndescription{}{fig:valmodels}
+    \missingdatafigurerowdescription
+    \modelshadingdescription
+    \modelplotannotations
+    All simulated \datasets had three pairs of populations.
+    \weusedmatplotlib
+    }
+}{fig:missingmodels}
+
 
 \siFigure{../../../simulations/validation/plots/filtered-data-leaf-pop-size-scatter.pdf}{
-    Assessing the affect of an acquisition bias against rare allele patterns on
+    Assessing the \jroedit{a}{e}ffect of an acquisition bias against rare allele patterns on
     the accuracy and precision of estimating descendant (leaf) population sizes
     (scaled by the mutation rate).
     \filtereddatafigurecolumndescription
@@ -251,7 +310,7 @@
 }{fig:filteredleafsizes}
 
 \siFigure{../../../simulations/validation/plots/filtered-data-root-pop-size-scatter.pdf}{
-    Assessing the affect of an acquisition bias against rare allele patterns on
+    Assessing the \jroedit{a}{e}ffect of an acquisition bias against rare allele patterns on
     the accuracy and precision of estimating ancestral (root) population size
     (scaled by the mutation rate).
     \filtereddatafigurecolumndescription
@@ -261,6 +320,20 @@
     All simulated \datasets had three pairs of populations.
     \weusedmatplotlib
 }{fig:filteredrootsizes}
+
+\siFigure{\ifuserasterizedplotsinsi{../../../simulations/validation/plots/filtered-data-models-compressed.pdf}{../../../simulations/validation/plots/filtered-data-models.pdf}}{
+    \jroedit{}{Assessing the effect of an acquisition bias against
+    rare allele patterns on the ability of the new method to estimate the
+    divergence model.
+    \filtereddatafigurecolumndescription
+    \comparisoncolumndescription{}{fig:valmodels}
+    \filtereddatafigurerowdescription
+    \modelshadingdescription
+    \modelplotannotations
+    All simulated \datasets had three pairs of populations.
+    \weusedmatplotlib
+    }
+}{fig:filteredmodels}
 
 
 \siFigure{../../../bake-off/plots/leaf-population-size-scatter.pdf}{
@@ -292,6 +365,21 @@
     \accuracyscatterplotannotations{\epopsize{}\murate{}}
     \weusedmatplotlib
 }{fig:bakeoffrootsizes}
+
+\siFigure{\ifuserasterizedplotsinsi{../../../bake-off/plots/model-compressed.pdf}{../../../bake-off/plots/model.pdf}}{
+    Comparing the ability to estimate the divergence model between
+    (left) the new full-likelihood Bayesian method, \ecoevolity, and (right)
+    the approximate-likelihood Bayesian method, \dppmsbayes.
+    Each plot shows the results of the analyses of 500 simulated \datasets;
+    the number of \datasets that fall within each possible cell
+    of true versus estimated model is shown, and cells with
+    more \datasets are shaded darker.
+    Each simulated \dataset contained three pairs of populations, and the
+    simulated character matrix for each pair consisted of 200 loci, each with
+    200 linked sites (40,000 characters total).
+    \modelplotannotations
+    \weusedmatplotlib
+}{fig:bakeoffmodels}
 
 
 \siFigure{../../../gekko-results/sumevents-nopoly.pdf}{

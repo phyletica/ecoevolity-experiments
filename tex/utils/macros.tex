@@ -96,15 +96,34 @@
     \citep{ggplot2}.}
 \newcommand{\weusedggridges}{We generated the plots with ggridges Version 0.4.1
     \citep{ggridges041} and ggplot2 Version 2.2.1 \citep{ggplot2}.}
-\newcommand{\neventplotannotations}{For each plot,
+\newcommand{\neventplotannotations}{\jroedit{}{The estimates are based on the
+    number of events with the maximum a posteriori probability (MAP).}
+    For each plot,
     the proportion of \datasets for which the number of events with the largest
     posterior probability matched the true number of events---$p(\hat{\nevents}
     = \nevents)$---is shown in the upper left corner,
     the median posterior probability of the correct number of events across all
     \datasets---$\widetilde{p(\nevents|\alldata)}$---is shown in the upper
     right corner, and
-    the proportion of \datasets for which the true divergence model was
+    the proportion of \datasets for which the true number of events was
     included in the 95\% credible set---$p(\nevents \in
+    \textrm{CS})$---is shown in the lower right.
+}
+\newcommand{\modelplotannotations}{Each model is represented along the plot
+    axes by three integers that indicate the divergence category of each
+    pair of populations (e.g., 011 represents the model in which the second and
+    third pair diverge at the same time, but separately from the first).
+    The estimates are based on the model with the maximum a posteriori
+    probability (MAP).
+    For each plot,
+    the proportion of \datasets for which the model with the largest
+    posterior probability matched the true model---$p(\hat{\divtimesets}
+    = \divtimesets)$---is shown in the upper left corner,
+    the median posterior probability of the correct model across all
+    \datasets---$\widetilde{p(\divtimesets|\alldata)}$---is shown in the upper
+    right corner, and
+    the proportion of \datasets for which the true model was
+    included in the 95\% credible set---$p(\divtimesets \in
     \textrm{CS})$---is shown in the lower right.
 }
 \newcommand{\accuracyscatterplotannotations}[1]{For each plot, the
@@ -114,6 +133,10 @@
 }
 \newcommand{\neventsshadingdescription}{The number of \datasets that fall
     within each possible cell of true versus estimated numbers of events is
+    shown, and cells with more \datasets are shaded darker.
+}
+\newcommand{\modelshadingdescription}{The number of \datasets that fall
+    within each possible cell of true versus estimated model is
     shown, and cells with more \datasets are shaded darker.
 }
 
