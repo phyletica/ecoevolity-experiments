@@ -6,7 +6,6 @@
 \newcommand{\datasets}{data sets\xspace}
 \newcommand{\dataset}{data set\xspace}
 
-\newcommand{\jroedit}[2]{\sout{#1}{\color{pauburn}{#2}}}
 \newcommand{\editorialNote}[1]{\textcolor{red}{[\textit{#1}]}}
 \newcommand{\ignore}[1]{}
 \newcommand{\addTail}[1]{\textit{#1}.---}
@@ -97,7 +96,7 @@
 \newcommand{\weusedggridges}{We generated the plots with ggridges Version 0.4.1
     \citep{ggridges041} and ggplot2 Version 2.2.1 \citep{ggplot2}.}
 \newcommand{\neventplotannotations}{\jroedit{}{The estimates are based on the
-    number of events with the maximum a posteriori probability (MAP).}
+    number of events with the maximum \textit{a posteriori} (MAP) probability.}
     For each plot,
     the proportion of \datasets for which the number of events with the largest
     posterior probability matched the true number of events---$p(\hat{\nevents}
@@ -113,8 +112,8 @@
     axes by three integers that indicate the divergence category of each
     pair of populations (e.g., 011 represents the model in which the second and
     third pair diverge at the same time, but separately from the first).
-    The estimates are based on the model with the maximum a posteriori
-    probability (MAP).
+    The estimates are based on the model with the maximum \textit{a posteriori}
+    (MAP) probability.
     For each plot,
     the proportion of \datasets for which the model with the largest
     posterior probability matched the true model---$p(\hat{\divtimesets}
