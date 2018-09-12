@@ -13,6 +13,9 @@ conducted by the [Phyletica Lab](http://phyletica.org) to assess the
 performance of the new method,
 [Ecoevolity](https://github.com/phyletica/ecoevolity).
 
+All of the scripts used to simulate data, setup and run analyses, and parse and
+plot results are located in the bin directory at the root of the repository.
+
 
 Acknowledgements
 ================
