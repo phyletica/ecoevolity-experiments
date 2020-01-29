@@ -1,0 +1,128 @@
+\begin{frame}
+\setbeamercovered{invisible}
+
+% Set the overall layout of the tree
+\tikzstyle{level 1}=[level distance=8em, sibling distance=10.8em]
+\tikzstyle{level 2}=[level distance=11em, sibling distance=4.3em]
+
+% Define styles
+\tikzstyle{root} = [minimum width=12mm, minimum height=8mm]
+\tikzstyle{internal} = [minimum width=12mm, minimum height=8mm]
+\tikzstyle{tip} = [minimum width=12mm, minimum height=8mm]
+\tikzstyle{branch} = [->, very thick]
+
+\vspace{-2mm}
+\uncover<6->{
+\hspace{0.25\textwidth}
+    {\LARGE $\boldsymbol{\concentration =} \mathbf{\ccconc}$
+        \hspace{0.1\textwidth}
+        $\boldsymbol{\discount = } \only<6>{\mathbf{\disc}}\only<7>{\mathbf{\ddisc}}\only<8->{\mathbf{\dddisc}}$} \\
+}
+
+\vspace{4mm}
+
+\hspace{1.2cm}
+% \resizebox{!}{1.02\frametextheight}{%
+\resizebox{!}{0.98\frametextheight}{%
+\begin{tikzpicture}[grow=right]%, sloped]
+\pgfkeys{/pgf/number format/.cd,fixed,fixed zerofill,precision=3}
+\node[root] {\pgftext{\includegraphics[width=8mm]{../images/dpp-nodes/dpp-node-1.pdf}}}
+    child [visible on=<2->]{
+        node[internal] {\pgftext{\includegraphics[width=8mm]{../images/dpp-nodes/dpp-node-12.pdf}}}        
+            child [visible on=<4->]{
+                node[tip, label=right:
+                    {\tiplabel{\uncover<5->{
+                        $
+                        % p(m = 123)=
+                        \left(\frac{\concentration+\discount}{\concentration+1}\right)\left(\frac{\concentration+2\discount}{\concentration+2}\right)
+                        \only<6>{= \cccalcprob{(\ccconc+\disc)}{(\ccconc+(2*\disc))}}
+                        \only<7>{= \cccalcprob{(\ccconc+\ddisc)}{(\ccconc+(2*\ddisc))}}
+                        \uncover<8->{= \cccalcprob{(\ccconc+\dddisc)}{(\ccconc+(2*\dddisc))}}$
+                        }}}]
+                    {\pgftext{\includegraphics[width=8mm]{../images/dpp-nodes/dpp-node-123.pdf}}}
+                edge from parent [style = branch]
+                node[above,
+                    label={[label distance = -0.7em]\branchlabel{$\concentration+2\discount$}}%$\frac{\concentration}}{\concentration+2}$}}
+                    ] {}
+            }
+            child [visible on=<4->]{
+                node[tip, label=right:
+                    {\tiplabel{\uncover<5->{
+                        $
+                        % p(m = 121)=
+                        \left(\frac{\concentration+\discount}{\concentration+1}\right)\left(\frac{1-\discount}{\concentration+2}\right)
+                        \only<6>{= \cccalcprob{(\ccconc+\disc)}{(1-\disc)}}
+                        \only<7>{= \cccalcprob{(\ccconc+\ddisc)}{(1-\ddisc)}}
+                        \uncover<8->{= \cccalcprob{(\ccconc+\dddisc)}{(1-\dddisc)}}$
+                        }}}]
+                    {\pgftext{\includegraphics[width=8mm]{../images/dpp-nodes/dpp-node-122.pdf}}}
+                edge from parent [style = branch]
+                node[above,
+                    label={[label distance = -0.7em]\branchlabel{$1-\discount$}}%$\frac{1}{\concentration+2}$}}
+                    ] {}
+            }
+            child [visible on=<4->]{
+                node[tip, label=right:
+                    {\tiplabel{\uncover<5->{
+                        $
+                        % p(m = 122)=
+                        \left(\frac{\concentration+\discount}{\concentration+1}\right)\left(\frac{1-\discount}{\concentration+2}\right)
+                        \only<6>{= \cccalcprob{(\ccconc+\disc)}{(1-\disc)}}
+                        \only<7>{= \cccalcprob{(\ccconc+\ddisc)}{(1-\ddisc)}}
+                        \uncover<8->{= \cccalcprob{(\ccconc+\dddisc)}{(1-\dddisc)}}$
+                        }}}]
+                    {\pgftext{\includegraphics[width=8mm]{../images/dpp-nodes/dpp-node-121.pdf}}}
+                edge from parent [style = branch]
+                node[above,
+                    label={[label distance = -0.5em]\branchlabel{$1-\discount$}}%$\frac{1}{\concentration+2}$}}
+                    ] {}
+            }
+            edge from parent [style = branch]
+            node[above,
+                label={[label distance = 0em]\branchlabel{$\concentration+\discount$}}%$\frac{\concentration}{\concentration+1}$}}
+                ] {}
+    }
+    child [visible on=<2->]{
+        node[internal] {\pgftext{\includegraphics[width=8mm]{../images/dpp-nodes/dpp-node-11.pdf}}}        
+            child [visible on=<3->]{
+                node[tip, label=right:
+                    {\tiplabel{\uncover<5->{
+                        $
+                        % p(m = 112)=
+                        \left(\frac{1-\discount}{\concentration+1}\right)\left(\frac{\concentration+\discount}{\concentration+2}\right)
+                        \only<6>{= \cccalcprob{(1-\disc)}{(\ccconc+\disc)}}
+                        \only<7>{= \cccalcprob{(1-\ddisc)}{(\ccconc+\ddisc)}}
+                        \uncover<8->{= \cccalcprob{(1-\dddisc)}{(\ccconc+\dddisc)}}$
+                        }}}]
+                    {\pgftext{\includegraphics[width=8mm]{../images/dpp-nodes/dpp-node-112.pdf}}}
+                edge from parent [style = branch]
+                node[above,
+                    label={[label distance = -0.7em]\branchlabel{$\concentration+\discount$}}%$\frac{\concentration}{\concentration+2}$}}
+                    ] {}
+            }
+            child [visible on=<3->]{
+                node[tip, label=right:
+                    {\tiplabel{\uncover<5->{
+                        $
+                        % p(m = 111)=
+                        \left(\frac{1-\discount}{\concentration+1}\right)\left(\frac{2-\discount}{\concentration+2}\right)
+                        \only<6>{= \cccalcprob{(1-\disc)}{(2-\disc)}}
+                        \only<7>{= \cccalcprob{(1-\ddisc)}{(2-\ddisc)}}
+                        \uncover<8->{= \cccalcprob{(1-\dddisc)}{(2-\dddisc)}}$
+                        }}}]
+                    {\pgftext{\includegraphics[width=8mm]{../images/dpp-nodes/dpp-node-111.pdf}}}
+                edge from parent [style = branch]
+                node[above,
+                    label={[label distance = -0.7em]\branchlabel{$2-\discount$}}%$\frac{2}{\concentration+2}$}}
+                    ] {}
+            }
+            edge from parent [style = branch]
+            node[above,
+                label={[label distance = 0em]\branchlabel{$1-\discount$}}%$\frac{1}{\concentration+1}$}}
+                ] {}
+    };
+\end{tikzpicture}
+}
+
+\end{frame}
+

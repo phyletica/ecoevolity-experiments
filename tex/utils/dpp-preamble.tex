@@ -8,7 +8,14 @@
 % leave probability values blank.
 \pgfmathsetmacro\conc{0.5}
 \pgfmathsetmacro\cconc{10.0}
+\pgfmathsetmacro\ccconc{0.5}
+\pgfmathsetmacro\disc{0.0}
+\pgfmathsetmacro\ddisc{0.5}
+\pgfmathsetmacro\dddisc{0.9}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \newcommand{\concentration}{\ensuremath{\alpha}\xspace}
+\newcommand{\discount}{\ensuremath{d}\xspace}
 
 \newcommand{\pclass}[3]{%
     \ifthenelse{\equal{#1}{}}%
@@ -40,11 +47,21 @@
         {}%
         {\pgfmathparse{(#1/(\cconc+1))*(#2/(\cconc+2))}\pgfmathprintnumber{\pgfmathresult}}%
 }
+\newcommand{\cccalcprob}[2]{%
+    \ifthenelse{\isundefined{\ccconc}}%
+        {}%
+        {\pgfmathparse{(#1/(\ccconc+1))*(#2/(\ccconc+2))}\pgfmathprintnumber{\pgfmathresult}}%
+}
 
 \newcommand{\getconc}[1]{%
     \ifthenelse{\isundefined{\conc}}%
         {}%
         {\conc}%
+}
+\newcommand{\getdisc}[1]{%
+    \ifthenelse{\isundefined{\disc}}%
+        {}%
+        {\disc}%
 }
 
 % \tikzset{hide on/.code={\only<#1>{\color{fg!20}}}}

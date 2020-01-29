@@ -1,0 +1,109 @@
+\begin{frame}[t]
+    \frametitle{``Uniform'' prior}
+    \begin{itemize}
+        \item We can also assume that every possible model (every way of
+            grouping the divergence times of the population pairs) is equally
+            probable \emph{a priori}
+        \item In addition to this, we added what we call a ``split weight,''
+            which we denote as $s$
+        \item We can think of $s$ in 2 ways:
+            \begin{enumerate}
+                \item For a given model with \nevents{} divergence time categories,
+                    the relative probability of each model with $\nevents+1$
+                    categories is $s$ (and the relative probability of each model with $\nevents-1$ categories
+                    is $\frac{1}{s}$)
+                \item During MCMC, when we propose splitting a div time category into
+                    2 groups, the prior ratio of the move is $s$ (if we propose lumping
+                    two categories, the prior ratio for this move is $\frac{1}{s}$)
+            \end{enumerate}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[t]
+    \frametitle{``Uniform'' prior}
+    \begin{itemize}
+        \item To get a feel for the uniform prior, on the following slides we
+            will look at an example with 4 pairs of populations, with 3
+            different values for the split weight $s$.
+        \item Some notation for the next few slides:
+            \begin{description}
+                \item[\ncomparisons] The number of population pairs we are comparing
+                \item[\nevents] The number of div time categories
+                \item[$S(\ncomparisons,\nevents)$] The number of models that
+                    have \nevents{} categories (the Stirling number of the second
+                    kind)
+                \item[$s^{\nevents-1}$] Relative prob of each model with \nevents{}
+                    categories (we rescale this to make table readable)
+                \item[$s^{\nevents-1}S(\ncomparisons,\nevents)$] Relative prob
+                    of entire class of models with \nevents{} categories
+                \item[$p(m_i)$] The prob of \emph{each} model 
+                    with \nevents{} div time categories
+            \end{description}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{``Uniform'' prior}
+\begin{center}
+Split weight $s = 1.0$
+\end{center}
+
+\begin{center}
+\begin{tabular}{ c c c c c }
+    \nevents & $S(\ncomparisons,
+                  \nevents)$     & $s^{\nevents-1}$ & $s^{\nevents-1}
+                                                      S(
+                                                      \ncomparisons,
+                                                      \nevents)$     & $p(m_i)$ \\
+    1        & 1                 & 1     & 1                 & $\frac{1}{15}$ \\
+    2        & 7                 & 1     & 7                 & $\frac{1}{15}$ \\
+    3        & 6                 & 1     & 6                 & $\frac{1}{15}$ \\
+    4        & 1                 & 1     & 1                 & $\frac{1}{15}$ \\
+             &                   &       & 15                &                \\
+\end{tabular}
+\end{center}
+\end{frame}
+
+\begin{frame}
+    \frametitle{``Uniform'' prior}
+\begin{center}
+Split weight $s = 2.0$
+\end{center}
+
+\begin{center}
+\begin{tabular}{ c c c c c }
+    \nevents & $S(\ncomparisons,
+                  \nevents)$     & $s^{\nevents-1}$ & $s^{\nevents-1}
+                                                      S(
+                                                      \ncomparisons,
+                                                      \nevents)$     & $p(m_i)$ \\
+    1        & 1                 & 1     & 1               & $\frac{1}{47}$ \\
+    2        & 7                 & 2     & 14              & $\frac{2}{47}$ \\
+    3        & 6                 & 4     & 24              & $\frac{4}{47}$ \\
+    4        & 1                 & 8     & 8               & $\frac{8}{47}$ \\
+             &                   &       & 47              &                \\
+\end{tabular}
+\end{center}
+\end{frame}
+
+\begin{frame}
+    \frametitle{``Uniform'' prior}
+\begin{center}
+Split weight $s = \frac{1}{2}$
+\end{center}
+
+\begin{center}
+\begin{tabular}{ c c c c c }
+    \nevents & $S(\ncomparisons,
+                  \nevents)$     & $s^{\nevents-1}$ & $s^{\nevents-1}
+                                                      S(
+                                                      \ncomparisons,
+                                                      \nevents)$     & $p(m_i)$ \\
+    1        & 1                 & 8     & 8               & $\frac{8}{49}$ \\
+    2        & 7                 & 4     & 28              & $\frac{4}{49}$ \\
+    3        & 6                 & 2     & 12              & $\frac{2}{49}$ \\
+    4        & 1                 & 1     & 1               & $\frac{1}{49}$ \\
+             &                   &       & 49              &                \\
+\end{tabular}
+\end{center}
+\end{frame}
