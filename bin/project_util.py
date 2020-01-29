@@ -12,6 +12,7 @@ VAL_DIR = os.path.join(SIM_DIR, 'validation')
 BAKE_OFF_DIR = os.path.join(PROJECT_DIR, 'bake-off')
 CONFIG_DIR = os.path.join(PROJECT_DIR, 'configs')
 GEKKO_OUTPUT_DIR = os.path.join(PROJECT_DIR, 'gekko-output')
+PLOT_DIR = os.path.join(VAL_DIR, "plots")
 
 def main():
     sys.stdout.write("{0}\n".format(PROJECT_DIR))
